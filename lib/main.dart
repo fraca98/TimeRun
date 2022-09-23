@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timerun/providers/datacollectionprovider.dart';
 import 'package:timerun/providers/introprovider.dart';
 import 'package:timerun/screens/datacollectionpage.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
 import 'package:timerun/screens/registrationpage.dart';
 import 'package:provider/provider.dart';
+import 'package:timerun/screens/userPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //to perform await/async in main
@@ -33,6 +35,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<IntroProvider>(
             create: (context) => IntroProvider(prefs)),
+        ChangeNotifierProvider<DataCollectionProvider>(
+            create: ((context) => DataCollectionProvider())),
       ],
       child: MaterialApp(
           title: 'Flutter Demo',
@@ -47,6 +51,7 @@ class MyApp extends StatelessWidget {
             DataCollectionPage.route: (context) => DataCollectionPage(),
             RegistrationPage.route: (context) => RegistrationPage(),
             IntroductionPage.route: (context) => IntroductionPage(),
+            UserPage.route: (context) => UserPage(),
           }),
     );
   }

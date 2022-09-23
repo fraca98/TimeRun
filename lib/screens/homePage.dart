@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
 import 'package:timerun/screens/registrationpage.dart';
+
+import '../providers/datacollectionprovider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,56 +28,14 @@ class _HomePageState extends State<HomePage> {
         itemBuilder: ((context, index) {
           return Card(
             elevation: 8,
-            child: Dismissible(
-              key: ValueKey(index),
-              background: Container(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                alignment: Alignment.centerRight,
-                color: Colors.redAccent,
-                child: Icon(
-                  MdiIcons.delete,
-                  color: Colors.white,
-                ),
+            child: ListTile(
+              leading: Icon(
+                MdiIcons.accountCircle,
+                color: Colors.red,
               ),
-              direction: DismissDirection.endToStart,
-              confirmDismiss: (DismissDirection direction) async {
-                return await showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text("Attenzione"),
-                      content:
-                          Text("Sei sicuro di voler eliminare questo utente?"),
-                      actions: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.redAccent),
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: Text("Elimina")),
-                            ElevatedButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: Text("Annulla"),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              onDismissed: (direction) {
-                print('Elimina utente');
-              },
-              child: ListTile(
-                leading: Icon(MdiIcons.accountCircle),
-                title: Text('Mario Rossi'),
-                subtitle: Text('No data'),
-                trailing: Icon(MdiIcons.arrowRight),
-              ),
+              title: Text('Mario Rossi'),
+              subtitle: Text('No data'),
+              trailing: Icon(MdiIcons.arrowRight),
             ),
           );
         }),
@@ -85,6 +46,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             ElevatedButton(
                 onPressed: () {
+                  Provider.of<DataCollectionProvider>(context, listen: false)
+                      .resetProgressindex();
                   Navigator.pushReplacementNamed(
                       context, DataCollectionPage.route);
                 },

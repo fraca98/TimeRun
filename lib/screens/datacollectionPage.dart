@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart'; // Import stop_watch_timer
-import 'package:timerun/screens/homePage.dart';
+import 'package:timerun/providers/datacollectionprovider.dart';
 import 'package:timelines/timelines.dart';
+
+import 'homePage.dart';
 
 class DataCollectionPage extends StatefulWidget {
   DataCollectionPage({super.key});
@@ -17,38 +20,28 @@ class DataCollectionPage extends StatefulWidget {
 
 class _DataCollectionPageState extends State<DataCollectionPage>
     with SingleTickerProviderStateMixin {
-  StopWatchTimer _stopWatchTimer = StopWatchTimer(
+  final StopWatchTimer _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countUp,
     //onChange: (value) => print('onChange $value'), //print value of timer on change
   );
-  late AnimationController _animationController;
-  int progressindex = 0; // gestisce la barra dei progressi
-
-  int timeplaying = 0; // variabile che gestisce se il timer sta andando
-  /* 0: Timer spento e bisogna premere play
-     1: Timer acceso e bisogna premere stop
-     2: Timer spento e bisogna selezionare salva/prosegui o cancella
-  */
 
   @override
   void initState() {
     super.initState();
-    _animationController =
-        AnimationController(duration: Duration(milliseconds: 200), vsync: this);
   }
 
   @override
   Future<void> dispose() async {
     super.dispose();
     await _stopWatchTimer.dispose();
-    _animationController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Data collection'),
+        title: Text('Sessione di allenamento'),
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -127,7 +120,9 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                   margin: EdgeInsets.only(bottom: 5),
                   child: Text(
                     (() {
-                      switch (progressindex) {
+                      switch (Provider.of<DataCollectionProvider>(context,
+                              listen: false)
+                          .progressindex) {
                         case 0:
                           return 'Stai fermo, a riposo';
                         case 1:
@@ -164,11 +159,18 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                       child: Container(
                         width: 200,
                         height: 200,
-                        child: CircularProgressIndicator(
-                          value: timeplaying == 1 ? null : 0,
-                          strokeWidth: 10,
-                          //color: Colors.red,
-                          backgroundColor: Colors.grey,
+                        child: Consumer<DataCollectionProvider>(
+                          builder: (context, value, child) =>
+                              CircularProgressIndicator(
+                            value: Provider.of<DataCollectionProvider>(context,
+                                            listen: false)
+                                        .timeplaying ==
+                                    1
+                                ? null
+                                : 0,
+                            strokeWidth: 10,
+                            backgroundColor: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -198,68 +200,8 @@ class _DataCollectionPageState extends State<DataCollectionPage>
             ],
           ),
           Spacer(),
-          timeplaying != 2
-              ? FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      if (timeplaying == 0) {
-                        print(DateTime.now());
-                        print((DateTime.now().toUtc().millisecondsSinceEpoch /
-                                1000)
-                            .floor()); //UNIX timestamp in secondi
-                        timeplaying = 1;
-                        _stopWatchTimer.onStartTimer();
-                      } else {
-                        print(DateTime.now());
-                        print((DateTime.now().toUtc().millisecondsSinceEpoch /
-                                1000)
-                            .floor()); //UNIX timestamp in secondi
-                        timeplaying = 2;
-                        _stopWatchTimer.onStopTimer();
-                      }
-                    });
-                  },
-                  //backgroundColor: Colors.red,
-                  child: Icon(() {
-                    if (timeplaying == 0) {
-                      return MdiIcons.play;
-                    } else {
-                      return MdiIcons.stop;
-                    }
-                  }()),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    FloatingActionButton(
-                      //saving button
-                      onPressed: () {
-                        setState(() {
-                          print(DateTime.now());
-                          progressindex++;
-                          if (progressindex == 5) {
-                            Navigator.pushReplacementNamed(
-                                context, HomePage.route);
-                          }
-                          _stopWatchTimer.onResetTimer();
-                          timeplaying = 0;
-                        });
-                      },
-                      backgroundColor: Colors.greenAccent,
-                      child: Icon(MdiIcons.contentSave),
-                    ),
-                    FloatingActionButton(
-                      onPressed: () {
-                        setState(() {
-                          _stopWatchTimer.onResetTimer();
-                          timeplaying = 0;
-                        });
-                      },
-                      backgroundColor: Colors.black,
-                      child: Icon(MdiIcons.delete),
-                    ),
-                  ],
-                ),
+          Consumer<DataCollectionProvider>(
+              builder: ((context, value, child) => _buttonsTimer())),
           Container(
               height: 120,
               width: MediaQuery.of(context).size.width,
@@ -277,77 +219,190 @@ class _DataCollectionPageState extends State<DataCollectionPage>
     'Picco',
   ];
 
-  Widget _progressbar() {
-    return Timeline.tileBuilder(
-      theme: TimelineThemeData(
-        direction: Axis.horizontal,
-        connectorTheme: ConnectorThemeData(
-          space: 30.0,
-          thickness: 5.0,
-        ),
-      ),
-      builder: TimelineTileBuilder.connected(
-        connectionDirection: ConnectionDirection.before,
-        itemExtentBuilder: (_, __) => MediaQuery.of(context).size.width / 5,
-        contentsBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 15.0),
-            child: Text(
-              '${_status[index]}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+  Widget _buttonsTimer() {
+    switch (Provider.of<DataCollectionProvider>(context, listen: false)
+        .timeplaying) {
+      case 0:
+        return FloatingActionButton(
+          onPressed: () {
+            _stopWatchTimer.onStartTimer();
+            Provider.of<DataCollectionProvider>(context, listen: false)
+                .startTimer();
+          },
+          child: Icon(MdiIcons.play),
+        );
+      case 1:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                _stopWatchTimer.onStopTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .pauseTimer();
+              },
+              child: Icon(MdiIcons.pause),
             ),
-          );
-        },
-        indicatorBuilder: (_, index) {
-          var color;
-          var child;
-          if (index == progressindex) {
-            color = Colors.grey;
-            child = Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(
-                strokeWidth: 3.0,
-                valueColor: AlwaysStoppedAnimation(Colors.white),
+            SizedBox(
+              width: 70,
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                _stopWatchTimer.onStopTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .stopTimer();
+              },
+              child: Icon(MdiIcons.stop),
+            ),
+          ],
+        );
+      case 2:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                _stopWatchTimer.onStartTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .resumeTimer();
+              },
+              child: Icon(MdiIcons.play),
+            ),
+            SizedBox(
+              width: 70,
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                _stopWatchTimer.onStopTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .stopTimer();
+              },
+              child: Icon(MdiIcons.stop),
+            ),
+          ],
+        );
+      case 3:
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                print('Salva timestamp');
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .offTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .updateProgressindex();
+                if (Provider.of<DataCollectionProvider>(context, listen: false)
+                        .progressindex ==
+                    _status.length) {
+                  Navigator.of(context).pushReplacementNamed(HomePage.route);
+                }
+              },
+              child: Icon(MdiIcons.archive),
+              backgroundColor: Colors.green,
+            ),
+            SizedBox(
+              width: 70,
+            ),
+            FloatingActionButton(
+              onPressed: () {
+                print('Reset timer senza salvare');
+                _stopWatchTimer.onResetTimer();
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .offTimer();
+              },
+              child: Icon(MdiIcons.delete),
+              backgroundColor: Colors.red,
+            ),
+          ],
+        );
+      default:
+        return Container();
+    }
+  }
+
+  Widget _progressbar() {
+    return Consumer<DataCollectionProvider>(
+      builder: (context, value, child) => Timeline.tileBuilder(
+        theme: TimelineThemeData(
+          direction: Axis.horizontal,
+          connectorTheme: ConnectorThemeData(
+            space: 30.0,
+            thickness: 5.0,
+          ),
+        ),
+        builder: TimelineTileBuilder.connected(
+          connectionDirection: ConnectionDirection.before,
+          itemExtentBuilder: (_, __) =>
+              MediaQuery.of(context).size.width / _status.length,
+          contentsBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 15.0),
+              child: Text(
+                '${_status[index]}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
             );
-          } else if (index < progressindex) {
-            color = Colors.greenAccent;
-            child = Icon(
-              Icons.check,
-              color: Colors.white,
-              size: 15.0,
-            );
-          } else {
-            color = Color(0xffd1d2d7);
-          }
-          if (index <= progressindex) {
-            return DotIndicator(
-              size: 30.0,
-              color: color,
-              child: child,
-            );
-          } else {
-            return OutlinedDotIndicator(
-              borderWidth: 4.0,
-              color: color,
-            );
-          }
-        },
-        connectorBuilder: (_, index, type) {
-          if (index > progressindex) {
-            return DecoratedLineConnector(
-              decoration: BoxDecoration(color: Color(0xffd1d2d7)),
-            );
-          } else {
-            return SolidLineConnector(
-              color: Colors.greenAccent,
-            );
-          }
-        },
-        itemCount: 5,
+          },
+          indicatorBuilder: (_, index) {
+            var color;
+            var child;
+            if (index ==
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .progressindex) {
+              color = Colors.grey;
+              child = Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(
+                  strokeWidth: 3.0,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              );
+            } else if (index <
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .progressindex) {
+              color = Colors.greenAccent;
+              child = Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 15.0,
+              );
+            } else {
+              color = Color(0xffd1d2d7);
+            }
+            if (index <=
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .progressindex) {
+              return DotIndicator(
+                size: 30.0,
+                color: color,
+                child: child,
+              );
+            } else {
+              return OutlinedDotIndicator(
+                borderWidth: 4.0,
+                color: color,
+              );
+            }
+          },
+          connectorBuilder: (_, index, type) {
+            if (index >
+                Provider.of<DataCollectionProvider>(context, listen: false)
+                    .progressindex) {
+              return DecoratedLineConnector(
+                decoration: BoxDecoration(color: Color(0xffd1d2d7)),
+              );
+            } else {
+              return SolidLineConnector(
+                color: Colors.greenAccent,
+              );
+            }
+          },
+          itemCount: _status.length,
+        ),
       ),
     );
   }
