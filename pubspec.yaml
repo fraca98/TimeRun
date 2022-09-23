@@ -31,6 +31,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  stop_watch_timer: ^2.0.0 #stopwatch
+  material_design_icons_flutter: ^5.0.6996 #icons
+  syncfusion_flutter_gauges: ^20.2.49 #bar
+  timelines: ^0.1.0 #timeline
+  introduction_screen: ^3.0.2 #flutter introduction screen
+  withings_flutter:
+    git:
+      url: https://github.com/fraca98/Withings_flutter
+      ref: master
+  shared_preferences: ^2.0.15 #save
+  provider: ^6.0.3 #state management
+  date_time_picker: ^2.1.0 
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -63,6 +75,10 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+  - assets/polar.png
+  - assets/withings.png
+  - assets/apple.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
