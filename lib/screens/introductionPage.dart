@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:timerun/providers/introprovider.dart';
 import 'package:timerun/screens/homePage.dart';
+import '../bloc/intro_bloc/intro_bloc.dart';
+import '../providers/introprovider.dart';
 
 class IntroductionPage extends StatefulWidget {
   const IntroductionPage({super.key});
@@ -18,15 +20,13 @@ class IntroductionPage extends StatefulWidget {
 class _IntroductionPageState extends State<IntroductionPage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<IntroProvider>(
-      builder: (context, value, child) => IntroductionScreen(
-        pages: listPages(),
-        showDoneButton: false,
-        showNextButton: false,
-        showBackButton: false,
-        showSkipButton: false,
-        isProgressTap: false,
-      ),
+    return IntroductionScreen(
+      pages: listPages(),
+      showDoneButton: false,
+      showNextButton: false,
+      showBackButton: false,
+      showSkipButton: false,
+      isProgressTap: false,
     );
   }
 
@@ -35,86 +35,121 @@ class _IntroductionPageState extends State<IntroductionPage> {
       PageViewModel(
           title: "Benvenuto",
           body: "Questa applicazione consente di ...",
-          image: Center(child: Padding(padding: EdgeInsets.only(top: 30), child: Container(child: Image.asset('assets/apple.png'))))),
+          image: Center(
+              child: Padding(
+                  padding: EdgeInsets.only(top: 30),
+                  child: Container(child: Image.asset('assets/apple.png'))))),
       PageViewModel(
-        title: "Connetti il tuo account",
+        title: 'Connetti il tuo account',
         body:
             "Prima di continuare, connetti il tuo account di Withings affinchè l'applicazione possa scaricare i tuoi dati",
         image: Container(
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Center(child: Image.asset('assets/withings.png')))),
-        footer: Provider.of<IntroProvider>(context, listen: false).isLoading
-            ? CircularProgressIndicator(
-                color: Colors.blue,
-              )
-            : Container(
-                child: Provider.of<IntroProvider>(context, listen: false)
-                            .accessToken !=
-                        null
-                    ? Icon(
-                        MdiIcons.cloudCheck,
-                        size: 80,
-                        color: Colors.greenAccent,
-                      )
-                    : ElevatedButton(
-                        onPressed: () async {
-                          Provider.of<IntroProvider>(context, listen: false)
-                              .updateLoading();
-                          await Future.delayed(Duration(seconds: 1));
-                          await Provider.of<IntroProvider>(context,
-                                  listen: false)
-                              .withAuthorization();
-                          await Future.delayed(Duration(seconds: 1));
-                          Provider.of<IntroProvider>(context, listen: false)
-                              .updateLoading();
-
-                          final snackbar = SnackBar(
-                              backgroundColor: Colors.redAccent,
-                              content:
-                                  Text('Autenticazione fallita, riprova !'));
-                          if (Provider.of<IntroProvider>(context, listen: false)
-                                  .accessToken ==
-                              null) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackbar);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: StadiumBorder(),
-                        ),
-                        child: Text("Connetti !"),
-                      ),
-              ),
+        footer: BlocBuilder<IntroBloc, IntroState>(
+          builder: ((context, state) {
+            if (state is IntroInitial) {
+              return ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: StadiumBorder(),
+                  ),
+                  onPressed: () =>
+                      context.read<IntroBloc>().add(LoadIntroEvent()),
+                  child: Text('Connetti !'));
+            }
+            if (state is IntroLoading) {
+              return CircularProgressIndicator();
+            }
+            if (state is IntroLoaded) {
+              return Icon(
+                MdiIcons.cloudCheck,
+                color: Colors.greenAccent,
+                size: 40,
+              );
+            }
+            if (state is IntroError) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    shape: StadiumBorder(), backgroundColor: Colors.redAccent),
+                onPressed: () =>
+                    context.read<IntroBloc>().add(LoadIntroEvent()),
+                child: Text('Riprova'),
+              );
+            } else {
+              return Text('Error IntroBloc');
+            }
+          }),
+        ),
       ),
       PageViewModel(
-          title: "Ora siamo pronti per iniziare !",
-          body:
-              "Premi sul pulsante sottostante per iniziare a usare l'applicazione",
-          image: Center(
-            child: Icon(
-              MdiIcons.run,
-              size: 250,
-              color: Colors.black,
-            ),
+        titleWidget: BlocBuilder<IntroBloc, IntroState>(
+          builder: (context, state) {
+            if (state is IntroLoading ||
+                state is IntroError ||
+                state is IntroInitial) {
+              return Text(
+                'Siamo quasi pronti per iniziare',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              );
+            }
+            if (state is IntroLoaded) {
+              return Text(
+                'Siamo pronti per iniziare',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              );
+            } else {
+              return Text('Error IntroBloc');
+            }
+          },
+        ),
+        bodyWidget: BlocBuilder<IntroBloc, IntroState>(
+          builder: (context, state) {
+            if (state is IntroLoading ||
+                state is IntroError ||
+                state is IntroInitial) {
+              return Text(
+                'Completa i passaggi precedenti, prima di iniziare',
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.normal),
+                textAlign: TextAlign.center,
+              );
+            }
+            if (state is IntroLoaded) {
+              return Text(
+                "Premi sul pulsante sottostante per iniziare a usare l'applicazione",
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.normal),
+                textAlign: TextAlign.center,
+              );
+            } else {
+              return Text('Error IntroBloc');
+            }
+          },
+        ),
+        image: Center(
+          child: Icon(
+            MdiIcons.run,
+            size: 250,
+            color: Colors.black,
           ),
-          footer: ElevatedButton(
-            style: ElevatedButton.styleFrom(shape: StadiumBorder()),
-            child: Text("Iniziamo !"),
-            onPressed: () async {
-              if (Provider.of<IntroProvider>(context, listen: false)
-                      .accessToken !=
-                  null) {
-                Provider.of<IntroProvider>(context, listen: false).introEnded();
-                Navigator.of(context).pushReplacementNamed(HomePage.route);
-              } else {
-                final snackbar = SnackBar(
-                    backgroundColor: Colors.redAccent,
-                    content: Text('Completa prima tutti i passaggi !'));
-                ScaffoldMessenger.of(context).showSnackBar(snackbar);
-              }
-            },
-          )),
+        ),
+        footer: BlocBuilder<IntroBloc, IntroState>(
+          builder: (context, state) {
+            if (state is IntroLoaded) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(shape: StadiumBorder()),
+                child: Text("Iniziamo !"),
+                onPressed: () {
+                  Provider.of<IntroProvider>(context, listen: false)
+                      .introEnded();
+                  Navigator.pushReplacementNamed(context, HomePage.route);
+                },
+              );
+            } else {
+              return Container();
+            }
+          },
+        ),
+      ),
     ];
   }
 }
