@@ -29,7 +29,7 @@ class DataCollectionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resumeTimer(){
+  void resumeTimer() {
     print('Resume timer');
     timeplaying = 1;
     notifyListeners();
@@ -46,11 +46,8 @@ class DataCollectionProvider extends ChangeNotifier {
 
   void updateProgressindex() {
     progressindex++;
-    notifyListeners();
-  }
-
-  void resetProgressindex(){
-    progressindex = 0;
-    notifyListeners();
+    if (progressindex < 5) {
+      notifyListeners();
+    }
   }
 }

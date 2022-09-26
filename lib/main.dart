@@ -26,7 +26,8 @@ void main() async {
   AppDatabase database = AppDatabase(); //inizialize database
 
   final getIt = GetIt.I;
-  getIt.registerSingleton<AppDatabase>(database); //pass the database in getIt to access it everywhere (use it cause with no context we can't use provider in BLOC)
+  getIt.registerSingleton<AppDatabase>(
+      database); //pass the database in getIt to access it everywhere (use it cause with no context we can't use provider in BLOC)
 
   runApp(MyApp(prefs));
 }
@@ -59,7 +60,7 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => UserBloc()..add(UserEventLoad()),
-          )
+          ),
         ],
         child: MaterialApp(
             title: 'Flutter Demo',

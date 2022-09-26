@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart'; // Import stop_watch_timer
+import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/providers/datacollectionprovider.dart';
 import 'package:timelines/timelines.dart';
+import 'package:timerun/providers/introprovider.dart';
+import 'package:timerun/screens/userPage.dart';
 
 import 'homePage.dart';
 
@@ -28,6 +32,8 @@ class _DataCollectionPageState extends State<DataCollectionPage>
   @override
   void initState() {
     super.initState();
+    Provider.of<DataCollectionProvider>(context, listen: false).progressindex =
+        0;
   }
 
   @override
@@ -116,28 +122,30 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                     ],
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(bottom: 5),
-                  child: Text(
-                    (() {
-                      switch (Provider.of<DataCollectionProvider>(context,
-                              listen: false)
-                          .progressindex) {
-                        case 0:
-                          return 'Stai fermo, a riposo';
-                        case 1:
-                          return "Mantieni l'indicatore nella zona verde";
-                        case 2:
-                          return "Mantieni l'indicatore nella zona gialla";
-                        case 3:
-                          return "Mantieni l'indicatore nella zona arancione";
-                        case 4:
-                          return "Mantieni l'indicatore nella zona rossa";
-                        default:
-                          return '';
-                      }
-                    }()),
-                    style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                Consumer<DataCollectionProvider>(
+                  builder: (context, value, child) => Container(
+                    margin: EdgeInsets.only(bottom: 5),
+                    child: Text(
+                      (() {
+                        switch (Provider.of<DataCollectionProvider>(context,
+                                listen: false)
+                            .progressindex) {
+                          case 0:
+                            return 'Stai fermo, a riposo';
+                          case 1:
+                            return "Mantieni l'indicatore nella zona verde";
+                          case 2:
+                            return "Mantieni l'indicatore nella zona gialla";
+                          case 3:
+                            return "Mantieni l'indicatore nella zona arancione";
+                          case 4:
+                            return "Mantieni l'indicatore nella zona rossa";
+                          default:
+                            return '';
+                        }
+                      }()),
+                      style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                    ),
                   ),
                 ),
               ],
@@ -220,17 +228,22 @@ class _DataCollectionPageState extends State<DataCollectionPage>
   ];
 
   Widget _buttonsTimer() {
+    final idUser = ModalRoute.of(context)!.settings.arguments as int;
     switch (Provider.of<DataCollectionProvider>(context, listen: false)
         .timeplaying) {
       case 0:
-        return FloatingActionButton(
-          onPressed: () {
-            _stopWatchTimer.onStartTimer();
-            Provider.of<DataCollectionProvider>(context, listen: false)
-                .startTimer();
-          },
-          child: Icon(MdiIcons.play),
-        );
+        return Provider.of<DataCollectionProvider>(context, listen: false)
+                    .progressindex <
+                5
+            ? FloatingActionButton(
+                onPressed: () {
+                  _stopWatchTimer.onStartTimer();
+                  Provider.of<DataCollectionProvider>(context, listen: false)
+                      .startTimer();
+                },
+                child: Icon(MdiIcons.play),
+              )
+            : Container();
       case 1:
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -286,7 +299,7 @@ class _DataCollectionPageState extends State<DataCollectionPage>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 print('Salva timestamp');
                 Provider.of<DataCollectionProvider>(context, listen: false)
                     .offTimer();
@@ -295,7 +308,8 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                 if (Provider.of<DataCollectionProvider>(context, listen: false)
                         .progressindex ==
                     _status.length) {
-                  Navigator.of(context).pushReplacementNamed(HomePage.route);
+                  User currentUser = await GetIt.I<AppDatabase>().usersDao.retrieveSpecificUser(idUser);
+                  Navigator.of(context).pushReplacementNamed(UserPage.route, arguments: currentUser);
                 }
               },
               child: Icon(MdiIcons.archive),
@@ -364,7 +378,7 @@ class _DataCollectionPageState extends State<DataCollectionPage>
             } else if (index <
                 Provider.of<DataCollectionProvider>(context, listen: false)
                     .progressindex) {
-              color = Colors.greenAccent;
+              color = Colors.green;
               child = Icon(
                 Icons.check,
                 color: Colors.white,
@@ -397,7 +411,7 @@ class _DataCollectionPageState extends State<DataCollectionPage>
               );
             } else {
               return SolidLineConnector(
-                color: Colors.greenAccent,
+                color: Colors.green,
               );
             }
           },

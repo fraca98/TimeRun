@@ -21,4 +21,6 @@ class UsersDao extends DatabaseAccessor<AppDatabase> with _$UsersDaoMixin {
   Future<int> deleteUser(int id){
     return (delete(users)..where((t) => t.id.equals(id))).go();
   }
+
+  Future<User> retrieveSpecificUser(int id) => (select(users)..where((t) => t.id.equals(id))).getSingle(); // return user given id (primary key)
 }

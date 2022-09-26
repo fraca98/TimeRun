@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -99,8 +100,8 @@ class _UserPageState extends State<UserPage> {
               trailing: IconButton(
                 icon: Icon(MdiIcons.play),
                 onPressed: () {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      DataCollectionPage.route, (_) => false);
+                  Navigator.of(context).pushReplacementNamed(
+                      DataCollectionPage.route, arguments: infoUser.id);
                 },
               ),
             ),
