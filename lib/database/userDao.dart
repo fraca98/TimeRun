@@ -17,4 +17,8 @@ class UsersDao extends DatabaseAccessor<AppDatabase> with _$UsersDaoMixin {
     //insert a new user and return the id (use UsersCompanion cause id is autoincremental)
     return into(users).insert(user);
   }
+
+  Future<int> deleteUser(int id){
+    return (delete(users)..where((t) => t.id.equals(id))).go();
+  }
 }

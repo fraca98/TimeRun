@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path/path.dart';
 import 'package:timerun/database/AppDatabase.dart';
 
 part 'user_event.dart';
@@ -23,17 +25,24 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
     on<UserEventAdd>(
       (event, emit) async {
-        if (state is UserStateLoaded) {
-          final state = this.state as UserStateLoaded;
-          print('Added a new User');
-          await db.usersDao.insertNewUser(UsersCompanion(
-              name: event.userComp.name,
-              surname: event.userComp.surname,
-              sex: event.userComp.sex));
-          emit(UserStateLoaded(
-              users: await db.usersDao
-                  .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))
-        }
+        emit(UserStateLoading());
+        print('Added a new User');
+        await db.usersDao.insertNewUser(UsersCompanion(
+            name: event.userComp.name,
+            surname: event.userComp.surname,
+            sex: event.userComp.sex));
+        emit(UserStateLoaded(
+            users: await db.usersDao
+                .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))
+      },
+    );
+
+    on<UserEventDelete>(
+      (event, emit) async {
+        emit(UserStateLoading());
+        print('Removed user');
+        await db.usersDao.deleteUser(event.id);
+        emit(UserStateLoaded(users: await db.usersDao.allEntries));
       },
     );
   }
