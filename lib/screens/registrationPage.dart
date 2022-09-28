@@ -5,9 +5,6 @@ import 'package:date_time_picker/date_time_picker.dart';
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
-  static const route = '/registration/';
-  static const routename = 'RegistrationPage';
-
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
 }
@@ -40,7 +37,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             final isLastStep = currentStep == getSteps().length - 1;
             if (isLastStep) {
               print('add user');
-              Navigator.of(context).pushReplacementNamed(HomePage.route);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
             } else {
               currentStep++;
             }
@@ -112,7 +109,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ),
                 onPressed: () {
                   Navigator.pop(context);
-                  Navigator.of(context).pushReplacementNamed(HomePage.route);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
                 },
                 child: Text('Vai indietro')),
             ElevatedButton(

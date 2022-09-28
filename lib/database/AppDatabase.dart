@@ -15,6 +15,7 @@ class Users extends Table {
   TextColumn get name => text()();
   TextColumn get surname => text()();
   BoolColumn get sex => boolean()();
+  IntColumn get session => integer()(); //.withDefault(Constant(0))(); //TODO: set withdefault
 }
 
 // this annotation tells drift to prepare a database class that uses both of the

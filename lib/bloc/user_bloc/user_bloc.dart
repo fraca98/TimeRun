@@ -1,9 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path/path.dart';
 import 'package:timerun/database/AppDatabase.dart';
 
 part 'user_event.dart';
@@ -30,7 +27,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         await db.usersDao.insertNewUser(UsersCompanion(
             name: event.userComp.name,
             surname: event.userComp.surname,
-            sex: event.userComp.sex));
+            sex: event.userComp.sex,
+            session: event.userComp.session)); //TODO: REMOVE
         emit(UserStateLoaded(
             users: await db.usersDao
                 .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))
@@ -45,5 +43,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         emit(UserStateLoaded(users: await db.usersDao.allEntries));
       },
     );
+
+    add(UserEventLoad()); //event called when first use UserBloc
   }
 }

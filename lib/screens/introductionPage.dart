@@ -2,22 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:timerun/screens/homePage.dart';
 import '../bloc/intro_bloc/intro_bloc.dart';
-import '../providers/introprovider.dart';
 
-class IntroductionPage extends StatefulWidget {
+class IntroductionPage extends StatelessWidget {
   const IntroductionPage({super.key});
 
-  static const route = '/introduction/';
-  static const routename = 'IntroductionPage';
-
-  @override
-  State<IntroductionPage> createState() => _IntroductionPageState();
-}
-
-class _IntroductionPageState extends State<IntroductionPage> {
   @override
   Widget build(BuildContext context) {
     return IntroductionScreen(
@@ -139,9 +129,8 @@ class _IntroductionPageState extends State<IntroductionPage> {
                 style: ElevatedButton.styleFrom(shape: StadiumBorder()),
                 child: Text("Iniziamo !"),
                 onPressed: () {
-                  Provider.of<IntroProvider>(context, listen: false)
-                      .introEnded();
-                  Navigator.pushReplacementNamed(context, HomePage.route);
+                  context.read<IntroBloc>().add(FinishIntroEvent());
+                  Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => HomePage()));
                 },
               );
             } else {

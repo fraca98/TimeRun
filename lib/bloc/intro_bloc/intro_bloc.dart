@@ -33,5 +33,11 @@ class IntroBloc extends Bloc<IntroEvent, IntroState> {
         emit(IntroError());
       }
     });
+
+    on<FinishIntroEvent>(
+      (event, emit) async {
+        await prefs?.setBool('isIntroEnded', true);
+      },
+    );
   }
 }

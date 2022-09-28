@@ -2,17 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timerun/bloc/user_bloc/user_bloc.dart';
-import 'package:timerun/providers/datacollectionprovider.dart';
-import 'package:timerun/providers/introprovider.dart';
-import 'package:timerun/screens/datacollectionpage.dart';
+import 'package:timerun/screens/datacollectionPage.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
-import 'package:timerun/screens/registrationpage.dart';
-import 'package:provider/provider.dart';
-import 'package:timerun/screens/userPage.dart';
 import 'package:timerun/database/AppDatabase.dart';
 
 import 'bloc/intro_bloc/intro_bloc.dart';
@@ -34,6 +27,7 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   SharedPreferences prefs;
+
   MyApp(this.prefs, {super.key});
 
   // This widget is the root of your application.
@@ -45,38 +39,21 @@ class MyApp extends StatelessWidget {
       statusBarIconBrightness: Brightness.dark,
     ));
 
-    return MultiProvider(
-      //pass the providers
+    return MultiBlocProvider(
+      //pass the blocs
       providers: [
-        Provider<IntroProvider>(create: (context) => IntroProvider(prefs)),
-        ChangeNotifierProvider<DataCollectionProvider>(
-            create: ((context) => DataCollectionProvider())),
+        BlocProvider(
+          create: (context) => IntroBloc(prefs),
+        ),
       ],
-      child: MultiBlocProvider(
-        //pass the blocs
-        providers: [
-          BlocProvider(
-            create: (context) => IntroBloc(prefs),
-          ),
-          BlocProvider(
-            create: (context) => UserBloc()..add(UserEventLoad()),
-          ),
-        ],
-        child: MaterialApp(
-            title: 'Flutter Demo',
-            theme: ThemeData(
-              primarySwatch: Colors.blue,
-            ),
-            initialRoute: prefs.getBool('isIntroEnded') == true
-                ? HomePage.route
-                : IntroductionPage.route,
-            routes: {
-              HomePage.route: (context) => HomePage(),
-              DataCollectionPage.route: (context) => DataCollectionPage(),
-              RegistrationPage.route: (context) => RegistrationPage(),
-              IntroductionPage.route: (context) => IntroductionPage(),
-              UserPage.route: (context) => UserPage(),
-            }),
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: prefs.getBool('isIntroEnded') == true
+            ? HomePage()
+            : IntroductionPage(),
       ),
     );
   }

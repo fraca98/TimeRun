@@ -9,3 +9,5 @@ abstract class IntroEvent extends Equatable {
 
 class LoadIntroEvent extends IntroEvent {} //press button to authorize
 
+class FinishIntroEvent extends IntroEvent{} // press button end intro
+

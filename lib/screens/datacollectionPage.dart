@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart'; // Import stop_watch_timer
-import 'package:timerun/database/AppDatabase.dart';
-import 'package:timerun/providers/datacollectionprovider.dart';
 import 'package:timelines/timelines.dart';
-import 'package:timerun/providers/introprovider.dart';
-import 'package:timerun/screens/userPage.dart';
-
-import 'homePage.dart';
+import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
+import 'package:timerun/model/status.dart';
+import 'package:timerun/screens/detailPage.dart';
 
 class DataCollectionPage extends StatefulWidget {
-  DataCollectionPage({super.key});
+  final int id;
 
-  static const route = '/datacollection/';
-  static const routename = 'DataCollectionPage';
+  DataCollectionPage({required this.id, super.key});
 
   @override
   State<DataCollectionPage> createState() => _DataCollectionPageState();
@@ -30,13 +25,6 @@ class _DataCollectionPageState extends State<DataCollectionPage>
   );
 
   @override
-  void initState() {
-    super.initState();
-    Provider.of<DataCollectionProvider>(context, listen: false).progressindex =
-        0;
-  }
-
-  @override
   Future<void> dispose() async {
     super.dispose();
     await _stopWatchTimer.dispose();
@@ -44,380 +32,385 @@ class _DataCollectionPageState extends State<DataCollectionPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Sessione di allenamento'),
-        centerTitle: true,
+    return BlocProvider(
+      create: (context) => CronoBloc(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Sessione di allenamento'),
+          centerTitle: true,
+        ),
+        body: BlocConsumer<CronoBloc, CronoState>(
+          listener: (context, state) async {
+            if (state is CronoStateCompleted) {
+              await Future.delayed(Duration(seconds: 2));
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DetailPage(id: widget.id)),
+                  (route) => false);
+            }
+          },
+          builder: (context, state) {
+            return Column(
+              children: [
+                _Polar(context),
+                Divider(
+                  thickness: 2,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                state is CronoStateCompleted
+                    ? Container(
+                        child: Icon(
+                          MdiIcons.databaseCheck,
+                          size: 215,
+                          color: Colors.green,
+                        ),
+                      )
+                    : _crono(context),
+                Spacer(),
+                _buttonsTimer(context),
+                Container(
+                  height: 120,
+                  width: MediaQuery.of(context).size.width,
+                  child: _progressbar(context),
+                ),
+              ],
+            );
+          },
+        ),
       ),
-      body: Column(
+    );
+  }
+
+  Widget _Polar(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        vertical: 16,
+        horizontal: 24,
+      ),
+      child: Column(
         children: [
           Container(
-            margin: EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 24,
+            margin: EdgeInsets.only(top: 5, left: 8, right: 8, bottom: 10),
+            child: Image.asset(
+              'assets/polar.png',
+              width: 200,
             ),
-            child: Column(
+          ),
+          Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  margin:
-                      EdgeInsets.only(top: 5, left: 8, right: 8, bottom: 10),
-                  child: Image.asset(
-                    'assets/polar.png',
-                    width: 200,
-                  ),
+                Spacer(),
+                Text(
+                  '100',
+                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
                 ),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Spacer(),
-                      Text(
-                        '100',
-                        style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
-                      ),
-                      Text(
-                        ' BPM',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins'),
-                      ),
-                      Spacer(),
-                    ],
-                  ),
+                Text(
+                  ' BPM',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins'),
                 ),
-                Container(
-                  padding:
-                      EdgeInsets.only(left: 5, right: 5, bottom: 10, top: 10),
-                  child: SfLinearGauge(
-                    minimum: 40,
-                    maximum: 200,
-                    ranges: [
-                      LinearGaugeRange(
-                        startValue: 40,
-                        endValue: 98,
-                        color: Colors.greenAccent,
-                      ),
-                      LinearGaugeRange(
-                        startValue: 98,
-                        endValue: 137,
-                        color: Colors.yellowAccent,
-                      ),
-                      LinearGaugeRange(
-                        startValue: 137,
-                        endValue: 176,
-                        color: Colors.orangeAccent,
-                      ),
-                      LinearGaugeRange(
-                        startValue: 176,
-                        endValue: 200,
-                        color: Colors.redAccent,
-                      ),
-                    ],
-                    markerPointers: [
-                      LinearShapePointer(
-                        color: Colors.black,
-                        value: 100,
-                      )
-                    ],
-                  ),
-                ),
-                Consumer<DataCollectionProvider>(
-                  builder: (context, value, child) => Container(
-                    margin: EdgeInsets.only(bottom: 5),
-                    child: Text(
-                      (() {
-                        switch (Provider.of<DataCollectionProvider>(context,
-                                listen: false)
-                            .progressindex) {
-                          case 0:
-                            return 'Stai fermo, a riposo';
-                          case 1:
-                            return "Mantieni l'indicatore nella zona verde";
-                          case 2:
-                            return "Mantieni l'indicatore nella zona gialla";
-                          case 3:
-                            return "Mantieni l'indicatore nella zona arancione";
-                          case 4:
-                            return "Mantieni l'indicatore nella zona rossa";
-                          default:
-                            return '';
-                        }
-                      }()),
-                      style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-                    ),
-                  ),
-                ),
+                Spacer(),
               ],
             ),
           ),
-          Divider(
-            thickness: 2,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Column(
-            children: [
-              Container(
-                height: 215.0,
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        child: Consumer<DataCollectionProvider>(
-                          builder: (context, value, child) =>
-                              CircularProgressIndicator(
-                            value: Provider.of<DataCollectionProvider>(context,
-                                            listen: false)
-                                        .timeplaying ==
-                                    1
-                                ? null
-                                : 0,
-                            strokeWidth: 10,
-                            backgroundColor: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Center(
-                      child: StreamBuilder<int>(
-                        /// Display time
-                        stream: _stopWatchTimer.rawTime,
-                        initialData: _stopWatchTimer.rawTime.value,
-                        builder: (context, snap) {
-                          final value = snap.data!;
-                          final displayTime = StopWatchTimer.getDisplayTime(
-                              value,
-                              hours: false);
-                          return Text(
-                            displayTime,
-                            style: const TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Spacer(),
-          Consumer<DataCollectionProvider>(
-              builder: ((context, value, child) => _buttonsTimer())),
           Container(
-              height: 120,
-              width: MediaQuery.of(context).size.width,
-              child: _progressbar()),
+            padding: EdgeInsets.only(left: 5, right: 5, bottom: 10, top: 10),
+            child: SfLinearGauge(
+              minimum: 40,
+              maximum: 200,
+              ranges: [
+                LinearGaugeRange(
+                  startValue: 40,
+                  endValue: 98,
+                  color: Colors.greenAccent,
+                ),
+                LinearGaugeRange(
+                  startValue: 98,
+                  endValue: 137,
+                  color: Colors.yellowAccent,
+                ),
+                LinearGaugeRange(
+                  startValue: 137,
+                  endValue: 176,
+                  color: Colors.orangeAccent,
+                ),
+                LinearGaugeRange(
+                  startValue: 176,
+                  endValue: 200,
+                  color: Colors.redAccent,
+                ),
+              ],
+              markerPointers: [
+                LinearShapePointer(
+                  color: Colors.black,
+                  value: 100,
+                )
+              ],
+            ),
+          ),
+          BlocBuilder<CronoBloc, CronoState>(
+            builder: (context, state) {
+              if (state is CronoStateLoading) {
+                return Text(
+                  'Salvataggio ...',
+                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                );
+              } else {
+                String text;
+                switch (state.progressIndex) {
+                  case 0:
+                    text = 'Stai fermo, a riposo';
+                    break;
+                  case 1:
+                    text = "Mantieni l'indicatore nella zona verde";
+                    break;
+                  case 2:
+                    text = "Mantieni l'indicatore nella zona gialla";
+                    break;
+                  case 3:
+                    text = "Mantieni l'indicatore nella zona arancione";
+                    break;
+                  case 4:
+                    text = "Mantieni l'indicatore nella zona rossa";
+                    break;
+                  default:
+                    text = '';
+                }
+                return Text(
+                  text,
+                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                );
+              }
+            },
+          ),
         ],
       ),
     );
   }
 
-  final _status = [
-    'A riposo',
-    'Leggero',
-    'Medio',
-    'Intenso',
-    'Picco',
-  ];
-
-  Widget _buttonsTimer() {
-    final idUser = ModalRoute.of(context)!.settings.arguments as int;
-    switch (Provider.of<DataCollectionProvider>(context, listen: false)
-        .timeplaying) {
-      case 0:
-        return Provider.of<DataCollectionProvider>(context, listen: false)
-                    .progressindex <
-                5
-            ? FloatingActionButton(
-                onPressed: () {
-                  _stopWatchTimer.onStartTimer();
-                  Provider.of<DataCollectionProvider>(context, listen: false)
-                      .startTimer();
-                },
-                child: Icon(MdiIcons.play),
-              )
-            : Container();
-      case 1:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                _stopWatchTimer.onStopTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .pauseTimer();
-              },
-              child: Icon(MdiIcons.pause),
-            ),
-            SizedBox(
-              width: 70,
-            ),
-            FloatingActionButton(
-              onPressed: () {
-                _stopWatchTimer.onStopTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .stopTimer();
-              },
-              child: Icon(MdiIcons.stop),
-            ),
-          ],
-        );
-      case 2:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FloatingActionButton(
-              onPressed: () {
-                _stopWatchTimer.onStartTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .resumeTimer();
-              },
-              child: Icon(MdiIcons.play),
-            ),
-            SizedBox(
-              width: 70,
-            ),
-            FloatingActionButton(
-              onPressed: () {
-                _stopWatchTimer.onStopTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .stopTimer();
-              },
-              child: Icon(MdiIcons.stop),
-            ),
-          ],
-        );
-      case 3:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FloatingActionButton(
-              onPressed: () async {
-                print('Salva timestamp');
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .offTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .updateProgressindex();
-                if (Provider.of<DataCollectionProvider>(context, listen: false)
-                        .progressindex ==
-                    _status.length) {
-                  User currentUser = await GetIt.I<AppDatabase>().usersDao.retrieveSpecificUser(idUser);
-                  Navigator.of(context).pushReplacementNamed(UserPage.route, arguments: currentUser);
-                }
-              },
-              child: Icon(MdiIcons.archive),
-              backgroundColor: Colors.green,
-            ),
-            SizedBox(
-              width: 70,
-            ),
-            FloatingActionButton(
-              onPressed: () {
-                print('Reset timer senza salvare');
-                _stopWatchTimer.onResetTimer();
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .offTimer();
-              },
-              child: Icon(MdiIcons.delete),
-              backgroundColor: Colors.red,
-            ),
-          ],
-        );
-      default:
-        return Container();
-    }
-  }
-
-  Widget _progressbar() {
-    return Consumer<DataCollectionProvider>(
-      builder: (context, value, child) => Timeline.tileBuilder(
-        theme: TimelineThemeData(
-          direction: Axis.horizontal,
-          connectorTheme: ConnectorThemeData(
-            space: 30.0,
-            thickness: 5.0,
-          ),
-        ),
-        builder: TimelineTileBuilder.connected(
-          connectionDirection: ConnectionDirection.before,
-          itemExtentBuilder: (_, __) =>
-              MediaQuery.of(context).size.width / _status.length,
-          contentsBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: Text(
-                '${_status[index]}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+  Widget _crono(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 215.0,
+          child: Stack(
+            children: [
+              Center(
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  child: BlocBuilder<CronoBloc, CronoState>(
+                    builder: (context, state) {
+                      return CircularProgressIndicator(
+                        strokeWidth: 10,
+                        backgroundColor: Colors.grey,
+                        value: state is CronoStateRunning ? null : 0,
+                      );
+                    },
+                  ),
                 ),
               ),
-            );
-          },
-          indicatorBuilder: (_, index) {
-            var color;
-            var child;
-            if (index ==
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .progressindex) {
-              color = Colors.grey;
-              child = Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(
-                  strokeWidth: 3.0,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
+              Center(
+                child: StreamBuilder<int>(
+                  /// Display time
+                  stream: _stopWatchTimer.rawTime,
+                  initialData: _stopWatchTimer.rawTime.value,
+                  builder: (context, snap) {
+                    final value = snap.data!;
+                    final displayTime =
+                        StopWatchTimer.getDisplayTime(value, hours: false);
+                    return Text(
+                      displayTime,
+                      style: const TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buttonsTimer(BuildContext context) {
+    return BlocConsumer<CronoBloc, CronoState>(
+      listener: ((context, state) {
+        if (state is CronoStateCompleted) {}
+      }),
+      builder: (context, state) {
+        if (state is CronoStateLoading) {
+          return CircularProgressIndicator();
+        }
+        if (state is CronoStatePlay) {
+          return FloatingActionButton(
+            onPressed: () {
+              _stopWatchTimer.onStartTimer();
+              context.read<CronoBloc>().add(CronoEventPlay());
+            },
+            child: Icon(MdiIcons.play),
+          );
+        }
+        if (state is CronoStateRunning) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  _stopWatchTimer.onStopTimer();
+                  context.read<CronoBloc>().add(CronoEventPause());
+                },
+                child: Icon(MdiIcons.pause),
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  _stopWatchTimer.onStopTimer();
+                  context.read<CronoBloc>().add(CronoEventStop());
+                },
+                child: Icon(MdiIcons.stop),
+              ),
+            ],
+          );
+        }
+        if (state is CronoStatePause) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FloatingActionButton(
+                onPressed: () {
+                  _stopWatchTimer.onStartTimer();
+                  context.read<CronoBloc>().add(CronoEventResume());
+                },
+                child: Icon(MdiIcons.play),
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  _stopWatchTimer.onStopTimer();
+                  context.read<CronoBloc>().add(CronoEventStop());
+                },
+                child: Icon(MdiIcons.stop),
+              ),
+            ],
+          );
+        }
+        if (state is CronoStateStop) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              FloatingActionButton(
+                backgroundColor: Colors.green,
+                onPressed: () async {
+                  _stopWatchTimer.onResetTimer();
+                  context.read<CronoBloc>().add(CronoEventSave());
+                },
+                child: Icon(MdiIcons.archive),
+              ),
+              FloatingActionButton(
+                backgroundColor: Colors.red,
+                onPressed: () {
+                  _stopWatchTimer.onResetTimer();
+                  context.read<CronoBloc>().add(CronoEventDelete());
+                },
+                child: Icon(MdiIcons.delete),
+              ),
+            ],
+          );
+        }
+        if (state is CronoStateCompleted) {
+          return Container();
+        } else {
+          return Text('Error CronoBloc');
+        }
+      },
+    );
+  }
+
+  Widget _progressbar(BuildContext context) {
+    return BlocBuilder<CronoBloc, CronoState>(
+      builder: (context, state) {
+        return Timeline.tileBuilder(
+          theme: TimelineThemeData(
+            direction: Axis.horizontal,
+            connectorTheme: ConnectorThemeData(
+              space: 30.0,
+              thickness: 5.0,
+            ),
+          ),
+          builder: TimelineTileBuilder.connected(
+            connectionDirection: ConnectionDirection.before,
+            itemExtentBuilder: (_, __) =>
+                MediaQuery.of(context).size.width / status.length,
+            contentsBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 15.0),
+                child: Text(
+                  '${status[index]}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
               );
-            } else if (index <
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .progressindex) {
-              color = Colors.green;
-              child = Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 15.0,
-              );
-            } else {
-              color = Color(0xffd1d2d7);
-            }
-            if (index <=
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .progressindex) {
-              return DotIndicator(
-                size: 30.0,
-                color: color,
-                child: child,
-              );
-            } else {
-              return OutlinedDotIndicator(
-                borderWidth: 4.0,
-                color: color,
-              );
-            }
-          },
-          connectorBuilder: (_, index, type) {
-            if (index >
-                Provider.of<DataCollectionProvider>(context, listen: false)
-                    .progressindex) {
-              return DecoratedLineConnector(
-                decoration: BoxDecoration(color: Color(0xffd1d2d7)),
-              );
-            } else {
-              return SolidLineConnector(
-                color: Colors.green,
-              );
-            }
-          },
-          itemCount: _status.length,
-        ),
-      ),
+            },
+            indicatorBuilder: (_, index) {
+              var color;
+              var child;
+              if (index == state.progressIndex) {
+                color = Colors.grey;
+                child = Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3.0,
+                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                  ),
+                );
+              } else if (index < state.progressIndex) {
+                color = Colors.green;
+                child = Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 15.0,
+                );
+              } else {
+                color = Color(0xffd1d2d7);
+              }
+              if (index <= state.progressIndex) {
+                return DotIndicator(
+                  size: 30.0,
+                  color: color,
+                  child: child,
+                );
+              } else {
+                return OutlinedDotIndicator(
+                  borderWidth: 4.0,
+                  color: color,
+                );
+              }
+            },
+            connectorBuilder: (_, index, type) {
+              if (index > state.progressIndex) {
+                return DecoratedLineConnector(
+                  decoration: BoxDecoration(color: Color(0xffd1d2d7)),
+                );
+              } else {
+                return SolidLineConnector(
+                  color: Colors.green,
+                );
+              }
+            },
+            itemCount: status.length,
+          ),
+        );
+      },
     );
   }
 }
