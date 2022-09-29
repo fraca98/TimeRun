@@ -27,8 +27,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         await db.usersDao.insertNewUser(UsersCompanion(
             name: event.userComp.name,
             surname: event.userComp.surname,
-            sex: event.userComp.sex,
-            session: event.userComp.session)); //TODO: REMOVE
+            sex: event.userComp.sex,)); //TODO: REMOVE
         emit(UserStateLoaded(
             users: await db.usersDao
                 .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))

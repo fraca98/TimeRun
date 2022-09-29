@@ -32,18 +32,17 @@ class HomePage extends StatelessWidget {
                       itemCount: state.users.length,
                       itemBuilder: (context, index) {
                         Color color;
-                        switch (state.users[index].session) {
-                          case 0:
-                            color = Colors.red;
-                            break;
-                          case 1:
-                            color = Colors.yellow;
-                            break;
-                          case 2:
-                            color = Colors.green;
-                            break;
-                          default:
-                            color = Colors.black;
+                        if (state.users[index].session1 != null &&
+                            state.users[index].session2 != null) {
+                          color = Colors.green;
+                        } else if (state.users[index].session1 == null &&
+                            state.users[index].session2 == null) {
+                          color = Colors.red;
+                        } else if (state.users[index].session1 != null &&
+                            state.users[index].session2 == null) {
+                          color = Colors.yellow;
+                        } else {
+                          color = Colors.black;
                         }
                         return InkWell(
                           onTap: () {
@@ -85,12 +84,12 @@ class HomePage extends StatelessWidget {
                 child: Icon(MdiIcons.accountPlus),
                 onPressed: () async {
                   context.read<UserBloc>().add(UserEventAdd(
-                      //TODO: remove, it's just an example to see if db works and BLOC
-                      userComp: UsersCompanion(
-                          name: Value(Random().nextInt(50).toString()),
-                          surname: Value(Random().nextInt(50).toString()),
-                          sex: Value(Random().nextBool()),
-                          session: Value(Random().nextInt(3)))));
+                          //TODO: remove, it's just an example to see if db works and BLOC
+                          userComp: UsersCompanion(
+                        name: Value(Random().nextInt(50).toString()),
+                        surname: Value(Random().nextInt(50).toString()),
+                        sex: Value(Random().nextBool()),
+                      )));
                 },
               );
             } else {

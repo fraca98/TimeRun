@@ -4,7 +4,7 @@ abstract class DetailEvent extends Equatable {
   const DetailEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class DetailEventLoad extends DetailEvent{
@@ -12,5 +12,5 @@ class DetailEventLoad extends DetailEvent{
   DetailEventLoad({required this.id});
 
   @override 
-  List<Object> get props => [id];
+  List<Object?> get props => [id];
 }

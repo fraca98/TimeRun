@@ -7,11 +7,18 @@ import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/screens/detailPage.dart';
+import 'package:timerun/screens/homePage.dart';
 
 class DataCollectionPage extends StatefulWidget {
   final int id;
+  final List<String> sessionDevices;
+  final int numSession;
 
-  DataCollectionPage({required this.id, super.key});
+  DataCollectionPage(
+      {required this.numSession,
+      required this.sessionDevices,
+      required this.id,
+      super.key});
 
   @override
   State<DataCollectionPage> createState() => _DataCollectionPageState();
@@ -33,52 +40,67 @@ class _DataCollectionPageState extends State<DataCollectionPage>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CronoBloc(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Sessione di allenamento'),
-          centerTitle: true,
-        ),
-        body: BlocConsumer<CronoBloc, CronoState>(
-          listener: (context, state) async {
-            if (state is CronoStateCompleted) {
-              await Future.delayed(Duration(seconds: 2));
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DetailPage(id: widget.id)),
-                  (route) => false);
-            }
-          },
-          builder: (context, state) {
-            return Column(
-              children: [
-                _Polar(context),
-                Divider(
-                  thickness: 2,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                state is CronoStateCompleted
-                    ? Container(
-                        child: Icon(
-                          MdiIcons.databaseCheck,
-                          size: 215,
-                          color: Colors.green,
-                        ),
-                      )
-                    : _crono(context),
-                Spacer(),
-                _buttonsTimer(context),
-                Container(
-                  height: 120,
-                  width: MediaQuery.of(context).size.width,
-                  child: _progressbar(context),
-                ),
-              ],
-            );
-          },
+      create: (context) => CronoBloc(
+        idUser: widget.id,
+        sessionDevices: widget.sessionDevices,
+        numSession: widget.numSession,
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Sessione di allenamento'),
+            centerTitle: true,
+          ),
+          body: BlocConsumer<CronoBloc, CronoState>(
+            listener: (context, state) async {
+              if (state is CronoStateCompleted) {
+                //TODO: fix this route
+                await Future.delayed(Duration(seconds: 1));
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => HomePage()),
+                    (_) => false);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DetailPage(
+                              id: widget.id,
+                            )));
+              }
+            },
+            builder: (context, state) {
+              return Column(
+                children: [
+                  _Polar(context),
+                  Divider(
+                    thickness: 2,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  state is CronoStateCompleted
+                      ? Container(
+                          child: Icon(
+                            MdiIcons.databaseCheck,
+                            size: 215,
+                            color: Colors.green,
+                          ),
+                        )
+                      : _crono(context),
+                  Spacer(),
+                  _buttonsTimer(context),
+                  Container(
+                    height: 120,
+                    width: MediaQuery.of(context).size.width,
+                    child: _progressbar(context),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

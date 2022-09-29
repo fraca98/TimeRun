@@ -18,9 +18,15 @@ class UsersDao extends DatabaseAccessor<AppDatabase> with _$UsersDaoMixin {
     return into(users).insert(user);
   }
 
-  Future<int> deleteUser(int id){
+  Future<int> deleteUser(int id) {
     return (delete(users)..where((t) => t.id.equals(id))).go();
   }
 
-  Future<User> retrieveSpecificUser(int id) => (select(users)..where((t) => t.id.equals(id))).getSingle(); // return user given id (primary key)
+  Future<User> retrieveSpecificUser(int id) =>
+      (select(users)..where((t) => t.id.equals(id)))
+          .getSingle(); // return user given id (primary key)
+
+
+  Future assignSession1(int iduser, int idSession1) => (update(users)..where((tbl) => tbl.id.equals(iduser))).write(UsersCompanion(session1: Value(idSession1)));
+  Future assignSession2(int iduser, int idSession2) => (update(users)..where((tbl) => tbl.id.equals(iduser))).write(UsersCompanion(session2: Value(idSession2)));
 }

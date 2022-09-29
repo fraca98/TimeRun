@@ -4,6 +4,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
+import 'package:timerun/screens/homePage.dart';
 import '../bloc/user_bloc/user_bloc.dart';
 
 class DetailPage extends StatelessWidget {
@@ -17,7 +18,6 @@ class DetailPage extends StatelessWidget {
       create: (context) => DetailBloc(id),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Dettagli'),
           actions: [
             BlocBuilder<DetailBloc, DetailState>(
               builder: (context, state) {
@@ -57,20 +57,17 @@ class DetailPage extends StatelessWidget {
 
   Widget _body(BuildContext context, DetailStateLoaded state) {
     Color colorFaceIcon;
-    switch (state.user.session) {
-      case 0:
-        colorFaceIcon = Colors.red;
-        break;
-      case 1:
-        colorFaceIcon = Colors.yellow;
-        break;
-      case 2:
-        colorFaceIcon = Colors.green;
-        break;
-      default:
-        colorFaceIcon = Colors.black;
+    if (state.user.session1 != null && state.user.session2 != null) {
+      colorFaceIcon = Colors.green;
     }
-
+    else if (state.user.session1 == null && state.user.session2 == null) {
+      colorFaceIcon = Colors.red;
+    }
+    else if (state.user.session1 != null && state.user.session2 == null) {
+      colorFaceIcon = Colors.yellow;
+    } else {
+      colorFaceIcon = Colors.black;
+    }
     return Container(
       width: MediaQuery.of(context).size.width,
       child: Column(children: [
@@ -118,16 +115,6 @@ class DetailPage extends StatelessWidget {
                       style: TextStyle(fontSize: 20))
                 ]),
               ]),
-              TableRow(children: [
-                //TODO: remove this tablerow
-                Column(children: [
-                  Text(
-                    'Session',
-                    style: TextStyle(fontSize: 20),
-                  )
-                ]),
-                Column(children: [Text(state.user.session.toString())]),
-              ]),
             ],
           ),
         ),
@@ -141,23 +128,39 @@ class DetailPage extends StatelessWidget {
             title: Text('Sessione 1'),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text('Withings'), Text('Apple watch')],
+              child: BlocBuilder<DetailBloc, DetailState>(
+                builder: (context, state) {
+                  state = state as DetailStateLoaded;
+                  return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: state.user.session1 == null
+                          ? [Text('No Data')]
+                          : [
+                              Text(state.session1!.device1!),
+                              Text(state.session1!.device2!)
+                            ]);
+                },
               ),
             ),
             leading: Icon(
               MdiIcons.circle,
-              color: state.user.session == 0 ? Colors.grey : Colors.green,
+              color: state.user.session1 == null ? Colors.grey : Colors.green,
             ),
-            trailing: state.user.session == 0
+            trailing: state.user.session1 == null
                 ? IconButton(
                     icon: Icon(MdiIcons.play),
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (BuildContext context) =>
-                              alertSession(context));
+                          builder: (BuildContext context) {
+                            List<String> selectable = [...devices];
+                            selectable.remove(state.session1?.device1);
+                            selectable.remove(state.session1?.device2);
+                            return alertSession(
+                              context,
+                              selectable,
+                            );
+                          });
                     },
                   )
                 : null,
@@ -172,27 +175,37 @@ class DetailPage extends StatelessWidget {
             title: Text('Sessione 2'),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text('Garmin'), Text('Fitbit')],
+              child: BlocBuilder<DetailBloc, DetailState>(
+                builder: (context, state) {
+                  state = state as DetailStateLoaded;
+                  return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: state.user.session2 == null
+                          ? [Text('No Data')]
+                          : [
+                              Text(state.session2!.device1!),
+                              Text(state.session2!.device2!)
+                            ]);
+                },
               ),
             ),
             leading: Icon(
               MdiIcons.circle,
-              color: state.user.session < 2 ? Colors.grey : Colors.green,
+              color: state.user.session2 == null ? Colors.grey : Colors.green,
             ),
-            trailing: state.user.session < 1 || state.user.session == 2
+            trailing: state.user.session1 == null || state.user.session2 != null
                 ? null
                 : IconButton(
                     icon: Icon(MdiIcons.play),
                     onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: ((context) => DataCollectionPage(
-                                    id: id,
-                                  ))),
-                          (_) => false);
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            List<String> selectable = [...devices];
+                            selectable.remove(state.session1?.device1);
+                            selectable.remove(state.session1?.device2);
+                            return alertSession(context, selectable);
+                          });
                     },
                   ),
           ),
@@ -222,7 +235,9 @@ class DetailPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<UserBloc>().add(UserEventDelete(id: state.user.id));
+              context
+                  .read<UserBloc>()
+                  .add(UserEventDelete(id: state.user.id)); //TODO: fix
               Navigator.of(context).pop();
             },
             child: Text(
@@ -233,8 +248,8 @@ class DetailPage extends StatelessWidget {
   }
 
   // dialogue per l'inizio della sessione 1 dove seleziono i device
-  Widget alertSession(BuildContext context) {
-    List<bool> togglecheck = List.generate(devices.length, (index) => false);
+  Widget alertSession(BuildContext context, List<String> selectable) {
+    List<bool> togglecheck = List.generate(selectable.length, (index) => false);
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
       return AlertDialog(
@@ -247,11 +262,11 @@ class DetailPage extends StatelessWidget {
             ),
             Column(
               children: List.generate(
-                devices.length,
+                selectable.length,
                 (index) => CheckboxListTile(
                   value: togglecheck[index],
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: Text(devices[index]),
+                  title: Text(selectable[index]),
                   onChanged: (bool? value) {
                     setState(
                       () {
@@ -278,13 +293,25 @@ class DetailPage extends StatelessWidget {
                   2
               ? TextButton(
                   onPressed: () {
-                    Navigator.pushAndRemoveUntil(
+                    int numSession;
+                    togglecheck.length > 2 ? numSession = 1 : numSession = 2;
+                    List<String> sessionDevices = [];
+                    for (int i = 0; i < togglecheck.length; i++) {
+                      if (togglecheck[i] == true) {
+                        sessionDevices.add(selectable[
+                            i]); //get the devices toggled by user in previous screen
+                      }
+                    }
+                    Navigator.push(
+                        //TODO: fix route
                         context,
                         MaterialPageRoute(
-                            builder: (context) => DataCollectionPage(
-                                  id: id,
-                                )),
-                        (_) => false);
+                          builder: (context) => DataCollectionPage(
+                            id: id,
+                            sessionDevices: sessionDevices,
+                            numSession: numSession,
+                          ),
+                        ));
                   },
                   child: Text('Inizia la sessione'))
               : Container(),

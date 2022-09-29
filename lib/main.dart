@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timerun/screens/datacollectionPage.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
 import 'package:timerun/database/AppDatabase.dart';
