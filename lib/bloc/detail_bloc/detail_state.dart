@@ -18,3 +18,7 @@ class DetailStateLoaded extends DetailState {
   @override
   List<Object?> get props => [user, session1, session2];
 }
+
+class DetailStateDeletingUser extends DetailState {} //deleting user
+
+class DetailStateDeletedUser extends DetailState {} //user deleted

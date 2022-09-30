@@ -16,7 +16,10 @@ class HomePage extends StatelessWidget {
       create: (context) => UserBloc(),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Utenti'),
+          title: Text(
+            'Utenti',
+            style: TextStyle(fontFamily: 'Poppins'),
+          ),
         ),
         drawer: Drawer(),
         body: BlocBuilder<UserBloc, UserState>(
@@ -26,23 +29,28 @@ class HomePage extends StatelessWidget {
             }
             if (state is UserStateLoaded) {
               return state.users.length == 0
-                  ? Center(child: Text('Non ci sono utenti'))
+                  ? Center(
+                      child: Text(
+                      'Non ci sono utenti',
+                      style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                    ))
                   : ListView.builder(
                       padding: EdgeInsets.only(bottom: 80),
                       itemCount: state.users.length,
                       itemBuilder: (context, index) {
                         Color color;
-                        if (state.users[index].session1 != null &&
-                            state.users[index].session2 != null) {
-                          color = Colors.green;
-                        } else if (state.users[index].session1 == null &&
-                            state.users[index].session2 == null) {
-                          color = Colors.red;
-                        } else if (state.users[index].session1 != null &&
-                            state.users[index].session2 == null) {
-                          color = Colors.yellow;
-                        } else {
-                          color = Colors.black;
+                        switch (state.users[index].completed) {
+                          case 0:
+                            color = Colors.red;
+                            break;
+                          case 1:
+                            color = Colors.yellow;
+                            break;
+                          case 2:
+                            color = Colors.green;
+                            break;
+                          default:
+                            color = Colors.black;
                         }
                         return InkWell(
                           onTap: () {

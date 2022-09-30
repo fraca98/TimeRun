@@ -26,7 +26,9 @@ class UsersDao extends DatabaseAccessor<AppDatabase> with _$UsersDaoMixin {
       (select(users)..where((t) => t.id.equals(id)))
           .getSingle(); // return user given id (primary key)
 
+  Future updateComplete(int iduser, int newcomplete) =>
+      (update(users)..where((tbl) => tbl.id.equals(iduser))).write(
+          UsersCompanion(
+              completed: Value(newcomplete))); //update completed user value
 
-  Future assignSession1(int iduser, int idSession1) => (update(users)..where((tbl) => tbl.id.equals(iduser))).write(UsersCompanion(session1: Value(idSession1)));
-  Future assignSession2(int iduser, int idSession2) => (update(users)..where((tbl) => tbl.id.equals(iduser))).write(UsersCompanion(session2: Value(idSession2)));
 }

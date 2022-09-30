@@ -18,3 +18,5 @@ class CronoEventSave extends CronoEvent {}
 class CronoEventDelete extends CronoEvent{}
 
 class CronoEventResume extends CronoEvent{}
+
+class CronoEventDeleteSession extends CronoEvent{}

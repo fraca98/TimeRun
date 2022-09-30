@@ -8,6 +8,7 @@ import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/screens/detailPage.dart';
 import 'package:timerun/screens/homePage.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class DataCollectionPage extends StatefulWidget {
   final int id;
@@ -45,68 +46,109 @@ class _DataCollectionPageState extends State<DataCollectionPage>
         sessionDevices: widget.sessionDevices,
         numSession: widget.numSession,
       ),
-      child: WillPopScope(
-        onWillPop: () async {
-          return false;
+      child: BlocConsumer<CronoBloc, CronoState>(
+        listener: (context, state) async {
+          if (state is CronoStateDeletedSession) {
+            //TODO: fix route
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+                (_) => false);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DetailPage(
+                          id: widget.id,
+                        )));
+          }
+          if (state is CronoStateCompleted) {
+            //TODO: fix this route
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),
+                (_) => false);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DetailPage(
+                          id: widget.id,
+                        )));
+          }
         },
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Sessione di allenamento'),
-            centerTitle: true,
-          ),
-          body: BlocConsumer<CronoBloc, CronoState>(
-            listener: (context, state) async {
-              if (state is CronoStateCompleted) {
-                //TODO: fix this route
-                await Future.delayed(Duration(seconds: 1));
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                    (_) => false);
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => DetailPage(
-                              id: widget.id,
-                            )));
+        builder: (context, state) {
+          return WillPopScope(
+            onWillPop: () async {
+              if (state is CronoStatePlay ||
+                  state is CronoStatePause ||
+                  state is CronoStateStop) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return _alertDeleteCurrentSession(
+                          context); //pass the context of the page to use BLOC in alertdialog
+                    });
               }
+              return false;
             },
-            builder: (context, state) {
-              return Column(
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text('Sessione di allenamento'),
+                centerTitle: true,
+                automaticallyImplyLeading: state is CronoStateSaving ||
+                        state is CronoStateCompleted ||
+                        state is CronoStateDeletingSession ||
+                        state is CronoStateDeletedSession
+                    ? false
+                    : true,
+              ),
+              body: Column(
                 children: [
-                  _Polar(context),
+                  _polar(context, state),
                   Divider(
                     thickness: 2,
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  state is CronoStateCompleted
-                      ? Container(
-                          child: Icon(
-                            MdiIcons.databaseCheck,
-                            size: 215,
-                            color: Colors.green,
-                          ),
-                        )
-                      : _crono(context),
+                  _crono(context, state),
                   Spacer(),
-                  _buttonsTimer(context),
+                  _buttonsTimer(context, state),
                   Container(
                     height: 120,
                     width: MediaQuery.of(context).size.width,
-                    child: _progressbar(context),
-                  ),
+                    child: _progressbar(context, state),
+                  )
                 ],
-              );
-            },
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _Polar(BuildContext context) {
+  Widget _polar(BuildContext context, CronoState state) {
+    String text;
+    switch (state.progressIndex) {
+      case 0:
+        text = 'Stai fermo, a riposo';
+        break;
+      case 1:
+        text = "Mantieni l'indicatore nella zona verde";
+        break;
+      case 2:
+        text = "Mantieni l'indicatore nella zona gialla";
+        break;
+      case 3:
+        text = "Mantieni l'indicatore nella zona arancione";
+        break;
+      case 4:
+        text = "Mantieni l'indicatore nella zona rossa";
+        break;
+      default:
+        text = '';
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(
         vertical: 16,
@@ -176,47 +218,34 @@ class _DataCollectionPageState extends State<DataCollectionPage>
               ],
             ),
           ),
-          BlocBuilder<CronoBloc, CronoState>(
-            builder: (context, state) {
-              if (state is CronoStateLoading) {
-                return Text(
+          state is CronoStateSaving || state is CronoStateCompleted
+              ? Text(
                   'Salvataggio ...',
                   style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-                );
-              } else {
-                String text;
-                switch (state.progressIndex) {
-                  case 0:
-                    text = 'Stai fermo, a riposo';
-                    break;
-                  case 1:
-                    text = "Mantieni l'indicatore nella zona verde";
-                    break;
-                  case 2:
-                    text = "Mantieni l'indicatore nella zona gialla";
-                    break;
-                  case 3:
-                    text = "Mantieni l'indicatore nella zona arancione";
-                    break;
-                  case 4:
-                    text = "Mantieni l'indicatore nella zona rossa";
-                    break;
-                  default:
-                    text = '';
-                }
-                return Text(
+                )
+              : Container(),
+          state is CronoStateDeletingSession ||
+                  state is CronoStateDeletedSession
+              ? Text(
+                  'Cancellando la sessione in corso ...',
+                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                )
+              : Container(),
+          state is CronoStatePlay ||
+                  state is CronoStatePause ||
+                  state is CronoStateStop ||
+                  state is CronoStateRunning
+              ? Text(
                   text,
                   style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-                );
-              }
-            },
-          ),
+                )
+              : Container(),
         ],
       ),
     );
   }
 
-  Widget _crono(BuildContext context) {
+  Widget _crono(BuildContext context, CronoState state) {
     return Column(
       children: [
         Container(
@@ -227,14 +256,10 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                 child: Container(
                   width: 200,
                   height: 200,
-                  child: BlocBuilder<CronoBloc, CronoState>(
-                    builder: (context, state) {
-                      return CircularProgressIndicator(
-                        strokeWidth: 10,
-                        backgroundColor: Colors.grey,
-                        value: state is CronoStateRunning ? null : 0,
-                      );
-                    },
+                  child: CircularProgressIndicator(
+                    strokeWidth: 10,
+                    backgroundColor: Colors.grey,
+                    value: state is CronoStateRunning ? null : 0,
                   ),
                 ),
               ),
@@ -264,175 +289,194 @@ class _DataCollectionPageState extends State<DataCollectionPage>
     );
   }
 
-  Widget _buttonsTimer(BuildContext context) {
-    return BlocConsumer<CronoBloc, CronoState>(
-      listener: ((context, state) {
-        if (state is CronoStateCompleted) {}
-      }),
-      builder: (context, state) {
-        if (state is CronoStateLoading) {
-          return CircularProgressIndicator();
-        }
-        if (state is CronoStatePlay) {
-          return FloatingActionButton(
+  Widget _buttonsTimer(BuildContext context, CronoState state) {
+    if (state is CronoStateSaving ||
+        state is CronoStateCompleted ||
+        state is CronoStateDeletingSession ||
+        state is CronoStateDeletedSession) {
+      return CircularProgressIndicator();
+    }
+    if (state is CronoStatePlay) {
+      return FloatingActionButton(
+        onPressed: () {
+          _stopWatchTimer.onStartTimer();
+          context.read<CronoBloc>().add(CronoEventPlay());
+        },
+        child: Icon(MdiIcons.play),
+      );
+    }
+    if (state is CronoStateRunning) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              _stopWatchTimer.onStopTimer();
+              context.read<CronoBloc>().add(CronoEventPause());
+            },
+            child: Icon(MdiIcons.pause),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              _stopWatchTimer.onStopTimer();
+              context.read<CronoBloc>().add(CronoEventStop());
+            },
+            child: Icon(MdiIcons.stop),
+          ),
+        ],
+      );
+    }
+    if (state is CronoStatePause) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
             onPressed: () {
               _stopWatchTimer.onStartTimer();
-              context.read<CronoBloc>().add(CronoEventPlay());
+              context.read<CronoBloc>().add(CronoEventResume());
             },
             child: Icon(MdiIcons.play),
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              _stopWatchTimer.onStopTimer();
+              context.read<CronoBloc>().add(CronoEventStop());
+            },
+            child: Icon(MdiIcons.stop),
+          ),
+        ],
+      );
+    }
+    if (state is CronoStateStop) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Colors.green,
+            onPressed: () async {
+              _stopWatchTimer.onResetTimer();
+              context.read<CronoBloc>().add(CronoEventSave());
+            },
+            child: Icon(MdiIcons.archive),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.red,
+            onPressed: () {
+              _stopWatchTimer.onResetTimer();
+              context.read<CronoBloc>().add(CronoEventDelete());
+            },
+            child: Icon(MdiIcons.delete),
+          ),
+        ],
+      );
+    }
+    if (state is CronoStateCompleted) {
+      return Container();
+    } else {
+      return Text('Error CronoBloc');
+    }
+  }
+
+  Widget _progressbar(BuildContext context, CronoState state) {
+    return Timeline.tileBuilder(
+      theme: TimelineThemeData(
+        direction: Axis.horizontal,
+        connectorTheme: ConnectorThemeData(
+          space: 30.0,
+          thickness: 5.0,
+        ),
+      ),
+      builder: TimelineTileBuilder.connected(
+        connectionDirection: ConnectionDirection.before,
+        itemExtentBuilder: (_, __) =>
+            MediaQuery.of(context).size.width / status.length,
+        contentsBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 15.0),
+            child: Text(
+              '${status[index]}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
           );
-        }
-        if (state is CronoStateRunning) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  _stopWatchTimer.onStopTimer();
-                  context.read<CronoBloc>().add(CronoEventPause());
-                },
-                child: Icon(MdiIcons.pause),
+        },
+        indicatorBuilder: (_, index) {
+          var color;
+          var child;
+          if (index == state.progressIndex) {
+            color = Colors.grey;
+            child = Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(
+                strokeWidth: 3.0,
+                valueColor: AlwaysStoppedAnimation(Colors.white),
               ),
-              FloatingActionButton(
-                onPressed: () {
-                  _stopWatchTimer.onStopTimer();
-                  context.read<CronoBloc>().add(CronoEventStop());
-                },
-                child: Icon(MdiIcons.stop),
-              ),
-            ],
-          );
-        }
-        if (state is CronoStatePause) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              FloatingActionButton(
-                onPressed: () {
-                  _stopWatchTimer.onStartTimer();
-                  context.read<CronoBloc>().add(CronoEventResume());
-                },
-                child: Icon(MdiIcons.play),
-              ),
-              FloatingActionButton(
-                onPressed: () {
-                  _stopWatchTimer.onStopTimer();
-                  context.read<CronoBloc>().add(CronoEventStop());
-                },
-                child: Icon(MdiIcons.stop),
-              ),
-            ],
-          );
-        }
-        if (state is CronoStateStop) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              FloatingActionButton(
-                backgroundColor: Colors.green,
-                onPressed: () async {
-                  _stopWatchTimer.onResetTimer();
-                  context.read<CronoBloc>().add(CronoEventSave());
-                },
-                child: Icon(MdiIcons.archive),
-              ),
-              FloatingActionButton(
-                backgroundColor: Colors.red,
-                onPressed: () {
-                  _stopWatchTimer.onResetTimer();
-                  context.read<CronoBloc>().add(CronoEventDelete());
-                },
-                child: Icon(MdiIcons.delete),
-              ),
-            ],
-          );
-        }
-        if (state is CronoStateCompleted) {
-          return Container();
-        } else {
-          return Text('Error CronoBloc');
-        }
-      },
+            );
+          } else if (index < state.progressIndex) {
+            color = Colors.green;
+            child = Icon(
+              Icons.check,
+              color: Colors.white,
+              size: 15.0,
+            );
+          } else {
+            color = Color(0xffd1d2d7);
+          }
+          if (index <= state.progressIndex) {
+            return DotIndicator(
+              size: 30.0,
+              color: color,
+              child: child,
+            );
+          } else {
+            return OutlinedDotIndicator(
+              borderWidth: 4.0,
+              color: color,
+            );
+          }
+        },
+        connectorBuilder: (_, index, type) {
+          if (index > state.progressIndex) {
+            return DecoratedLineConnector(
+              decoration: BoxDecoration(color: Color(0xffd1d2d7)),
+            );
+          } else {
+            return SolidLineConnector(
+              color: Colors.green,
+            );
+          }
+        },
+        itemCount: status.length,
+      ),
     );
   }
 
-  Widget _progressbar(BuildContext context) {
-    return BlocBuilder<CronoBloc, CronoState>(
-      builder: (context, state) {
-        return Timeline.tileBuilder(
-          theme: TimelineThemeData(
-            direction: Axis.horizontal,
-            connectorTheme: ConnectorThemeData(
-              space: 30.0,
-              thickness: 5.0,
-            ),
-          ),
-          builder: TimelineTileBuilder.connected(
-            connectionDirection: ConnectionDirection.before,
-            itemExtentBuilder: (_, __) =>
-                MediaQuery.of(context).size.width / status.length,
-            contentsBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.only(top: 15.0),
-                child: Text(
-                  '${status[index]}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-              );
+  // set up the AlertDialog when deleting current session (go back)
+  Widget _alertDeleteCurrentSession(BuildContext context) {
+    //pass the context of the page
+    return AlertDialog(
+      icon: Icon(MdiIcons.alert),
+      title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
+      content: Text("Sei sicuro di voler eliminare questa sessione ?",
+          style: TextStyle(fontFamily: 'Poppins')),
+      shape:
+          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins')),
+        ),
+        TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<CronoBloc>().add(CronoEventDeleteSession());
             },
-            indicatorBuilder: (_, index) {
-              var color;
-              var child;
-              if (index == state.progressIndex) {
-                color = Colors.grey;
-                child = Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3.0,
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                  ),
-                );
-              } else if (index < state.progressIndex) {
-                color = Colors.green;
-                child = Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 15.0,
-                );
-              } else {
-                color = Color(0xffd1d2d7);
-              }
-              if (index <= state.progressIndex) {
-                return DotIndicator(
-                  size: 30.0,
-                  color: color,
-                  child: child,
-                );
-              } else {
-                return OutlinedDotIndicator(
-                  borderWidth: 4.0,
-                  color: color,
-                );
-              }
-            },
-            connectorBuilder: (_, index, type) {
-              if (index > state.progressIndex) {
-                return DecoratedLineConnector(
-                  decoration: BoxDecoration(color: Color(0xffd1d2d7)),
-                );
-              } else {
-                return SolidLineConnector(
-                  color: Colors.green,
-                );
-              }
-            },
-            itemCount: status.length,
-          ),
-        );
-      },
+            child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
+      ],
     );
   }
 }

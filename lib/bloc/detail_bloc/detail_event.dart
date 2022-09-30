@@ -8,9 +8,17 @@ abstract class DetailEvent extends Equatable {
 }
 
 class DetailEventLoad extends DetailEvent{
-  int id;
+  final int id;
   DetailEventLoad({required this.id});
 
   @override 
   List<Object?> get props => [id];
+}
+
+class DetailEventDeleteUser extends DetailEvent{
+  final int id;
+  DetailEventDeleteUser({required this.id});
+
+  @override
+  List<Object> get props => [id];
 }

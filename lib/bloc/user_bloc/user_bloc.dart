@@ -12,8 +12,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
     on<UserEventLoad>(
       (event, emit) async {
-        print('Loading Users from database');
+        //print('Loading Users from database');
         //await Future.delayed(Duration(seconds: 1));
+        /*print(await db.usersDao.allEntries);
+        print(await db.sessionsDao.allEntries);
+        print(await db.intervalsDao.allEntries);*/
         emit(
           UserStateLoaded(users: await db.usersDao.allEntries),
         );
@@ -23,23 +26,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<UserEventAdd>(
       (event, emit) async {
         emit(UserStateLoading());
-        print('Added a new User');
         await db.usersDao.insertNewUser(UsersCompanion(
-            name: event.userComp.name,
-            surname: event.userComp.surname,
-            sex: event.userComp.sex,)); //TODO: REMOVE
+          name: event.userComp.name,
+          surname: event.userComp.surname,
+          sex: event.userComp.sex,
+        )); //TODO: Remove and add page with the form
+        //print('Added a new User');
         emit(UserStateLoaded(
             users: await db.usersDao
                 .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))
-      },
-    );
-
-    on<UserEventDelete>(
-      (event, emit) async {
-        emit(UserStateLoading());
-        print('Removed user');
-        await db.usersDao.deleteUser(event.id);
-        emit(UserStateLoaded(users: await db.usersDao.allEntries));
       },
     );
 

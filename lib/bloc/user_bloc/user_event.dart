@@ -16,11 +16,3 @@ class UserEventAdd extends UserEvent {
   @override
   List<Object> get props => [userComp];
 }
-
-class UserEventDelete extends UserEvent{
-  final int id;
-  UserEventDelete({required this.id});
-
-  @override
-  List<Object> get props => [id];
-}

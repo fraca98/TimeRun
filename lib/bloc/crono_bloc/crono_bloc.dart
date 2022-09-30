@@ -27,7 +27,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStateRunning(progressIndex: progressIndex));
         starttimestamp =
             (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
-        print('starttimestamp: $starttimestamp');
+        //print('starttimestamp: $starttimestamp');
       },
     );
 
@@ -41,7 +41,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       emit(CronoStateStop(progressIndex: progressIndex));
       endtimestamp =
           (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
-      print('endtimestamp: $endtimestamp');
+      //print('endtimestamp: $endtimestamp');
     });
 
     on<CronoEventResume>(
@@ -51,22 +51,18 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     );
 
     on<CronoEventSave>((event, emit) async {
-      emit(CronoStateLoading(progressIndex: progressIndex));
-      print("Save timestamp");
-
+      emit(CronoStateSaving(progressIndex: progressIndex));
+      //print("Save timestamp");
       if (progressIndex == 0) {
         //if i save (for progressindex = 0)
         idSession = await db.sessionsDao.inserNewSession(SessionsCompanion(
             //insert a new session
-            startsession: Value(starttimestamp),
+            iduser: Value(idUser),
+            startsession: Value(starttimestamp!),
             device1: Value(sessionDevices[0]),
-            device2: Value(sessionDevices[1])));
+            device2: Value(sessionDevices[1]),
+            numsession: Value(numSession)));
         //print(idSession);
-        numSession == 1
-            ? await db.usersDao.assignSession1(idUser, idSession!)
-            : await db.usersDao.assignSession2(
-                idUser, idSession!); // add the session1/2 for the user
-        //print(await db.sessionsDao.allEntries);
       }
 
       await db.intervalsDao.inserNewInterval(IntervalsCompanion(
@@ -82,6 +78,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (progressIndex == 5) {
         //end the session of data collection
         await db.sessionsDao.updateSession(idSession!, endtimestamp!); //update endtimestamp of session
+        numSession == 1 //update the completed (number of completed session for the user)
+            ? await db.usersDao.updateComplete(idUser, 1)
+            : await db.usersDao.updateComplete(idUser, 2);
         emit(CronoStateCompleted(progressIndex: progressIndex));
       } else {
         emit(CronoStatePlay(progressIndex: progressIndex));
@@ -93,10 +92,20 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStatePlay(progressIndex: progressIndex));
         starttimestamp = null;
         endtimestamp = null;
-        print('Cancel timestamp');
-        print('starttimestamp: $starttimestamp');
-        print('endtimestamp: $endtimestamp');
+        //print('Cancel timestamp');
+        //print('starttimestamp: $starttimestamp');
+        //print('endtimestamp: $endtimestamp');
       },
     );
+
+    on<CronoEventDeleteSession>((event, emit) async {
+      emit(CronoStateDeletingSession(progressIndex: progressIndex));
+      if (idSession != null){
+        await db.sessionsDao.deleteSession(idSession!);
+      }
+      else{}
+      emit(CronoStateDeletedSession(progressIndex: progressIndex));
+      
+    },);
   }
 }

@@ -5,7 +5,6 @@ import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
 import 'package:timerun/screens/homePage.dart';
-import '../bloc/user_bloc/user_bloc.dart';
 
 class DetailPage extends StatelessWidget {
   const DetailPage({required this.id, super.key});
@@ -16,54 +15,94 @@ class DetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => DetailBloc(id),
-      child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            BlocBuilder<DetailBloc, DetailState>(
-              builder: (context, state) {
-                if (state is DetailStateLoaded) {
-                  return IconButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) =>
-                                alertDelete(context, state));
-                      },
-                      icon: Icon(MdiIcons.delete));
-                } else {
-                  return Container();
-                }
-              },
-            )
-          ],
-        ),
-        body: BlocBuilder<DetailBloc, DetailState>(
-          builder: (context, state) {
-            if (state is DetailStateLoading) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (state is DetailStateLoaded) {
-              return _body(context, state);
-            } else {
-              return Container();
-            }
-          },
-        ),
+      child: BlocConsumer<DetailBloc, DetailState>(
+        listener: (context, state) {
+          //TODO: fix route
+          if (state is DetailStateDeletedUser){Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+              (_) => false);
+          }
+        },
+        builder: (context, state) {
+          return WillPopScope(
+            onWillPop: () async {
+              if (state is DetailStateDeletingUser ||
+                  state is DetailStateDeletedUser) {
+                return false;
+              } else {
+                return true;
+              }
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                automaticallyImplyLeading: state is DetailStateDeletingUser ||
+                        state is DetailStateDeletingUser
+                    ? false
+                    : true,
+                title: Text('Dettagli utente',
+                    style: TextStyle(fontFamily: 'Poppins')),
+                centerTitle: true,
+                actions: [
+                  state is DetailStateLoaded
+                      ? IconButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (BuildContext
+                                        dialogContext) => //here pass the context of the page (Not context of dialog)
+                                    alertDelete(context, state));
+                          },
+                          icon: Icon(MdiIcons.delete))
+                      : Container(),
+                ],
+              ),
+              body: BlocBuilder<DetailBloc, DetailState>(
+                builder: (context, state) {
+                  if (state is DetailStateDeletingUser ||
+                      state is DetailStateDeletedUser) {
+                    return Center(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Text(
+                              "Cancello l'utente",
+                              style: TextStyle(
+                                  fontSize: 18, fontFamily: 'Poppins'),
+                            )
+                          ]),
+                    );
+                  }
+                  if (state is DetailStateLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (state is DetailStateLoaded) {
+                    return _body(context, state);
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _body(BuildContext context, DetailStateLoaded state) {
     Color colorFaceIcon;
-    if (state.user.session1 != null && state.user.session2 != null) {
+    if (state.session1 != null && state.session2 != null) {
       colorFaceIcon = Colors.green;
-    }
-    else if (state.user.session1 == null && state.user.session2 == null) {
+    } else if (state.session1 == null && state.session2 == null) {
       colorFaceIcon = Colors.red;
-    }
-    else if (state.user.session1 != null && state.user.session2 == null) {
+    } else if (state.session1 != null && state.session2 == null) {
       colorFaceIcon = Colors.yellow;
     } else {
       colorFaceIcon = Colors.black;
@@ -85,34 +124,36 @@ class DetailPage extends StatelessWidget {
                 Column(children: [
                   Text(
                     'Nome',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.name, style: TextStyle(fontSize: 20))
+                  Text(state.user.name,
+                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
               TableRow(children: [
                 Column(children: [
                   Text(
                     'Cognome',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.surname, style: TextStyle(fontSize: 20))
+                  Text(state.user.surname,
+                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
               TableRow(children: [
                 Column(children: [
                   Text(
                     'Sesso',
-                    style: TextStyle(fontSize: 20),
+                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
                   Text(state.user.sex ? 'Uomo' : 'Donna',
-                      style: TextStyle(fontSize: 20))
+                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
             ],
@@ -125,39 +166,35 @@ class DetailPage extends StatelessWidget {
         Container(
           height: 60,
           child: ListTile(
-            title: Text('Sessione 1'),
+            title: Text('Sessione 1', style: TextStyle(fontFamily: 'Poppins')),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
-              child: BlocBuilder<DetailBloc, DetailState>(
-                builder: (context, state) {
-                  state = state as DetailStateLoaded;
-                  return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: state.user.session1 == null
-                          ? [Text('No Data')]
-                          : [
-                              Text(state.session1!.device1!),
-                              Text(state.session1!.device2!)
-                            ]);
-                },
-              ),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: state.session1 == null
+                      ? [
+                          Text('No Data',
+                              style: TextStyle(fontFamily: 'Poppins'))
+                        ]
+                      : [
+                          Text(state.session1!.device1),
+                          Text(state.session1!.device2)
+                        ]),
             ),
             leading: Icon(
               MdiIcons.circle,
-              color: state.user.session1 == null ? Colors.grey : Colors.green,
+              color: state.session1 == null ? Colors.grey : Colors.green,
             ),
-            trailing: state.user.session1 == null
+            trailing: state.session1 == null
                 ? IconButton(
                     icon: Icon(MdiIcons.play),
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (BuildContext context) {
+                          builder: (BuildContext dialogContext) {
                             List<String> selectable = [...devices];
-                            selectable.remove(state.session1?.device1);
-                            selectable.remove(state.session1?.device2);
                             return alertSession(
-                              context,
+                              dialogContext,
                               selectable,
                             );
                           });
@@ -172,39 +209,42 @@ class DetailPage extends StatelessWidget {
         Container(
           height: 60,
           child: ListTile(
-            title: Text('Sessione 2'),
+            title: Text(
+              'Sessione 2',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
-              child: BlocBuilder<DetailBloc, DetailState>(
-                builder: (context, state) {
-                  state = state as DetailStateLoaded;
-                  return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: state.user.session2 == null
-                          ? [Text('No Data')]
-                          : [
-                              Text(state.session2!.device1!),
-                              Text(state.session2!.device2!)
-                            ]);
-                },
-              ),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: state.session2 == null
+                      ? [
+                          Text('No Data',
+                              style: TextStyle(fontFamily: 'Poppins'))
+                        ]
+                      : [
+                          Text(state.session2!.device1,
+                              style: TextStyle(fontFamily: 'Poppins')),
+                          Text(state.session2!.device2,
+                              style: TextStyle(fontFamily: 'Poppins'))
+                        ]),
             ),
             leading: Icon(
               MdiIcons.circle,
-              color: state.user.session2 == null ? Colors.grey : Colors.green,
+              color: state.session2 == null ? Colors.grey : Colors.green,
             ),
-            trailing: state.user.session1 == null || state.user.session2 != null
+            trailing: state.session1 == null || state.session2 != null
                 ? null
                 : IconButton(
                     icon: Icon(MdiIcons.play),
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (BuildContext context) {
+                          builder: (BuildContext dialogContext) {
                             List<String> selectable = [...devices];
                             selectable.remove(state.session1?.device1);
                             selectable.remove(state.session1?.device2);
-                            return alertSession(context, selectable);
+                            return alertSession(dialogContext, selectable);
                           });
                     },
                   ),
@@ -221,8 +261,9 @@ class DetailPage extends StatelessWidget {
   Widget alertDelete(BuildContext context, DetailStateLoaded state) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Attenzione"),
-      content: Text("Sei sicuro di voler eliminare questo utente ?"),
+      title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
+      content: Text("Sei sicuro di voler eliminare questo utente ?",
+          style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
       actions: [
@@ -230,25 +271,20 @@ class DetailPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Annulla'),
+          child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins')),
         ),
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context
-                  .read<UserBloc>()
-                  .add(UserEventDelete(id: state.user.id)); //TODO: fix
-              Navigator.of(context).pop();
+              context.read<DetailBloc>().add(DetailEventDeleteUser(id: id));
             },
-            child: Text(
-              'Elimina',
-            ))
+            child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
   }
 
   // dialogue per l'inizio della sessione 1 dove seleziono i device
-  Widget alertSession(BuildContext context, List<String> selectable) {
+  Widget alertSession(BuildContext dialogContext, List<String> selectable) {
     List<bool> togglecheck = List.generate(selectable.length, (index) => false);
     return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
@@ -258,7 +294,10 @@ class DetailPage extends StatelessWidget {
           children: [
             Text(
               'Seleziona i 2 dispositivi per la sessione',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'Poppins'),
             ),
             Column(
               children: List.generate(
@@ -284,7 +323,7 @@ class DetailPage extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Annulla')),
+              child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins'))),
           togglecheck
                       .where(
                         (element) => element == true,
@@ -313,7 +352,8 @@ class DetailPage extends StatelessWidget {
                           ),
                         ));
                   },
-                  child: Text('Inizia la sessione'))
+                  child: Text('Inizia la sessione',
+                      style: TextStyle(fontFamily: 'Poppins')))
               : Container(),
         ],
       );

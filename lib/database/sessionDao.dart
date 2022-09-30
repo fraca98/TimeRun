@@ -20,10 +20,19 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
     return into(sessions).insert(session);
   }
 
-  Future<Session> retrieveSpecificSession(int id) =>
-      (select(sessions)..where((t) => t.id.equals(id)))
-          .getSingle(); // return Single specific session given id session (primary key)
+  Future<
+      Session> retrieveSpecificSession(int idUser, int numsession) => (select(
+          sessions)
+        ..where(
+            (t) => t.iduser.equals(idUser) & t.numsession.equals(numsession)))
+      .getSingle(); // return Single specific session given idUser and the number (1/2) of the session
 
-  Future updateSession(int idSession, int endsession )=> (update(sessions)..where((tbl) => tbl.id.equals(idSession))).write(SessionsCompanion(endsession: Value(endsession)));
+  Future updateSession(int idSession, int endsession) =>
+      (update(sessions)..where((tbl) => tbl.id.equals(idSession)))
+          .write(SessionsCompanion(endsession: Value(endsession)));
 
+  Future<int> deleteSession(int id) {
+    //delete session given the id of the session
+    return (delete(sessions)..where((t) => t.id.equals(id))).go();
+  }
 }

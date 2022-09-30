@@ -13,25 +13,34 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     on<DetailEventLoad>((event, emit) async {
       emit(DetailStateLoading());
       User user = await db.usersDao.retrieveSpecificUser(event.id);
-      print(user);
+      //print(user);
 
       Session? session1;
       Session? session2;
 
-      if (user.session1 != null) {
-        //retrieve session1
-        session1 = await db.sessionsDao.retrieveSpecificSession(user.session1!);
-        print(session1);
+      if (user.completed == 1) {
+        session1 = await db.sessionsDao.retrieveSpecificSession(event.id, 1);
       }
-      if (user.session2 != null) {
-        //retrieve session2
-        session2 = await db.sessionsDao.retrieveSpecificSession(user.session2!);
-        print(session2);
+      if (user.completed == 2) {
+        session1 = await db.sessionsDao.retrieveSpecificSession(event.id, 1);
+        session2 = await db.sessionsDao.retrieveSpecificSession(event.id, 2);
       }
+
+      //print(session1);
+      //print(session2);
 
       emit(DetailStateLoaded(
           user: user, session1: session1, session2: session2));
     });
+
+    on<DetailEventDeleteUser>(
+      (event, emit) async {
+        emit(DetailStateDeletingUser());
+        await db.usersDao.deleteUser(event.id); //on cascade deletes linked Sessions, Intervals
+        //print('Removed user');
+        emit(DetailStateDeletedUser());
+      },
+    );
 
     add(DetailEventLoad(id: id)); // run when created class DetailBloc
   }

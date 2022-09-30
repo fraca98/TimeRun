@@ -17,32 +17,35 @@ class Users extends Table {
   TextColumn get name => text()();
   TextColumn get surname => text()();
   BoolColumn get sex => boolean()();
-  IntColumn get session1 => integer().nullable().references(Sessions, #id)();
-  IntColumn get session2 => integer().nullable().references(Sessions, #id)();
+  IntColumn get completed => integer().withDefault(Constant(0))();
 }
 
 // this will generate the table called "Sessions"
-class Sessions extends Table{
+class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get startsession => integer().nullable()();
+  IntColumn get iduser => integer().references(Users, #id, onDelete: KeyAction.cascade)();
+  IntColumn get numsession => integer()();
+  IntColumn get startsession => integer()();
   IntColumn get endsession => integer().nullable()();
-  TextColumn get device1 => text().nullable()();
-  TextColumn get device2 => text().nullable()();
+  TextColumn get device1 => text()();
+  TextColumn get device2 => text()();
 }
 
-class Intervals extends Table{
+// this will generate the table called "Intervals"
+class Intervals extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idSession => integer()();
+  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
   TextColumn get status => text()();
   IntColumn get startstimestamp => integer()();
   IntColumn get endtimestamp => integer()();
   IntColumn get deltatime => integer()();
 }
 
-
 // this annotation tells drift to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
-@DriftDatabase(tables: [Users, Sessions, Intervals], daos: [UsersDao, SessionsDao, IntervalsDao])
+@DriftDatabase(
+    tables: [Users, Sessions, Intervals],
+    daos: [UsersDao, SessionsDao, IntervalsDao])
 class AppDatabase extends _$AppDatabase {
   // we tell the database where to store the data with this constructor
   AppDatabase() : super(_openConnection());
@@ -51,6 +54,15 @@ class AppDatabase extends _$AppDatabase {
   // Migrations are covered later in the documentation.
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      beforeOpen: (details) async {
+        await customStatement('PRAGMA foreign_keys = ON'); //enable foreign keys
+      },
+    );
+  }
 }
 
 LazyDatabase _openConnection() {

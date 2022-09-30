@@ -7,313 +7,18 @@ part of 'AppDatabase.dart';
 // **************************************************************************
 
 // ignore_for_file: type=lint
-class Session extends DataClass implements Insertable<Session> {
-  final int id;
-  final int? startsession;
-  final int? endsession;
-  final String? device1;
-  final String? device2;
-  const Session(
-      {required this.id,
-      this.startsession,
-      this.endsession,
-      this.device1,
-      this.device2});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    if (!nullToAbsent || startsession != null) {
-      map['startsession'] = Variable<int>(startsession);
-    }
-    if (!nullToAbsent || endsession != null) {
-      map['endsession'] = Variable<int>(endsession);
-    }
-    if (!nullToAbsent || device1 != null) {
-      map['device1'] = Variable<String>(device1);
-    }
-    if (!nullToAbsent || device2 != null) {
-      map['device2'] = Variable<String>(device2);
-    }
-    return map;
-  }
-
-  SessionsCompanion toCompanion(bool nullToAbsent) {
-    return SessionsCompanion(
-      id: Value(id),
-      startsession: startsession == null && nullToAbsent
-          ? const Value.absent()
-          : Value(startsession),
-      endsession: endsession == null && nullToAbsent
-          ? const Value.absent()
-          : Value(endsession),
-      device1: device1 == null && nullToAbsent
-          ? const Value.absent()
-          : Value(device1),
-      device2: device2 == null && nullToAbsent
-          ? const Value.absent()
-          : Value(device2),
-    );
-  }
-
-  factory Session.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Session(
-      id: serializer.fromJson<int>(json['id']),
-      startsession: serializer.fromJson<int?>(json['startsession']),
-      endsession: serializer.fromJson<int?>(json['endsession']),
-      device1: serializer.fromJson<String?>(json['device1']),
-      device2: serializer.fromJson<String?>(json['device2']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'startsession': serializer.toJson<int?>(startsession),
-      'endsession': serializer.toJson<int?>(endsession),
-      'device1': serializer.toJson<String?>(device1),
-      'device2': serializer.toJson<String?>(device2),
-    };
-  }
-
-  Session copyWith(
-          {int? id,
-          Value<int?> startsession = const Value.absent(),
-          Value<int?> endsession = const Value.absent(),
-          Value<String?> device1 = const Value.absent(),
-          Value<String?> device2 = const Value.absent()}) =>
-      Session(
-        id: id ?? this.id,
-        startsession:
-            startsession.present ? startsession.value : this.startsession,
-        endsession: endsession.present ? endsession.value : this.endsession,
-        device1: device1.present ? device1.value : this.device1,
-        device2: device2.present ? device2.value : this.device2,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Session(')
-          ..write('id: $id, ')
-          ..write('startsession: $startsession, ')
-          ..write('endsession: $endsession, ')
-          ..write('device1: $device1, ')
-          ..write('device2: $device2')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, startsession, endsession, device1, device2);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Session &&
-          other.id == this.id &&
-          other.startsession == this.startsession &&
-          other.endsession == this.endsession &&
-          other.device1 == this.device1 &&
-          other.device2 == this.device2);
-}
-
-class SessionsCompanion extends UpdateCompanion<Session> {
-  final Value<int> id;
-  final Value<int?> startsession;
-  final Value<int?> endsession;
-  final Value<String?> device1;
-  final Value<String?> device2;
-  const SessionsCompanion({
-    this.id = const Value.absent(),
-    this.startsession = const Value.absent(),
-    this.endsession = const Value.absent(),
-    this.device1 = const Value.absent(),
-    this.device2 = const Value.absent(),
-  });
-  SessionsCompanion.insert({
-    this.id = const Value.absent(),
-    this.startsession = const Value.absent(),
-    this.endsession = const Value.absent(),
-    this.device1 = const Value.absent(),
-    this.device2 = const Value.absent(),
-  });
-  static Insertable<Session> custom({
-    Expression<int>? id,
-    Expression<int>? startsession,
-    Expression<int>? endsession,
-    Expression<String>? device1,
-    Expression<String>? device2,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (startsession != null) 'startsession': startsession,
-      if (endsession != null) 'endsession': endsession,
-      if (device1 != null) 'device1': device1,
-      if (device2 != null) 'device2': device2,
-    });
-  }
-
-  SessionsCompanion copyWith(
-      {Value<int>? id,
-      Value<int?>? startsession,
-      Value<int?>? endsession,
-      Value<String?>? device1,
-      Value<String?>? device2}) {
-    return SessionsCompanion(
-      id: id ?? this.id,
-      startsession: startsession ?? this.startsession,
-      endsession: endsession ?? this.endsession,
-      device1: device1 ?? this.device1,
-      device2: device2 ?? this.device2,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (startsession.present) {
-      map['startsession'] = Variable<int>(startsession.value);
-    }
-    if (endsession.present) {
-      map['endsession'] = Variable<int>(endsession.value);
-    }
-    if (device1.present) {
-      map['device1'] = Variable<String>(device1.value);
-    }
-    if (device2.present) {
-      map['device2'] = Variable<String>(device2.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SessionsCompanion(')
-          ..write('id: $id, ')
-          ..write('startsession: $startsession, ')
-          ..write('endsession: $endsession, ')
-          ..write('device1: $device1, ')
-          ..write('device2: $device2')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $SessionsTable(this.attachedDatabase, [this._alias]);
-  final VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _startsessionMeta =
-      const VerificationMeta('startsession');
-  @override
-  late final GeneratedColumn<int> startsession = GeneratedColumn<int>(
-      'startsession', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  final VerificationMeta _endsessionMeta = const VerificationMeta('endsession');
-  @override
-  late final GeneratedColumn<int> endsession = GeneratedColumn<int>(
-      'endsession', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  final VerificationMeta _device1Meta = const VerificationMeta('device1');
-  @override
-  late final GeneratedColumn<String> device1 = GeneratedColumn<String>(
-      'device1', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  final VerificationMeta _device2Meta = const VerificationMeta('device2');
-  @override
-  late final GeneratedColumn<String> device2 = GeneratedColumn<String>(
-      'device2', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, startsession, endsession, device1, device2];
-  @override
-  String get aliasedName => _alias ?? 'sessions';
-  @override
-  String get actualTableName => 'sessions';
-  @override
-  VerificationContext validateIntegrity(Insertable<Session> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('startsession')) {
-      context.handle(
-          _startsessionMeta,
-          startsession.isAcceptableOrUnknown(
-              data['startsession']!, _startsessionMeta));
-    }
-    if (data.containsKey('endsession')) {
-      context.handle(
-          _endsessionMeta,
-          endsession.isAcceptableOrUnknown(
-              data['endsession']!, _endsessionMeta));
-    }
-    if (data.containsKey('device1')) {
-      context.handle(_device1Meta,
-          device1.isAcceptableOrUnknown(data['device1']!, _device1Meta));
-    }
-    if (data.containsKey('device2')) {
-      context.handle(_device2Meta,
-          device2.isAcceptableOrUnknown(data['device2']!, _device2Meta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Session(
-      id: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      startsession: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}startsession']),
-      endsession: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}endsession']),
-      device1: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}device1']),
-      device2: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}device2']),
-    );
-  }
-
-  @override
-  $SessionsTable createAlias(String alias) {
-    return $SessionsTable(attachedDatabase, alias);
-  }
-}
-
 class User extends DataClass implements Insertable<User> {
   final int id;
   final String name;
   final String surname;
   final bool sex;
-  final int? session1;
-  final int? session2;
+  final int completed;
   const User(
       {required this.id,
       required this.name,
       required this.surname,
       required this.sex,
-      this.session1,
-      this.session2});
+      required this.completed});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -321,12 +26,7 @@ class User extends DataClass implements Insertable<User> {
     map['name'] = Variable<String>(name);
     map['surname'] = Variable<String>(surname);
     map['sex'] = Variable<bool>(sex);
-    if (!nullToAbsent || session1 != null) {
-      map['session1'] = Variable<int>(session1);
-    }
-    if (!nullToAbsent || session2 != null) {
-      map['session2'] = Variable<int>(session2);
-    }
+    map['completed'] = Variable<int>(completed);
     return map;
   }
 
@@ -336,12 +36,7 @@ class User extends DataClass implements Insertable<User> {
       name: Value(name),
       surname: Value(surname),
       sex: Value(sex),
-      session1: session1 == null && nullToAbsent
-          ? const Value.absent()
-          : Value(session1),
-      session2: session2 == null && nullToAbsent
-          ? const Value.absent()
-          : Value(session2),
+      completed: Value(completed),
     );
   }
 
@@ -353,8 +48,7 @@ class User extends DataClass implements Insertable<User> {
       name: serializer.fromJson<String>(json['name']),
       surname: serializer.fromJson<String>(json['surname']),
       sex: serializer.fromJson<bool>(json['sex']),
-      session1: serializer.fromJson<int?>(json['session1']),
-      session2: serializer.fromJson<int?>(json['session2']),
+      completed: serializer.fromJson<int>(json['completed']),
     );
   }
   @override
@@ -365,8 +59,7 @@ class User extends DataClass implements Insertable<User> {
       'name': serializer.toJson<String>(name),
       'surname': serializer.toJson<String>(surname),
       'sex': serializer.toJson<bool>(sex),
-      'session1': serializer.toJson<int?>(session1),
-      'session2': serializer.toJson<int?>(session2),
+      'completed': serializer.toJson<int>(completed),
     };
   }
 
@@ -375,15 +68,13 @@ class User extends DataClass implements Insertable<User> {
           String? name,
           String? surname,
           bool? sex,
-          Value<int?> session1 = const Value.absent(),
-          Value<int?> session2 = const Value.absent()}) =>
+          int? completed}) =>
       User(
         id: id ?? this.id,
         name: name ?? this.name,
         surname: surname ?? this.surname,
         sex: sex ?? this.sex,
-        session1: session1.present ? session1.value : this.session1,
-        session2: session2.present ? session2.value : this.session2,
+        completed: completed ?? this.completed,
       );
   @override
   String toString() {
@@ -392,14 +83,13 @@ class User extends DataClass implements Insertable<User> {
           ..write('name: $name, ')
           ..write('surname: $surname, ')
           ..write('sex: $sex, ')
-          ..write('session1: $session1, ')
-          ..write('session2: $session2')
+          ..write('completed: $completed')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, surname, sex, session1, session2);
+  int get hashCode => Object.hash(id, name, surname, sex, completed);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -408,8 +98,7 @@ class User extends DataClass implements Insertable<User> {
           other.name == this.name &&
           other.surname == this.surname &&
           other.sex == this.sex &&
-          other.session1 == this.session1 &&
-          other.session2 == this.session2);
+          other.completed == this.completed);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
@@ -417,23 +106,20 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> name;
   final Value<String> surname;
   final Value<bool> sex;
-  final Value<int?> session1;
-  final Value<int?> session2;
+  final Value<int> completed;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.surname = const Value.absent(),
     this.sex = const Value.absent(),
-    this.session1 = const Value.absent(),
-    this.session2 = const Value.absent(),
+    this.completed = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String surname,
     required bool sex,
-    this.session1 = const Value.absent(),
-    this.session2 = const Value.absent(),
+    this.completed = const Value.absent(),
   })  : name = Value(name),
         surname = Value(surname),
         sex = Value(sex);
@@ -442,16 +128,14 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String>? name,
     Expression<String>? surname,
     Expression<bool>? sex,
-    Expression<int>? session1,
-    Expression<int>? session2,
+    Expression<int>? completed,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (surname != null) 'surname': surname,
       if (sex != null) 'sex': sex,
-      if (session1 != null) 'session1': session1,
-      if (session2 != null) 'session2': session2,
+      if (completed != null) 'completed': completed,
     });
   }
 
@@ -460,15 +144,13 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<String>? name,
       Value<String>? surname,
       Value<bool>? sex,
-      Value<int?>? session1,
-      Value<int?>? session2}) {
+      Value<int>? completed}) {
     return UsersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       surname: surname ?? this.surname,
       sex: sex ?? this.sex,
-      session1: session1 ?? this.session1,
-      session2: session2 ?? this.session2,
+      completed: completed ?? this.completed,
     );
   }
 
@@ -487,11 +169,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (sex.present) {
       map['sex'] = Variable<bool>(sex.value);
     }
-    if (session1.present) {
-      map['session1'] = Variable<int>(session1.value);
-    }
-    if (session2.present) {
-      map['session2'] = Variable<int>(session2.value);
+    if (completed.present) {
+      map['completed'] = Variable<int>(completed.value);
     }
     return map;
   }
@@ -503,8 +182,7 @@ class UsersCompanion extends UpdateCompanion<User> {
           ..write('name: $name, ')
           ..write('surname: $surname, ')
           ..write('sex: $sex, ')
-          ..write('session1: $session1, ')
-          ..write('session2: $session2')
+          ..write('completed: $completed')
           ..write(')'))
         .toString();
   }
@@ -539,23 +217,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: DriftSqlType.bool,
       requiredDuringInsert: true,
       defaultConstraints: 'CHECK (sex IN (0, 1))');
-  final VerificationMeta _session1Meta = const VerificationMeta('session1');
+  final VerificationMeta _completedMeta = const VerificationMeta('completed');
   @override
-  late final GeneratedColumn<int> session1 = GeneratedColumn<int>(
-      'session1', aliasedName, true,
+  late final GeneratedColumn<int> completed = GeneratedColumn<int>(
+      'completed', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
-      defaultConstraints: 'REFERENCES sessions (id)');
-  final VerificationMeta _session2Meta = const VerificationMeta('session2');
+      defaultValue: Constant(0));
   @override
-  late final GeneratedColumn<int> session2 = GeneratedColumn<int>(
-      'session2', aliasedName, true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints: 'REFERENCES sessions (id)');
-  @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, surname, sex, session1, session2];
+  List<GeneratedColumn> get $columns => [id, name, surname, sex, completed];
   @override
   String get aliasedName => _alias ?? 'users';
   @override
@@ -586,13 +256,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     } else if (isInserting) {
       context.missing(_sexMeta);
     }
-    if (data.containsKey('session1')) {
-      context.handle(_session1Meta,
-          session1.isAcceptableOrUnknown(data['session1']!, _session1Meta));
-    }
-    if (data.containsKey('session2')) {
-      context.handle(_session2Meta,
-          session2.isAcceptableOrUnknown(data['session2']!, _session2Meta));
+    if (data.containsKey('completed')) {
+      context.handle(_completedMeta,
+          completed.isAcceptableOrUnknown(data['completed']!, _completedMeta));
     }
     return context;
   }
@@ -611,16 +277,376 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
           .read(DriftSqlType.string, data['${effectivePrefix}surname'])!,
       sex: attachedDatabase.options.types
           .read(DriftSqlType.bool, data['${effectivePrefix}sex'])!,
-      session1: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}session1']),
-      session2: attachedDatabase.options.types
-          .read(DriftSqlType.int, data['${effectivePrefix}session2']),
+      completed: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}completed'])!,
     );
   }
 
   @override
   $UsersTable createAlias(String alias) {
     return $UsersTable(attachedDatabase, alias);
+  }
+}
+
+class Session extends DataClass implements Insertable<Session> {
+  final int id;
+  final int iduser;
+  final int numsession;
+  final int startsession;
+  final int? endsession;
+  final String device1;
+  final String device2;
+  const Session(
+      {required this.id,
+      required this.iduser,
+      required this.numsession,
+      required this.startsession,
+      this.endsession,
+      required this.device1,
+      required this.device2});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['iduser'] = Variable<int>(iduser);
+    map['numsession'] = Variable<int>(numsession);
+    map['startsession'] = Variable<int>(startsession);
+    if (!nullToAbsent || endsession != null) {
+      map['endsession'] = Variable<int>(endsession);
+    }
+    map['device1'] = Variable<String>(device1);
+    map['device2'] = Variable<String>(device2);
+    return map;
+  }
+
+  SessionsCompanion toCompanion(bool nullToAbsent) {
+    return SessionsCompanion(
+      id: Value(id),
+      iduser: Value(iduser),
+      numsession: Value(numsession),
+      startsession: Value(startsession),
+      endsession: endsession == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endsession),
+      device1: Value(device1),
+      device2: Value(device2),
+    );
+  }
+
+  factory Session.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Session(
+      id: serializer.fromJson<int>(json['id']),
+      iduser: serializer.fromJson<int>(json['iduser']),
+      numsession: serializer.fromJson<int>(json['numsession']),
+      startsession: serializer.fromJson<int>(json['startsession']),
+      endsession: serializer.fromJson<int?>(json['endsession']),
+      device1: serializer.fromJson<String>(json['device1']),
+      device2: serializer.fromJson<String>(json['device2']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'iduser': serializer.toJson<int>(iduser),
+      'numsession': serializer.toJson<int>(numsession),
+      'startsession': serializer.toJson<int>(startsession),
+      'endsession': serializer.toJson<int?>(endsession),
+      'device1': serializer.toJson<String>(device1),
+      'device2': serializer.toJson<String>(device2),
+    };
+  }
+
+  Session copyWith(
+          {int? id,
+          int? iduser,
+          int? numsession,
+          int? startsession,
+          Value<int?> endsession = const Value.absent(),
+          String? device1,
+          String? device2}) =>
+      Session(
+        id: id ?? this.id,
+        iduser: iduser ?? this.iduser,
+        numsession: numsession ?? this.numsession,
+        startsession: startsession ?? this.startsession,
+        endsession: endsession.present ? endsession.value : this.endsession,
+        device1: device1 ?? this.device1,
+        device2: device2 ?? this.device2,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Session(')
+          ..write('id: $id, ')
+          ..write('iduser: $iduser, ')
+          ..write('numsession: $numsession, ')
+          ..write('startsession: $startsession, ')
+          ..write('endsession: $endsession, ')
+          ..write('device1: $device1, ')
+          ..write('device2: $device2')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, iduser, numsession, startsession, endsession, device1, device2);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Session &&
+          other.id == this.id &&
+          other.iduser == this.iduser &&
+          other.numsession == this.numsession &&
+          other.startsession == this.startsession &&
+          other.endsession == this.endsession &&
+          other.device1 == this.device1 &&
+          other.device2 == this.device2);
+}
+
+class SessionsCompanion extends UpdateCompanion<Session> {
+  final Value<int> id;
+  final Value<int> iduser;
+  final Value<int> numsession;
+  final Value<int> startsession;
+  final Value<int?> endsession;
+  final Value<String> device1;
+  final Value<String> device2;
+  const SessionsCompanion({
+    this.id = const Value.absent(),
+    this.iduser = const Value.absent(),
+    this.numsession = const Value.absent(),
+    this.startsession = const Value.absent(),
+    this.endsession = const Value.absent(),
+    this.device1 = const Value.absent(),
+    this.device2 = const Value.absent(),
+  });
+  SessionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int iduser,
+    required int numsession,
+    required int startsession,
+    this.endsession = const Value.absent(),
+    required String device1,
+    required String device2,
+  })  : iduser = Value(iduser),
+        numsession = Value(numsession),
+        startsession = Value(startsession),
+        device1 = Value(device1),
+        device2 = Value(device2);
+  static Insertable<Session> custom({
+    Expression<int>? id,
+    Expression<int>? iduser,
+    Expression<int>? numsession,
+    Expression<int>? startsession,
+    Expression<int>? endsession,
+    Expression<String>? device1,
+    Expression<String>? device2,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (iduser != null) 'iduser': iduser,
+      if (numsession != null) 'numsession': numsession,
+      if (startsession != null) 'startsession': startsession,
+      if (endsession != null) 'endsession': endsession,
+      if (device1 != null) 'device1': device1,
+      if (device2 != null) 'device2': device2,
+    });
+  }
+
+  SessionsCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? iduser,
+      Value<int>? numsession,
+      Value<int>? startsession,
+      Value<int?>? endsession,
+      Value<String>? device1,
+      Value<String>? device2}) {
+    return SessionsCompanion(
+      id: id ?? this.id,
+      iduser: iduser ?? this.iduser,
+      numsession: numsession ?? this.numsession,
+      startsession: startsession ?? this.startsession,
+      endsession: endsession ?? this.endsession,
+      device1: device1 ?? this.device1,
+      device2: device2 ?? this.device2,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (iduser.present) {
+      map['iduser'] = Variable<int>(iduser.value);
+    }
+    if (numsession.present) {
+      map['numsession'] = Variable<int>(numsession.value);
+    }
+    if (startsession.present) {
+      map['startsession'] = Variable<int>(startsession.value);
+    }
+    if (endsession.present) {
+      map['endsession'] = Variable<int>(endsession.value);
+    }
+    if (device1.present) {
+      map['device1'] = Variable<String>(device1.value);
+    }
+    if (device2.present) {
+      map['device2'] = Variable<String>(device2.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('iduser: $iduser, ')
+          ..write('numsession: $numsession, ')
+          ..write('startsession: $startsession, ')
+          ..write('endsession: $endsession, ')
+          ..write('device1: $device1, ')
+          ..write('device2: $device2')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SessionsTable(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
+  final VerificationMeta _iduserMeta = const VerificationMeta('iduser');
+  @override
+  late final GeneratedColumn<int> iduser = GeneratedColumn<int>(
+      'iduser', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: 'REFERENCES users (id) ON DELETE CASCADE');
+  final VerificationMeta _numsessionMeta = const VerificationMeta('numsession');
+  @override
+  late final GeneratedColumn<int> numsession = GeneratedColumn<int>(
+      'numsession', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  final VerificationMeta _startsessionMeta =
+      const VerificationMeta('startsession');
+  @override
+  late final GeneratedColumn<int> startsession = GeneratedColumn<int>(
+      'startsession', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  final VerificationMeta _endsessionMeta = const VerificationMeta('endsession');
+  @override
+  late final GeneratedColumn<int> endsession = GeneratedColumn<int>(
+      'endsession', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  final VerificationMeta _device1Meta = const VerificationMeta('device1');
+  @override
+  late final GeneratedColumn<String> device1 = GeneratedColumn<String>(
+      'device1', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  final VerificationMeta _device2Meta = const VerificationMeta('device2');
+  @override
+  late final GeneratedColumn<String> device2 = GeneratedColumn<String>(
+      'device2', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, iduser, numsession, startsession, endsession, device1, device2];
+  @override
+  String get aliasedName => _alias ?? 'sessions';
+  @override
+  String get actualTableName => 'sessions';
+  @override
+  VerificationContext validateIntegrity(Insertable<Session> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('iduser')) {
+      context.handle(_iduserMeta,
+          iduser.isAcceptableOrUnknown(data['iduser']!, _iduserMeta));
+    } else if (isInserting) {
+      context.missing(_iduserMeta);
+    }
+    if (data.containsKey('numsession')) {
+      context.handle(
+          _numsessionMeta,
+          numsession.isAcceptableOrUnknown(
+              data['numsession']!, _numsessionMeta));
+    } else if (isInserting) {
+      context.missing(_numsessionMeta);
+    }
+    if (data.containsKey('startsession')) {
+      context.handle(
+          _startsessionMeta,
+          startsession.isAcceptableOrUnknown(
+              data['startsession']!, _startsessionMeta));
+    } else if (isInserting) {
+      context.missing(_startsessionMeta);
+    }
+    if (data.containsKey('endsession')) {
+      context.handle(
+          _endsessionMeta,
+          endsession.isAcceptableOrUnknown(
+              data['endsession']!, _endsessionMeta));
+    }
+    if (data.containsKey('device1')) {
+      context.handle(_device1Meta,
+          device1.isAcceptableOrUnknown(data['device1']!, _device1Meta));
+    } else if (isInserting) {
+      context.missing(_device1Meta);
+    }
+    if (data.containsKey('device2')) {
+      context.handle(_device2Meta,
+          device2.isAcceptableOrUnknown(data['device2']!, _device2Meta));
+    } else if (isInserting) {
+      context.missing(_device2Meta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Session(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      iduser: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}iduser'])!,
+      numsession: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}numsession'])!,
+      startsession: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}startsession'])!,
+      endsession: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}endsession']),
+      device1: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}device1'])!,
+      device2: attachedDatabase.options.types
+          .read(DriftSqlType.string, data['${effectivePrefix}device2'])!,
+    );
+  }
+
+  @override
+  $SessionsTable createAlias(String alias) {
+    return $SessionsTable(attachedDatabase, alias);
   }
 }
 
@@ -846,7 +872,9 @@ class $IntervalsTable extends Intervals
   @override
   late final GeneratedColumn<int> idSession = GeneratedColumn<int>(
       'id_session', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: 'REFERENCES sessions (id) ON DELETE CASCADE');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -950,8 +978,8 @@ class $IntervalsTable extends Intervals
 
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
-  late final $SessionsTable sessions = $SessionsTable(this);
   late final $UsersTable users = $UsersTable(this);
+  late final $SessionsTable sessions = $SessionsTable(this);
   late final $IntervalsTable intervals = $IntervalsTable(this);
   late final UsersDao usersDao = UsersDao(this as AppDatabase);
   late final SessionsDao sessionsDao = SessionsDao(this as AppDatabase);
@@ -961,5 +989,5 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [sessions, users, intervals];
+      [users, sessions, intervals];
 }
