@@ -23,7 +23,8 @@ class Users extends Table {
 // this will generate the table called "Sessions"
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get iduser => integer().references(Users, #id, onDelete: KeyAction.cascade)();
+  IntColumn get iduser =>
+      integer().references(Users, #id, onDelete: KeyAction.cascade)();
   IntColumn get numsession => integer()();
   IntColumn get startsession => integer()();
   IntColumn get endsession => integer().nullable()();
@@ -34,7 +35,8 @@ class Sessions extends Table {
 // this will generate the table called "Intervals"
 class Intervals extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get idSession =>
+      integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
   TextColumn get status => text()();
   IntColumn get startstimestamp => integer()();
   IntColumn get endtimestamp => integer()();
@@ -62,6 +64,18 @@ class AppDatabase extends _$AppDatabase {
         await customStatement('PRAGMA foreign_keys = ON'); //enable foreign keys
       },
     );
+  }
+
+  Future<void> exportInto(File file) async {
+    // Make sure the directory of the target file exists
+    await file.parent.create(recursive: true);
+
+    // Override an existing backup, sqlite expects the target file to be empty
+    if (file.existsSync()) {
+      file.deleteSync();
+    }
+
+    await customStatement('VACUUM INTO ?', [file.path]);
   }
 }
 

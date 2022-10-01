@@ -8,7 +8,6 @@ import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/screens/detailPage.dart';
 import 'package:timerun/screens/homePage.dart';
-import 'package:animated_text_kit/animated_text_kit.dart';
 
 class DataCollectionPage extends StatefulWidget {
   final int id;
@@ -97,7 +96,7 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                 automaticallyImplyLeading: state is CronoStateSaving ||
                         state is CronoStateCompleted ||
                         state is CronoStateDeletingSession ||
-                        state is CronoStateDeletedSession
+                        state is CronoStateDeletedSession || state is CronoStateRunning
                     ? false
                     : true,
               ),

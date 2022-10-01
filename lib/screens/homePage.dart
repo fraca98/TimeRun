@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/screens/detailPage.dart';
 import '../bloc/user_bloc/user_bloc.dart';
+import 'package:drift_db_viewer/drift_db_viewer.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -21,7 +26,41 @@ class HomePage extends StatelessWidget {
             style: TextStyle(fontFamily: 'Poppins'),
           ),
         ),
-        drawer: Drawer(),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              DrawerHeader(
+                  child: Text(
+                'TimeRun',
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
+              )),
+              ListTile(
+                onTap: () async {
+                  Directory dbFolder = await getApplicationDocumentsDirectory();
+                  final file = File('${dbFolder.path}/database.sqlite');
+                  //print(file);
+                  //print(file.path);
+                  await GetIt.I<AppDatabase>()
+                      .exportInto(file); // save the database (export) in local
+                  await Share.shareFiles([file.path],
+                      subject:
+                          'TimeRun database'); //share the database file saved
+                },
+                title: Text('Esporta il database'),
+                trailing: Icon(MdiIcons.shareVariant),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          DriftDbViewer(GetIt.I<AppDatabase>())));
+                },
+                title: Text('Visualizza il database'),
+                trailing: Icon(MdiIcons.databaseEye),
+              )
+            ],
+          ),
+        ),
         body: BlocBuilder<UserBloc, UserState>(
           builder: (context, state) {
             if (state is UserStateLoading) {
@@ -52,30 +91,28 @@ class HomePage extends StatelessWidget {
                           default:
                             color = Colors.black;
                         }
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DetailPage(
-                                          id: state.users[index].id,
-                                        )));
-                          },
-                          child: Card(
-                            elevation: 8,
-                            child: ListTile(
-                              leading: Icon(
-                                state.users[index].sex
-                                    ? MdiIcons.faceMan
-                                    : MdiIcons.faceWoman,
-                                color: color,
-                              ),
-                              title: Text(
-                                  '${state.users[index].name} ${state.users[index].surname}'),
-                              subtitle: Text(
-                                  state.users[index].sex ? 'Uomo' : 'Donna'),
-                              trailing: Icon(MdiIcons.arrowRight),
+                        return Card(
+                          elevation: 8,
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DetailPage(
+                                            id: state.users[index].id,
+                                          )));
+                            },
+                            leading: Icon(
+                              state.users[index].sex
+                                  ? MdiIcons.faceMan
+                                  : MdiIcons.faceWoman,
+                              color: color,
                             ),
+                            title: Text(
+                                '${state.users[index].name} ${state.users[index].surname}'),
+                            subtitle:
+                                Text(state.users[index].sex ? 'Uomo' : 'Donna'),
+                            trailing: Icon(MdiIcons.arrowRight),
                           ),
                         );
                       },

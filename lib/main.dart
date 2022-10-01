@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       //change the style of the statusBar
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.transparent,
     ));
 
     return MultiBlocProvider(
