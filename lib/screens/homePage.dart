@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -8,6 +7,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:path_provider/path_provider.dart';
 import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/screens/detailPage.dart';
+import 'package:timerun/screens/formUserPage.dart';
 import '../bloc/user_bloc/user_bloc.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:share_plus/share_plus.dart';
@@ -128,13 +128,14 @@ class HomePage extends StatelessWidget {
               return FloatingActionButton(
                 child: Icon(MdiIcons.accountPlus),
                 onPressed: () async {
-                  context.read<UserBloc>().add(UserEventAdd(
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FormUserPage()));
+                  /*context.read<UserBloc>().add(UserEventAdd(
                           //TODO: remove, it's just an example to see if db works and BLOC
                           userComp: UsersCompanion(
                         name: Value(Random().nextInt(50).toString()),
                         surname: Value(Random().nextInt(50).toString()),
                         sex: Value(Random().nextBool()),
-                      )));
+                      )));*/
                 },
               );
             } else {

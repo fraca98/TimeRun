@@ -23,21 +23,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       },
     );
 
-    on<UserEventAdd>(
-      (event, emit) async {
-        emit(UserStateLoading());
-        await db.usersDao.insertNewUser(UsersCompanion(
-          name: event.userComp.name,
-          surname: event.userComp.surname,
-          sex: event.userComp.sex,
-        )); //TODO: Remove and add page with the form
-        //print('Added a new User');
-        emit(UserStateLoaded(
-            users: await db.usersDao
-                .allEntries)); //list of Users loaded from the db (cause User has now value id (autoid))
-      },
-    );
-
     add(UserEventLoad()); //event called when first use UserBloc
   }
 }

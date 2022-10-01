@@ -52,6 +52,8 @@ dependencies:
   flutter_bloc: ^8.1.1 #for bloc
   equatable: ^2.0.5 #for bloc
 
+  flutter_form_bloc: ^0.30.1 #for bloc form
+
   get_it: ^7.2.0 #inject db in bloc (access without context)
 
   drift_db_viewer: ^2.0.0 # TODO: remove

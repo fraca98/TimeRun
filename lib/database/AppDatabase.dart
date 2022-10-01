@@ -16,7 +16,7 @@ class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   TextColumn get surname => text()();
-  BoolColumn get sex => boolean()();
+  BoolColumn get sex => boolean()(); // true : Man, false : Woman
   IntColumn get completed => integer().withDefault(Constant(0))();
 }
 
