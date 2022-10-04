@@ -20,7 +20,10 @@ class FormUserPage extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Form utente', style: TextStyle(fontFamily: 'Poppins'),),
+          title: Text(
+            'Form utente',
+            style: TextStyle(fontFamily: 'Poppins'),
+          ),
           centerTitle: true,
         ),
         body: BlocProvider(
@@ -28,12 +31,10 @@ class FormUserPage extends StatelessWidget {
           child: FormBlocListener<WizardFormBloc, dynamic, dynamic>(
             onSubmissionFailed: (context, state) => LoadingDialog.hide(context),
             onSubmitting: (context, state) => LoadingDialog.show(context),
-            onSuccess: (context, state) {
+            onSuccess: (context, state) async {
               LoadingDialog.hide(context);
               if (state.stepCompleted == state.lastStep) {
-                LoadingDialog.hide(context);
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => HomePage()));
+                Navigator.pop(context, true); //pass true to pop cause i want to reload
               }
             },
             child: StepperFormBlocBuilder<WizardFormBloc>(
@@ -130,7 +131,8 @@ class FormUserPage extends StatelessWidget {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
       title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Sei sicuro di voler tornare indietro ? Tutti i dati verranno persi",
+      content: Text(
+          "Sei sicuro di voler tornare indietro ? Tutti i dati verranno persi",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),

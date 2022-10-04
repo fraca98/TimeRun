@@ -3,14 +3,14 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timerun/database/AppDatabase.dart';
 
-part 'user_event.dart';
-part 'user_state.dart';
+part 'home_event.dart';
+part 'home_state.dart';
 
-class UserBloc extends Bloc<UserEvent, UserState> {
-  UserBloc() : super(UserStateLoading()) {
+class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  HomeBloc() : super(HomeStateLoading()) {
     AppDatabase db = GetIt.I<AppDatabase>(); //database getIt
 
-    on<UserEventLoad>(
+    on<HomeEventLoad>(
       (event, emit) async {
         //print('Loading Users from database');
         //await Future.delayed(Duration(seconds: 1));
@@ -18,11 +18,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         print(await db.sessionsDao.allEntries);
         print(await db.intervalsDao.allEntries);*/
         emit(
-          UserStateLoaded(users: await db.usersDao.allEntries),
+          HomeStateLoaded(users: await db.usersDao.allEntries),
         );
       },
     );
 
-    add(UserEventLoad()); //event called when first use UserBloc
+    add(HomeEventLoad()); //event called when first use UserBloc
   }
 }

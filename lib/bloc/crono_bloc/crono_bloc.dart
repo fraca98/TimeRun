@@ -15,7 +15,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   int? idSession;
 
   CronoBloc(
-      {this.progressIndex = 0,
+      {this.progressIndex = 0, //TODO: fix
       required int idUser,
       required List<String> sessionDevices,
       required int numSession})
@@ -101,7 +101,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     on<CronoEventDeleteSession>((event, emit) async {
       emit(CronoStateDeletingSession(progressIndex: progressIndex));
       if (idSession != null){
-        await db.sessionsDao.deleteSession(idSession!);
+        await db.sessionsDao.deleteSession(idSession!); //delete the session if already saved
       }
       else{}
       emit(CronoStateDeletedSession(progressIndex: progressIndex));

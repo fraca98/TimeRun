@@ -6,8 +6,6 @@ import 'package:stop_watch_timer/stop_watch_timer.dart'; // Import stop_watch_ti
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
-import 'package:timerun/screens/detailPage.dart';
-import 'package:timerun/screens/homePage.dart';
 
 class DataCollectionPage extends StatefulWidget {
   final int id;
@@ -48,30 +46,10 @@ class _DataCollectionPageState extends State<DataCollectionPage>
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
           if (state is CronoStateDeletedSession) {
-            //TODO: fix route
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-                (_) => false);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => DetailPage(
-                          id: widget.id,
-                        )));
+            Navigator.pop(context); //no reload, pass null object
           }
           if (state is CronoStateCompleted) {
-            //TODO: fix this route
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-                (_) => false);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => DetailPage(
-                          id: widget.id,
-                        )));
+            Navigator.pop(context, true); //need to reload previous, pass true
           }
         },
         builder: (context, state) {
@@ -96,7 +74,8 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                 automaticallyImplyLeading: state is CronoStateSaving ||
                         state is CronoStateCompleted ||
                         state is CronoStateDeletingSession ||
-                        state is CronoStateDeletedSession || state is CronoStateRunning
+                        state is CronoStateDeletedSession ||
+                        state is CronoStateRunning
                     ? false
                     : true,
               ),
@@ -162,25 +141,23 @@ class _DataCollectionPageState extends State<DataCollectionPage>
               width: 200,
             ),
           ),
-          Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Spacer(),
-                Text(
-                  '100',
-                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
-                ),
-                Text(
-                  ' BPM',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins'),
-                ),
-                Spacer(),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Spacer(),
+              Text(
+                '100',
+                style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+              ),
+              Text(
+                ' BPM',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins'),
+              ),
+              Spacer(),
+            ],
           ),
           Container(
             padding: EdgeInsets.only(left: 5, right: 5, bottom: 10, top: 10),

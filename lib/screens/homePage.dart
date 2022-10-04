@@ -1,14 +1,13 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:timerun/bloc/home_bloc/home_bloc.dart';
 import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/screens/detailPage.dart';
 import 'package:timerun/screens/formUserPage.dart';
-import '../bloc/user_bloc/user_bloc.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -18,7 +17,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => UserBloc(),
+      create: (context) => HomeBloc(),
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -61,12 +60,12 @@ class HomePage extends StatelessWidget {
             ],
           ),
         ),
-        body: BlocBuilder<UserBloc, UserState>(
+        body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is UserStateLoading) {
+            if (state is HomeStateLoading) {
               return Center(child: CircularProgressIndicator());
             }
-            if (state is UserStateLoaded) {
+            if (state is HomeStateLoaded) {
               return state.users.length == 0
                   ? Center(
                       child: Text(
@@ -94,13 +93,17 @@ class HomePage extends StatelessWidget {
                         return Card(
                           elevation: 8,
                           child: ListTile(
-                            onTap: () {
-                              Navigator.push(
+                            onTap: () async {
+                              var reload = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => DetailPage(
                                             id: state.users[index].id,
                                           )));
+                              //print(reload);
+                              if (reload != null && reload == true) {
+                                context.read<HomeBloc>().add(HomeEventLoad());
+                              }
                             },
                             leading: Icon(
                               state.users[index].sex
@@ -122,20 +125,18 @@ class HomePage extends StatelessWidget {
             }
           },
         ),
-        floatingActionButton: BlocBuilder<UserBloc, UserState>(
+        floatingActionButton: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
-            if (state is UserStateLoaded) {
+            if (state is HomeStateLoaded) {
               return FloatingActionButton(
                 child: Icon(MdiIcons.accountPlus),
                 onPressed: () async {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => FormUserPage()));
-                  /*context.read<UserBloc>().add(UserEventAdd(
-                          //TODO: remove, it's just an example to see if db works and BLOC
-                          userComp: UsersCompanion(
-                        name: Value(Random().nextInt(50).toString()),
-                        surname: Value(Random().nextInt(50).toString()),
-                        sex: Value(Random().nextBool()),
-                      )));*/
+                  var reload = await Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => FormUserPage()));
+                  //print(reload); //if true : reload
+                  if (reload != null && reload == true){
+                    context.read<HomeBloc>().add(HomeEventLoad());
+                  }
                 },
               );
             } else {

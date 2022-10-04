@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
-import 'package:timerun/screens/datacollectionPage.dart';
-import 'package:timerun/screens/homePage.dart';
+import 'package:timerun/widget/alertsession.dart';
 
 class DetailPage extends StatelessWidget {
   const DetailPage({required this.id, super.key});
@@ -17,11 +16,8 @@ class DetailPage extends StatelessWidget {
       create: (context) => DetailBloc(id),
       child: BlocConsumer<DetailBloc, DetailState>(
         listener: (context, state) {
-          //TODO: fix route
-          if (state is DetailStateDeletedUser){Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => HomePage()),
-              (_) => false);
+          if (state is DetailStateDeletedUser) {
+            Navigator.pop(context, true); //pass true if pop and delete the user
           }
         },
         builder: (context, state) {
@@ -31,7 +27,8 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateDeletedUser) {
                 return false;
               } else {
-                return true;
+                Navigator.pop(context, true); //TODO: fix: every time i go back reload
+                return false;
               }
             },
             child: Scaffold(
@@ -48,10 +45,12 @@ class DetailPage extends StatelessWidget {
                       ? IconButton(
                           onPressed: () {
                             showDialog(
-                                context: context,
-                                builder: (BuildContext
-                                        dialogContext) => //here pass the context of the page (Not context of dialog)
-                                    alertDelete(context, state));
+                              context: context,
+                              builder: (_) {
+                                return alertDelete(context,
+                                    state); //here pass the context of the page (Not context of dialog)
+                              },
+                            );
                           },
                           icon: Icon(MdiIcons.delete))
                       : Container(),
@@ -191,11 +190,13 @@ class DetailPage extends StatelessWidget {
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (BuildContext dialogContext) {
+                          builder: (_) {
                             List<String> selectable = [...devices];
-                            return alertSession(
-                              dialogContext,
-                              selectable,
+                            return AlertSession(
+                              supercontext:
+                                  context, //pass this context to use the DetailBloc in the alertdialog of session
+                              selectable: selectable,
+                              id: id,
                             );
                           });
                     },
@@ -240,11 +241,16 @@ class DetailPage extends StatelessWidget {
                     onPressed: () {
                       showDialog(
                           context: context,
-                          builder: (BuildContext dialogContext) {
+                          builder: (_) {
                             List<String> selectable = [...devices];
                             selectable.remove(state.session1?.device1);
                             selectable.remove(state.session1?.device2);
-                            return alertSession(dialogContext, selectable);
+                            return AlertSession(
+                              supercontext:
+                                  context, //pass this context to use the DetailBloc in the alertdialog of session
+                              selectable: selectable,
+                              id: id,
+                            );
                           });
                     },
                   ),
@@ -264,8 +270,7 @@ class DetailPage extends StatelessWidget {
       title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
       content: Text("Sei sicuro di voler eliminare questo utente ?",
           style: TextStyle(fontFamily: 'Poppins')),
-      shape:
-          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       actions: [
         TextButton(
           onPressed: () {
@@ -276,87 +281,10 @@ class DetailPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<DetailBloc>().add(DetailEventDeleteUser(id: id));
+              context.read<DetailBloc>().add(DetailEventDeleteUser(id: id)); //ok cause i pop first the dialog, so its context
             },
             child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
-  }
-
-  // dialogue per l'inizio della sessione 1 dove seleziono i device
-  Widget alertSession(BuildContext dialogContext, List<String> selectable) {
-    List<bool> togglecheck = List.generate(selectable.length, (index) => false);
-    return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-      return AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Seleziona i 2 dispositivi per la sessione',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  fontFamily: 'Poppins'),
-            ),
-            Column(
-              children: List.generate(
-                selectable.length,
-                (index) => CheckboxListTile(
-                  value: togglecheck[index],
-                  controlAffinity: ListTileControlAffinity.leading,
-                  title: Text(selectable[index]),
-                  onChanged: (bool? value) {
-                    setState(
-                      () {
-                        togglecheck[index] = value!;
-                      },
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins'))),
-          togglecheck
-                      .where(
-                        (element) => element == true,
-                      )
-                      .length ==
-                  2
-              ? TextButton(
-                  onPressed: () {
-                    int numSession;
-                    togglecheck.length > 2 ? numSession = 1 : numSession = 2;
-                    List<String> sessionDevices = [];
-                    for (int i = 0; i < togglecheck.length; i++) {
-                      if (togglecheck[i] == true) {
-                        sessionDevices.add(selectable[
-                            i]); //get the devices toggled by user in previous screen
-                      }
-                    }
-                    Navigator.push(
-                        //TODO: fix route
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DataCollectionPage(
-                            id: id,
-                            sessionDevices: sessionDevices,
-                            numSession: numSession,
-                          ),
-                        ));
-                  },
-                  child: Text('Inizia la sessione',
-                      style: TextStyle(fontFamily: 'Poppins')))
-              : Container(),
-        ],
-      );
-    });
   }
 }
