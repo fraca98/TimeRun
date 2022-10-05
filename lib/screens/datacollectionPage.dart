@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart'; // Import stop_watch_timer
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
+import 'package:timerun/widget/timerText.dart';
+import '../model/ticker.dart';
 
-class DataCollectionPage extends StatefulWidget {
+class DataCollectionPage extends StatelessWidget {
   final int id;
   final List<String> sessionDevices;
   final int numSession;
@@ -19,29 +20,13 @@ class DataCollectionPage extends StatefulWidget {
       super.key});
 
   @override
-  State<DataCollectionPage> createState() => _DataCollectionPageState();
-}
-
-class _DataCollectionPageState extends State<DataCollectionPage>
-    with SingleTickerProviderStateMixin {
-  final StopWatchTimer _stopWatchTimer = StopWatchTimer(
-    mode: StopWatchMode.countUp,
-    //onChange: (value) => print('onChange $value'), //print value of timer on change
-  );
-
-  @override
-  Future<void> dispose() async {
-    super.dispose();
-    await _stopWatchTimer.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => CronoBloc(
-        idUser: widget.id,
-        sessionDevices: widget.sessionDevices,
-        numSession: widget.numSession,
+        idUser: id,
+        sessionDevices: sessionDevices,
+        numSession: numSession,
+        ticker: Ticker(),
       ),
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
@@ -240,23 +225,7 @@ class _DataCollectionPageState extends State<DataCollectionPage>
                 ),
               ),
               Center(
-                child: StreamBuilder<int>(
-                  /// Display time
-                  stream: _stopWatchTimer.rawTime,
-                  initialData: _stopWatchTimer.rawTime.value,
-                  builder: (context, snap) {
-                    final value = snap.data!;
-                    final displayTime =
-                        StopWatchTimer.getDisplayTime(value, hours: false);
-                    return Text(
-                      displayTime,
-                      style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                    );
-                  },
-                ),
+                child: TimerText(),
               ),
             ],
           ),
@@ -275,8 +244,9 @@ class _DataCollectionPageState extends State<DataCollectionPage>
     if (state is CronoStatePlay) {
       return FloatingActionButton(
         onPressed: () {
-          _stopWatchTimer.onStartTimer();
-          context.read<CronoBloc>().add(CronoEventPlay());
+          context
+              .read<CronoBloc>()
+              .add(CronoEventPlay(duration: state.duration));
         },
         child: Icon(MdiIcons.play),
       );
@@ -287,14 +257,12 @@ class _DataCollectionPageState extends State<DataCollectionPage>
         children: [
           FloatingActionButton(
             onPressed: () {
-              _stopWatchTimer.onStopTimer();
               context.read<CronoBloc>().add(CronoEventPause());
             },
             child: Icon(MdiIcons.pause),
           ),
           FloatingActionButton(
             onPressed: () {
-              _stopWatchTimer.onStopTimer();
               context.read<CronoBloc>().add(CronoEventStop());
             },
             child: Icon(MdiIcons.stop),
@@ -308,14 +276,12 @@ class _DataCollectionPageState extends State<DataCollectionPage>
         children: [
           FloatingActionButton(
             onPressed: () {
-              _stopWatchTimer.onStartTimer();
               context.read<CronoBloc>().add(CronoEventResume());
             },
             child: Icon(MdiIcons.play),
           ),
           FloatingActionButton(
             onPressed: () {
-              _stopWatchTimer.onStopTimer();
               context.read<CronoBloc>().add(CronoEventStop());
             },
             child: Icon(MdiIcons.stop),
@@ -330,7 +296,6 @@ class _DataCollectionPageState extends State<DataCollectionPage>
           FloatingActionButton(
             backgroundColor: Colors.green,
             onPressed: () async {
-              _stopWatchTimer.onResetTimer();
               context.read<CronoBloc>().add(CronoEventSave());
             },
             child: Icon(MdiIcons.archive),
@@ -338,7 +303,6 @@ class _DataCollectionPageState extends State<DataCollectionPage>
           FloatingActionButton(
             backgroundColor: Colors.red,
             onPressed: () {
-              _stopWatchTimer.onResetTimer();
               context.read<CronoBloc>().add(CronoEventDelete());
             },
             child: Icon(MdiIcons.delete),
