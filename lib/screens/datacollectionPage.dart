@@ -6,7 +6,6 @@ import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
-import '../model/ticker.dart';
 
 class DataCollectionPage extends StatelessWidget {
   final int id;
@@ -26,7 +25,6 @@ class DataCollectionPage extends StatelessWidget {
         idUser: id,
         sessionDevices: sessionDevices,
         numSession: numSession,
-        ticker: Ticker(),
       ),
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
@@ -54,7 +52,7 @@ class DataCollectionPage extends StatelessWidget {
             },
             child: Scaffold(
               appBar: AppBar(
-                title: Text('Sessione di allenamento'),
+                title: Text('Data Collection Session'),
                 centerTitle: true,
                 automaticallyImplyLeading: state is CronoStateSaving ||
                         state is CronoStateCompleted ||
@@ -94,19 +92,19 @@ class DataCollectionPage extends StatelessWidget {
     String text;
     switch (state.progressIndex) {
       case 0:
-        text = 'Stai fermo, a riposo';
+        text = 'Stay at rest';
         break;
       case 1:
-        text = "Mantieni l'indicatore nella zona verde";
+        text = "Keep the indicator in the green zone";
         break;
       case 2:
-        text = "Mantieni l'indicatore nella zona gialla";
+        text = "Keep the indicator in the yellow zone";
         break;
       case 3:
-        text = "Mantieni l'indicatore nella zona arancione";
+        text = "Keep the indicator in the orange zone";
         break;
       case 4:
-        text = "Mantieni l'indicatore nella zona rossa";
+        text = "Keep the indicator in the red zone";
         break;
       default:
         text = '';
@@ -131,7 +129,7 @@ class DataCollectionPage extends StatelessWidget {
             children: [
               Spacer(),
               Text(
-                '100',
+                state.hr.toString(),
                 style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
               ),
               Text(
@@ -174,21 +172,21 @@ class DataCollectionPage extends StatelessWidget {
               markerPointers: [
                 LinearShapePointer(
                   color: Colors.black,
-                  value: 100,
+                  value: state.hr.toDouble(),
                 )
               ],
             ),
           ),
           state is CronoStateSaving || state is CronoStateCompleted
               ? Text(
-                  'Salvataggio ...',
+                  'Saving ...',
                   style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
                 )
               : Container(),
           state is CronoStateDeletingSession ||
                   state is CronoStateDeletedSession
               ? Text(
-                  'Cancellando la sessione in corso ...',
+                  'Deleting this session ...',
                   style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
                 )
               : Container(),
@@ -398,8 +396,8 @@ class DataCollectionPage extends StatelessWidget {
     //pass the context of the page
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Sei sicuro di voler eliminare questa sessione ?",
+      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
+      content: Text("Are you sure to delete this session ?",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
@@ -408,14 +406,14 @@ class DataCollectionPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
         ),
         TextButton(
             onPressed: () {
               Navigator.pop(context);
               context.read<CronoBloc>().add(CronoEventDeleteSession());
             },
-            child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
   }

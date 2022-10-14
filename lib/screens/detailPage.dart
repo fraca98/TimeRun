@@ -37,7 +37,7 @@ class DetailPage extends StatelessWidget {
                         state is DetailStateDeletingUser
                     ? false
                     : true,
-                title: Text('Dettagli utente',
+                title: Text('User Detail',
                     style: TextStyle(fontFamily: 'Poppins')),
                 centerTitle: true,
                 actions: [
@@ -69,7 +69,7 @@ class DetailPage extends StatelessWidget {
                               height: 20,
                             ),
                             Text(
-                              "Cancello l'utente",
+                              "Delete the user",
                               style: TextStyle(
                                   fontSize: 18, fontFamily: 'Poppins'),
                             )
@@ -122,7 +122,7 @@ class DetailPage extends StatelessWidget {
               TableRow(children: [
                 Column(children: [
                   Text(
-                    'Nome',
+                    'Name',
                     style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
@@ -134,7 +134,7 @@ class DetailPage extends StatelessWidget {
               TableRow(children: [
                 Column(children: [
                   Text(
-                    'Cognome',
+                    'Surname',
                     style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
@@ -146,12 +146,12 @@ class DetailPage extends StatelessWidget {
               TableRow(children: [
                 Column(children: [
                   Text(
-                    'Sesso',
+                    'Sex',
                     style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.sex ? 'Uomo' : 'Donna',
+                  Text(state.user.sex ? 'Man' : 'Woman',
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -165,7 +165,7 @@ class DetailPage extends StatelessWidget {
         Container(
           height: 60,
           child: ListTile(
-            title: Text('Sessione 1', style: TextStyle(fontFamily: 'Poppins')),
+            title: Text('Session 1', style: TextStyle(fontFamily: 'Poppins')),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
               child: Column(
@@ -211,7 +211,7 @@ class DetailPage extends StatelessWidget {
           height: 60,
           child: ListTile(
             title: Text(
-              'Sessione 2',
+              'Session 2',
               style: TextStyle(fontFamily: 'Poppins'),
             ),
             subtitle: Padding(
@@ -267,8 +267,8 @@ class DetailPage extends StatelessWidget {
   Widget alertDelete(BuildContext context, DetailStateLoaded state) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Sei sicuro di voler eliminare questo utente ?",
+      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
+      content: Text("Are you sure to delete this user ?",
           style: TextStyle(fontFamily: 'Poppins')),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       actions: [
@@ -276,14 +276,14 @@ class DetailPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
         ),
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<DetailBloc>().add(DetailEventDeleteUser(id: id)); //ok cause i pop first the dialog, so its context
             },
-            child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
   }

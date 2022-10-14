@@ -23,16 +23,16 @@ class IntroductionPage extends StatelessWidget {
   List<PageViewModel> listPages() {
     return [
       PageViewModel(
-          title: "Benvenuto",
-          body: "Questa applicazione consente di ...",
+          title: "Welcome",
+          body: "This application allows to ...",
           image: Center(
               child: Padding(
                   padding: EdgeInsets.only(top: 30),
                   child: Container(child: Image.asset('assets/apple.png'))))),
       PageViewModel(
-        title: 'Connetti il tuo account',
+        title: 'Connect your account',
         body:
-            "Prima di continuare, connetti il tuo account di Withings affinchè l'applicazione possa scaricare i tuoi dati",
+            "Before continuing, connect your Withings account so the app can download your data",
         image: Container(
             child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10),
@@ -46,7 +46,7 @@ class IntroductionPage extends StatelessWidget {
                   ),
                   onPressed: () =>
                       context.read<IntroBloc>().add(LoadIntroEvent()),
-                  child: Text('Connetti !'));
+                  child: Text('Connect !'));
             }
             if (state is IntroLoading) {
               return CircularProgressIndicator();
@@ -64,7 +64,7 @@ class IntroductionPage extends StatelessWidget {
                     shape: StadiumBorder(), backgroundColor: Colors.redAccent),
                 onPressed: () =>
                     context.read<IntroBloc>().add(LoadIntroEvent()),
-                child: Text('Riprova'),
+                child: Text('Retry'),
               );
             } else {
               return Text('Error IntroBloc');
@@ -79,13 +79,13 @@ class IntroductionPage extends StatelessWidget {
                 state is IntroError ||
                 state is IntroInitial) {
               return Text(
-                'Siamo quasi pronti per iniziare',
+                'We are almost ready to start',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               );
             }
             if (state is IntroLoaded) {
               return Text(
-                'Siamo pronti per iniziare',
+                'We are ready to start',
                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
               );
             } else {
@@ -99,14 +99,14 @@ class IntroductionPage extends StatelessWidget {
                 state is IntroError ||
                 state is IntroInitial) {
               return Text(
-                'Completa i passaggi precedenti, prima di iniziare',
+                'Complete the previous steps',
                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.normal),
                 textAlign: TextAlign.center,
               );
             }
             if (state is IntroLoaded) {
               return Text(
-                "Premi sul pulsante sottostante per iniziare a usare l'applicazione",
+                "Press the button below to start using the application",
                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.normal),
                 textAlign: TextAlign.center,
               );
@@ -127,7 +127,7 @@ class IntroductionPage extends StatelessWidget {
             if (state is IntroLoaded) {
               return ElevatedButton(
                 style: ElevatedButton.styleFrom(shape: StadiumBorder()),
-                child: Text("Iniziamo !"),
+                child: Text("Let's start !"),
                 onPressed: () {
                   context.read<IntroBloc>().add(FinishIntroEvent());
                   Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => HomePage()));

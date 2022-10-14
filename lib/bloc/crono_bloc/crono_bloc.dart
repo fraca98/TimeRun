@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:polar/polar.dart';
 import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/model/ticker.dart';
@@ -16,25 +17,82 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   AppDatabase db = GetIt.I<AppDatabase>();
   int progressIndex = 0;
 
-  final Ticker _ticker;
-  StreamSubscription<int>? _tickerSubscription;
+  Ticker ticker = Ticker();
+  StreamSubscription<int>? tickerSubscription;
+  StreamSubscription? hrSubscription;
 
-  CronoBloc(
-      {required int idUser,
-      required List<String> sessionDevices,
-      required int numSession,
-      required Ticker ticker})
-      : _ticker = ticker,
-        super(CronoStatePlay(progressIndex: 0, duration: 0)) {
+  CronoBloc({
+    required int idUser,
+    required List<String> sessionDevices,
+    required int numSession,
+  }) : super(CronoStatePlay(progressIndex: 0, duration: 0, hr: 0)) { //TODO: need to fix this initial Heart Rate
+    hrSubscription = Polar().heartRateStream.listen(
+      (event) {
+        if (event.data.hr != 0) {
+          if (state is CronoStatePlay) {
+            emit(CronoStatePlay(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateRunning) {
+            emit(CronoStateRunning(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStatePause) {
+            emit(CronoStatePause(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateStop) {
+            emit(CronoStateStop(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateSaving) {
+            emit(CronoStateSaving(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateCompleted) {
+            emit(CronoStateCompleted(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateDeletingSession) {
+            emit(CronoStateDeletingSession(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+          if (state is CronoStateDeletedSession) {
+            emit(CronoStateDeletedSession(
+                progressIndex: progressIndex,
+                duration: state.duration,
+                hr: event.data.hr));
+          }
+        }
+      },
+    );
+
     on<CronoEventPlay>(
       (event, emit) {
         emit(CronoStateRunning(
-            progressIndex: progressIndex, duration: event.duration));
+            progressIndex: progressIndex,
+            duration: event.duration,
+            hr: state.hr));
+
         starttimestamp =
             (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
         //print('starttimestamp: $starttimestamp');
-        _tickerSubscription?.cancel();
-        _tickerSubscription = _ticker
+        tickerSubscription?.cancel();
+        tickerSubscription = ticker
             .tick(ticks: event.duration)
             .listen((duration) => add(CronoEventTicked(duration: duration)));
       },
@@ -42,17 +100,21 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventPause>(
       (event, emit) {
-        _tickerSubscription?.pause();
+        tickerSubscription?.pause();
         emit(CronoStatePause(
-            progressIndex: progressIndex, duration: state.duration));
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: state.hr));
       },
     );
 
     on<CronoEventStop>((event, emit) {
-      _tickerSubscription?.cancel();
+      tickerSubscription?.cancel();
       //print(state); //CronoStatePause
       emit(CronoStateStop(
-          progressIndex: progressIndex, duration: state.duration));
+          progressIndex: progressIndex,
+          duration: state.duration,
+          hr: state.hr));
       endtimestamp =
           (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
       //print('endtimestamp: $endtimestamp');
@@ -60,15 +122,19 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventResume>(
       (event, emit) {
-        _tickerSubscription?.resume();
+        tickerSubscription?.resume();
         emit(CronoStateRunning(
-            progressIndex: progressIndex, duration: state.duration));
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: state.hr));
       },
     );
 
     on<CronoEventSave>((event, emit) async {
       emit(CronoStateSaving(
-          progressIndex: progressIndex, duration: state.duration));
+          progressIndex: progressIndex,
+          duration: state.duration,
+          hr: state.hr));
       //print("Save timestamp");
       if (progressIndex == 0) {
         //if i save (for progressindex = 0)
@@ -99,16 +165,21 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
                 1 //update the completed (number of completed session for the user)
             ? await db.usersDao.updateComplete(idUser, 1)
             : await db.usersDao.updateComplete(idUser, 2);
+        hrSubscription!.cancel(); //stop collecting heart data
         emit(CronoStateCompleted(
-            progressIndex: progressIndex, duration: state.duration));
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: state.hr));
       } else {
-        emit(CronoStatePlay(progressIndex: progressIndex, duration: 0));
+        emit(CronoStatePlay(
+            progressIndex: progressIndex, duration: 0, hr: state.hr));
       }
     });
 
     on<CronoEventDelete>(
       (event, emit) {
-        emit(CronoStatePlay(progressIndex: progressIndex, duration: 0));
+        emit(CronoStatePlay(
+            progressIndex: progressIndex, duration: 0, hr: state.hr));
         starttimestamp = null;
         endtimestamp = null;
         //print('Cancel timestamp');
@@ -120,20 +191,27 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     on<CronoEventDeleteSession>(
       (event, emit) async {
         emit(CronoStateDeletingSession(
-            progressIndex: progressIndex, duration: state.duration));
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: state.hr));
         if (idSession != null) {
           await db.sessionsDao
               .deleteSession(idSession!); //delete the session if already saved
         } else {}
+        hrSubscription!.cancel(); //stop collecting heart data
         emit(CronoStateDeletedSession(
-            progressIndex: progressIndex, duration: state.duration));
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: state.hr));
       },
     );
 
     on<CronoEventTicked>(
       (event, emit) {
         emit(CronoStateRunning(
-            progressIndex: progressIndex, duration: event.duration));
+            progressIndex: progressIndex,
+            duration: event.duration,
+            hr: state.hr));
       },
     );
   }

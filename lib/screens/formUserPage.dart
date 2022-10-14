@@ -21,7 +21,7 @@ class FormUserPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Form utente',
+            'User Form',
             style: TextStyle(fontFamily: 'Poppins'),
           ),
           centerTitle: true,
@@ -59,7 +59,7 @@ class FormUserPage extends StatelessWidget {
             keyboardType: TextInputType.name,
             enableOnlyWhenFormBlocCanSubmit: true,
             decoration: const InputDecoration(
-              labelText: 'Nome',
+              labelText: 'Name',
               prefixIcon: Icon(Icons.person),
             ),
           ),
@@ -68,7 +68,7 @@ class FormUserPage extends StatelessWidget {
             keyboardType: TextInputType.name,
             enableOnlyWhenFormBlocCanSubmit: true,
             decoration: const InputDecoration(
-              labelText: 'Cognome',
+              labelText: 'Surname',
               prefixIcon: Icon(Icons.person),
             ),
           ),
@@ -78,7 +78,7 @@ class FormUserPage extends StatelessWidget {
               child: Text(value),
             ),
             decoration: const InputDecoration(
-              labelText: 'Genere',
+              labelText: 'Sex',
               prefixIcon: SizedBox(),
             ),
           ),
@@ -89,7 +89,7 @@ class FormUserPage extends StatelessWidget {
             lastDate: DateTime.now(),
             format: DateFormat('yyyy-MM-dd'),
             decoration: const InputDecoration(
-              labelText: 'Data di nascita',
+              labelText: 'Date of birth',
               prefixIcon: Icon(Icons.cake),
             ),
           ),
@@ -108,7 +108,7 @@ class FormUserPage extends StatelessWidget {
               keyboardType: TextInputType.number,
               enableOnlyWhenFormBlocCanSubmit: true,
               decoration: const InputDecoration(
-                  labelText: 'Altezza',
+                  labelText: 'Height',
                   prefixIcon: Icon(Icons.height),
                   suffix: Text('cm')),
             ),
@@ -117,7 +117,7 @@ class FormUserPage extends StatelessWidget {
               keyboardType: TextInputType.number,
               enableOnlyWhenFormBlocCanSubmit: true,
               decoration: const InputDecoration(
-                labelText: 'Peso',
+                labelText: 'Weight',
                 prefixIcon: Icon(MdiIcons.weight),
                 suffix: Text('Kg'),
               ),
@@ -130,9 +130,9 @@ class FormUserPage extends StatelessWidget {
   Widget alertBack(BuildContext context) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Attenzione", style: TextStyle(fontFamily: 'Poppins')),
+      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
       content: Text(
-          "Sei sicuro di voler tornare indietro ? Tutti i dati verranno persi",
+          "Are you sure to go back ? All data will be lost",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
@@ -141,14 +141,14 @@ class FormUserPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
         ),
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text('Elimina', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
   }

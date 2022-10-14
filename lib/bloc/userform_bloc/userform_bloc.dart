@@ -19,7 +19,7 @@ class WizardFormBloc extends FormBloc<dynamic, dynamic> {
   final weight = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final sex = SelectFieldBloc(
     validators: [FieldBlocValidators.required],
-    items: ['Uomo', 'Donna'],
+    items: ['Man', 'Woman'],
   );
   final birthDate = InputFieldBloc<DateTime?, Object>(
     validators: [

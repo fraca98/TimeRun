@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:timerun/screens/bluetoothPage.dart';
 import '../bloc/detail_bloc/detail_bloc.dart';
 import '../screens/datacollectionPage.dart';
 
@@ -36,7 +37,7 @@ class _AlertSessionState extends State<AlertSession> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Seleziona i 2 dispositivi per la sessione',
+            'Select the 2 devices for this session',
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -66,7 +67,7 @@ class _AlertSessionState extends State<AlertSession> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('Annulla', style: TextStyle(fontFamily: 'Poppins'))),
+            child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins'))),
         togglecheck
                     .where(
                       (element) => element == true,
@@ -88,11 +89,7 @@ class _AlertSessionState extends State<AlertSession> {
                       //replace: so if pop i don't go back to the dialogue
                       context,
                       MaterialPageRoute(
-                        builder: (context) => DataCollectionPage(
-                          id: widget.id,
-                          sessionDevices: sessionDevices,
-                          numSession: numSession,
-                        ),
+                        builder: (context) => BluetoothPage(id: widget.id, numSession: numSession, sessionDevices: sessionDevices,) //TODO: fix
                       ));
                   //print(widget.supercontext); //supercontext: NOT the context of the dialogue to pass to use DetailBloc
                   //print(reload);
@@ -102,7 +99,7 @@ class _AlertSessionState extends State<AlertSession> {
                         .add(DetailEventLoad(id: widget.id));
                   }
                 },
-                child: Text('Inizia la sessione',
+                child: Text('Start',
                     style: TextStyle(fontFamily: 'Poppins')))
             : Container(),
       ],

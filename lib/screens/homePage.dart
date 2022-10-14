@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Utenti',
+            'Users',
             style: TextStyle(fontFamily: 'Poppins'),
           ),
         ),
@@ -45,7 +45,7 @@ class HomePage extends StatelessWidget {
                       subject:
                           'TimeRun database'); //share the database file saved
                 },
-                title: Text('Esporta il database'),
+                title: Text('Export the database'),
                 trailing: Icon(MdiIcons.shareVariant),
               ),
               ListTile(
@@ -54,7 +54,7 @@ class HomePage extends StatelessWidget {
                       builder: (context) =>
                           DriftDbViewer(GetIt.I<AppDatabase>())));
                 },
-                title: Text('Visualizza il database'),
+                title: Text('Visualize the database'),
                 trailing: Icon(MdiIcons.databaseEye),
               )
             ],
@@ -69,7 +69,7 @@ class HomePage extends StatelessWidget {
               return state.users.length == 0
                   ? Center(
                       child: Text(
-                      'Non ci sono utenti',
+                      'There are not users',
                       style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
                     ))
                   : ListView.builder(
@@ -114,7 +114,7 @@ class HomePage extends StatelessWidget {
                             title: Text(
                                 '${state.users[index].name} ${state.users[index].surname}'),
                             subtitle:
-                                Text(state.users[index].sex ? 'Uomo' : 'Donna'),
+                                Text(state.users[index].sex ? 'Man' : 'Woman'),
                             trailing: Icon(MdiIcons.arrowRight),
                           ),
                         );
