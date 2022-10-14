@@ -15,8 +15,8 @@ class IntroBloc extends Bloc<IntroEvent, IntroState> {
     on<LoadIntroEvent>((event, emit) async {
       emit(IntroLoading());
       await Future.delayed(Duration(seconds: 1));
-      List<String?> authResp;
-      authResp = await WithingsConnector.authorize(
+      WithingsCredentials? withingsCredentials;
+      withingsCredentials = await WithingsConnector.authorize(
           clientID:
               'd49824f2a5059e804fc1da4d639e80d8dea2aeb46429e8e5513008d13af551d4',
           clientSecret:
@@ -25,9 +25,12 @@ class IntroBloc extends Bloc<IntroEvent, IntroState> {
           redirectUri: 'example://withings/auth',
           callbackUrlScheme: 'example');
       await Future.delayed(Duration(seconds: 1));
-      if (authResp[0] != null && authResp[1] != null) {
-        await prefs?.setString('accessToken', authResp[0]!);
-        await prefs?.setString('refreshToken', authResp[1]!);
+      if (withingsCredentials != null) {
+        await prefs?.setString('userID', withingsCredentials.userID);
+        await prefs?.setString(
+            'accessToken', withingsCredentials.withingsAccessToken);
+        await prefs?.setString(
+            'refreshToken', withingsCredentials.withingsRefreshToken);
         emit(IntroLoaded());
       } else {
         emit(IntroError());

@@ -7,17 +7,20 @@ part 'detail_event.dart';
 part 'detail_state.dart';
 
 class DetailBloc extends Bloc<DetailEvent, DetailState> {
+  bool hasnewsession = false;
   DetailBloc(int id) : super(DetailStateLoading()) {
     AppDatabase db = GetIt.I<AppDatabase>();
-
     on<DetailEventLoad>((event, emit) async {
-      emit(DetailStateLoading());
       User user = await db.usersDao.retrieveSpecificUser(event.id);
+      if (state is DetailStateLoaded &&
+          (state as DetailStateLoaded).user.completed != user.completed) {
+        hasnewsession = true;
+      }
+      //emit(DetailStateLoading());
       //print(user);
 
       Session? session1;
       Session? session2;
-
       if (user.completed == 1) {
         session1 = await db.sessionsDao.retrieveSpecificSession(event.id, 1);
       }
@@ -36,7 +39,8 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     on<DetailEventDeleteUser>(
       (event, emit) async {
         emit(DetailStateDeletingUser());
-        await db.usersDao.deleteUser(event.id); //on cascade deletes linked Sessions, Intervals
+        await db.usersDao.deleteUser(
+            event.id); //on cascade deletes linked Sessions, Intervals
         //print('Removed user');
         emit(DetailStateDeletedUser());
       },

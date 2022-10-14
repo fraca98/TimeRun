@@ -27,7 +27,7 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateDeletedUser) {
                 return false;
               } else {
-                Navigator.pop(context, true); //TODO: fix: every time i go back reload
+                Navigator.pop(context, BlocProvider.of<DetailBloc>(context).hasnewsession);
                 return false;
               }
             },

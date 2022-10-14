@@ -38,7 +38,7 @@ dependencies:
   introduction_screen: ^3.0.2 #flutter introduction screen
   withings_flutter:
     git:
-      url: https://github.com/fraca98/Withings_flutter
+      url: https://github.com/fraca98/WithingsFlutter
       ref: master
   shared_preferences: ^2.0.15 #save
   provider: ^6.0.3 #state management

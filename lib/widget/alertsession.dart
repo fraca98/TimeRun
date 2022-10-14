@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/detail_bloc/detail_bloc.dart';
 import '../screens/datacollectionPage.dart';
 
-class AlertSession extends StatefulWidget {
+class AlertSession extends StatefulWidget { //Dialog alert session when start
   var selectable;
   int id;
   BuildContext supercontext;
