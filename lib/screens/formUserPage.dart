@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/userform_bloc/userform_bloc.dart';
-import 'package:timerun/screens/homePage.dart';
 
 class FormUserPage extends StatelessWidget {
   const FormUserPage({super.key});
@@ -34,7 +33,7 @@ class FormUserPage extends StatelessWidget {
             onSuccess: (context, state) async {
               LoadingDialog.hide(context);
               if (state.stepCompleted == state.lastStep) {
-                Navigator.pop(context, true); //pass true to pop cause i want to reload
+                Navigator.pop(context);
               }
             },
             child: StepperFormBlocBuilder<WizardFormBloc>(

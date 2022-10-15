@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timerun/screens/bluetoothPage.dart';
-import '../bloc/detail_bloc/detail_bloc.dart';
-import '../screens/datacollectionPage.dart';
 
-class AlertSession extends StatefulWidget { //Dialog alert session when start
+class AlertSession extends StatefulWidget {
+  //Dialog alert session when start
   var selectable;
   int id;
-  BuildContext supercontext;
 
-  AlertSession(
-      {super.key,
-      required this.selectable,
-      required this.id,
-      required this.supercontext});
+  AlertSession({
+    super.key,
+    required this.selectable,
+    required this.id,
+  });
 
   @override
   State<AlertSession> createState() => _AlertSessionState();
@@ -85,22 +82,19 @@ class _AlertSessionState extends State<AlertSession> {
                           i]); //get the devices toggled by user in previous screen
                     }
                   }
-                  var reload = await Navigator.pushReplacement(
-                      //replace: so if pop i don't go back to the dialogue
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BluetoothPage(id: widget.id, numSession: numSession, sessionDevices: sessionDevices,) //TODO: fix
-                      ));
-                  print(widget.supercontext); //supercontext: NOT the context of the dialogue to pass to use DetailBloc
-                  print('reload $reload');
-                  if (reload != null && reload == true) {
-                    widget.supercontext //pass supercontext to the bloc
-                        .read<DetailBloc>()
-                        .add(DetailEventLoad(id: widget.id));
-                  }
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BluetoothPage(
+                        id: widget.id,
+                        numSession: numSession,
+                        sessionDevices: sessionDevices,
+                      ),
+                    ),
+                  );
                 },
-                child: Text('Start',
-                    style: TextStyle(fontFamily: 'Poppins')))
+                child: Text('Start', style: TextStyle(fontFamily: 'Poppins')))
             : Container(),
       ],
     );

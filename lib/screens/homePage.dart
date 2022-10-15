@@ -93,17 +93,13 @@ class HomePage extends StatelessWidget {
                         return Card(
                           elevation: 8,
                           child: ListTile(
-                            onTap: () async {
-                              var reload = await Navigator.push(
+                            onTap: () {
+                              Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => DetailPage(
-                                            id: state.users[index].id,
+                                            user: state.users[index],
                                           )));
-                              //print(reload);
-                              if (reload != null && reload == true) {
-                                context.read<HomeBloc>().add(HomeEventLoad());
-                              }
                             },
                             leading: Icon(
                               state.users[index].sex
@@ -130,13 +126,9 @@ class HomePage extends StatelessWidget {
             if (state is HomeStateLoaded) {
               return FloatingActionButton(
                 child: Icon(MdiIcons.accountPlus),
-                onPressed: () async {
-                  var reload = await Navigator.push(context,
+                onPressed: () {
+                  Navigator.push(context,
                       MaterialPageRoute(builder: (context) => FormUserPage()));
-                  //print(reload); //if true : reload
-                  if (reload != null && reload == true){
-                    context.read<HomeBloc>().add(HomeEventLoad());
-                  }
                 },
               );
             } else {

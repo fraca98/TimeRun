@@ -18,13 +18,17 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       emit(BluetoothStateConnected());
     });
 
+    polar.deviceDisconnectedStream.listen((event) {
+      print('Disconnected: ${event.name}');
+    });
+
     on<BluetoothEventPressConnect>(
       (event, emit) {
         polar.connectToDevice(polarIdentifier);
       },
     );
 
-    on<BluetoothEventBack>(
+    on<BluetoothEventDisconnect>(
       (event, emit) {
         polar.disconnectFromDevice(polarIdentifier);
       },

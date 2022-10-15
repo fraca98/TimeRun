@@ -38,7 +38,7 @@ class BluetoothPage extends StatelessWidget {
               onWillPop: () async {
                 if (state is BluetoothStateConnect) {
                   context.read<BluetoothBloc>().add(
-                      BluetoothEventBack()); //disconnect the Polar Device when i go back
+                      BluetoothEventDisconnect()); //disconnect the Polar Device when i go back
                   return true;
                 } else {
                   return false;
@@ -74,6 +74,9 @@ class BluetoothPage extends StatelessWidget {
                               style: ElevatedButton.styleFrom(
                                   shape: StadiumBorder()),
                               onPressed: () {
+                                context
+                                    .read<BluetoothBloc>()
+                                    .add(BluetoothEventDisconnect()); //disconnect if i press button to be sure device is not connected
                                 context
                                     .read<BluetoothBloc>()
                                     .add(BluetoothEventPressConnect());

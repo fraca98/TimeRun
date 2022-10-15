@@ -4,20 +4,21 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
 import 'package:timerun/widget/alertsession.dart';
+import '../database/AppDatabase.dart';
 
 class DetailPage extends StatelessWidget {
-  const DetailPage({required this.id, super.key});
+  const DetailPage({required this.user, super.key});
 
-  final int id;
+  final User user;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DetailBloc(id),
+      create: (context) => DetailBloc(user.id),
       child: BlocConsumer<DetailBloc, DetailState>(
         listener: (context, state) {
           if (state is DetailStateDeletedUser) {
-            Navigator.pop(context, true); //pass true if pop and delete the user
+            Navigator.pop(context);
           }
         },
         builder: (context, state) {
@@ -27,14 +28,14 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateDeletedUser) {
                 return false;
               } else {
-                Navigator.pop(context, BlocProvider.of<DetailBloc>(context).hasnewsession);
+                Navigator.pop(context);
                 return false;
               }
             },
             child: Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: state is DetailStateDeletingUser ||
-                        state is DetailStateDeletingUser
+                        state is DetailStateDeletedUser
                     ? false
                     : true,
                 title: Text('User Detail',
@@ -110,7 +111,7 @@ class DetailPage extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Column(children: [
         Icon(
-          state.user.sex ? MdiIcons.faceMan : MdiIcons.faceWoman,
+          user.sex ? MdiIcons.faceMan : MdiIcons.faceWoman,
           size: 150,
           color: colorFaceIcon,
         ),
@@ -127,7 +128,7 @@ class DetailPage extends StatelessWidget {
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.name,
+                  Text(user.name,
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -139,7 +140,7 @@ class DetailPage extends StatelessWidget {
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.surname,
+                  Text(user.surname,
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -151,7 +152,7 @@ class DetailPage extends StatelessWidget {
                   )
                 ]),
                 Column(children: [
-                  Text(state.user.sex ? 'Man' : 'Woman',
+                  Text(user.sex ? 'Man' : 'Woman',
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -193,10 +194,8 @@ class DetailPage extends StatelessWidget {
                           builder: (_) {
                             List<String> selectable = [...devices];
                             return AlertSession(
-                              supercontext:
-                                  context, //pass this context to use the DetailBloc in the alertdialog of session
                               selectable: selectable,
-                              id: id,
+                              id: user.id,
                             );
                           });
                     },
@@ -246,10 +245,8 @@ class DetailPage extends StatelessWidget {
                             selectable.remove(state.session1?.device1);
                             selectable.remove(state.session1?.device2);
                             return AlertSession(
-                              supercontext:
-                                  context, //pass this context to use the DetailBloc in the alertdialog of session
                               selectable: selectable,
-                              id: id,
+                              id: user.id,
                             );
                           });
                     },
@@ -281,7 +278,9 @@ class DetailPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<DetailBloc>().add(DetailEventDeleteUser(id: id)); //ok cause i pop first the dialog, so its context
+              context.read<DetailBloc>().add(DetailEventDeleteUser(
+                  id: user
+                      .id)); //ok cause i pop first the dialog, so its context
             },
             child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],

@@ -29,10 +29,10 @@ class DataCollectionPage extends StatelessWidget {
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
           if (state is CronoStateDeletedSession) {
-            Navigator.pop(context); //no reload, pass null object
+            Navigator.pop(context);
           }
           if (state is CronoStateCompleted) {
-            Navigator.pop(context, true); //need to reload previous, pass true
+            Navigator.pop(context);
           }
         },
         builder: (context, state) {
