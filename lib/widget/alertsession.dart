@@ -91,8 +91,8 @@ class _AlertSessionState extends State<AlertSession> {
                       MaterialPageRoute(
                         builder: (context) => BluetoothPage(id: widget.id, numSession: numSession, sessionDevices: sessionDevices,) //TODO: fix
                       ));
-                  //print(widget.supercontext); //supercontext: NOT the context of the dialogue to pass to use DetailBloc
-                  //print(reload);
+                  print(widget.supercontext); //supercontext: NOT the context of the dialogue to pass to use DetailBloc
+                  print('reload $reload');
                   if (reload != null && reload == true) {
                     widget.supercontext //pass supercontext to the bloc
                         .read<DetailBloc>()

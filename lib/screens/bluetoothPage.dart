@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:polar/polar.dart';
 import 'package:timerun/bloc/bluetooth_bloc/bluetooth_bloc.dart';
-import 'package:timerun/model/device.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
 
 class BluetoothPage extends StatelessWidget {
@@ -39,8 +37,8 @@ class BluetoothPage extends StatelessWidget {
             return WillPopScope(
               onWillPop: () async {
                 if (state is BluetoothStateConnect) {
-                  Polar().disconnectFromDevice(
-                      polarIdentifier); //disconnect the Polar Device when i go back
+                  context.read<BluetoothBloc>().add(
+                      BluetoothEventBack()); //disconnect the Polar Device when i go back
                   return true;
                 } else {
                   return false;

@@ -51,37 +51,41 @@ class DataCollectionPage extends StatelessWidget {
               return false;
             },
             child: Scaffold(
-              appBar: AppBar(
-                title: Text('Data Collection Session'),
-                centerTitle: true,
-                automaticallyImplyLeading: state is CronoStateSaving ||
-                        state is CronoStateCompleted ||
-                        state is CronoStateDeletingSession ||
-                        state is CronoStateDeletedSession ||
-                        state is CronoStateRunning
-                    ? false
-                    : true,
-              ),
-              body: Column(
-                children: [
-                  _polar(context, state),
-                  Divider(
-                    thickness: 2,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  _crono(context, state),
-                  Spacer(),
-                  _buttonsTimer(context, state),
-                  Container(
-                    height: 120,
-                    width: MediaQuery.of(context).size.width,
-                    child: _progressbar(context, state),
-                  )
-                ],
-              ),
-            ),
+                appBar: AppBar(
+                  title: Text('Data Collection Session'),
+                  centerTitle: true,
+                  automaticallyImplyLeading: state is CronoStateInit ||
+                          state is CronoStateSaving ||
+                          state is CronoStateCompleted ||
+                          state is CronoStateDeletingSession ||
+                          state is CronoStateDeletedSession ||
+                          state is CronoStateRunning
+                      ? false
+                      : true,
+                ),
+                body: state is CronoStateInit
+                    ? Center(
+                        child: CircularProgressIndicator(),
+                      )
+                    : Column(
+                        children: [
+                          _polar(context, state),
+                          Divider(
+                            thickness: 2,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          _crono(context, state),
+                          Spacer(),
+                          _buttonsTimer(context, state),
+                          Container(
+                            height: 120,
+                            width: MediaQuery.of(context).size.width,
+                            child: _progressbar(context, state),
+                          )
+                        ],
+                      )),
           );
         },
       ),
@@ -109,7 +113,6 @@ class DataCollectionPage extends StatelessWidget {
       default:
         text = '';
     }
-
     return Container(
       margin: EdgeInsets.symmetric(
         vertical: 16,

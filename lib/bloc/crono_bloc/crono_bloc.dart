@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:polar/polar.dart';
 import 'package:timerun/database/AppDatabase.dart';
+import 'package:timerun/model/device.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/model/ticker.dart';
 part 'crono_event.dart';
@@ -25,10 +26,16 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     required int idUser,
     required List<String> sessionDevices,
     required int numSession,
-  }) : super(CronoStatePlay(progressIndex: 0, duration: 0, hr: 0)) { //TODO: need to fix this initial Heart Rate
+  }) : super(CronoStateInit(progressIndex: 0, duration: 0, hr: 0)) {
     hrSubscription = Polar().heartRateStream.listen(
       (event) {
+        print(event.data.hr);
         if (event.data.hr != 0) {
+          if (state is CronoStateInit) {
+            emit(CronoStatePlay(
+                progressIndex: progressIndex, duration: 0, hr: event.data.hr));
+          }
+
           if (state is CronoStatePlay) {
             emit(CronoStatePlay(
                 progressIndex: progressIndex,
@@ -166,6 +173,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             ? await db.usersDao.updateComplete(idUser, 1)
             : await db.usersDao.updateComplete(idUser, 2);
         hrSubscription!.cancel(); //stop collecting heart data
+        Polar().disconnectFromDevice(polarIdentifier); //disconnect Polar
         emit(CronoStateCompleted(
             progressIndex: progressIndex,
             duration: state.duration,
@@ -199,13 +207,13 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               .deleteSession(idSession!); //delete the session if already saved
         } else {}
         hrSubscription!.cancel(); //stop collecting heart data
+        Polar().disconnectFromDevice(polarIdentifier); //disconnect polar
         emit(CronoStateDeletedSession(
             progressIndex: progressIndex,
             duration: state.duration,
             hr: state.hr));
       },
     );
-
     on<CronoEventTicked>(
       (event, emit) {
         emit(CronoStateRunning(

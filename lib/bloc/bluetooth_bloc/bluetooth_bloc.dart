@@ -8,18 +8,25 @@ part 'bluetooth_state.dart';
 
 class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   bool connected = false;
+  Polar polar = Polar();
   BluetoothBloc() : super(BluetoothStateConnect()) {
-    Polar().deviceConnectingStream.listen((event) {
+    polar.deviceConnectingStream.listen((event) {
       print('Connecting: ${event.name}');
     });
-    Polar().deviceConnectedStream.listen((event) {
+    polar.deviceConnectedStream.listen((event) {
       print('Connected: ${event.name}');
       emit(BluetoothStateConnected());
     });
 
     on<BluetoothEventPressConnect>(
       (event, emit) {
-        Polar().connectToDevice(polarIdentifier);
+        polar.connectToDevice(polarIdentifier);
+      },
+    );
+
+    on<BluetoothEventBack>(
+      (event, emit) {
+        polar.disconnectFromDevice(polarIdentifier);
       },
     );
   }

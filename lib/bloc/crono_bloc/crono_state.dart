@@ -10,6 +10,10 @@ abstract class CronoState extends Equatable {
   List<Object> get props => [progressIndex, duration, hr];
 }
 
+class CronoStateInit extends CronoState{
+  CronoStateInit({required super.progressIndex, required super.duration, required super.hr});
+}
+
 class CronoStatePlay extends CronoState {
   CronoStatePlay({required super.progressIndex, required super.duration, required super.hr});
 }

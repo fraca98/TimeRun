@@ -8,3 +8,5 @@ abstract class BluetoothEvent extends Equatable {
 }
 
 class BluetoothEventPressConnect extends BluetoothEvent{}
+
+class BluetoothEventBack extends BluetoothEvent{}
