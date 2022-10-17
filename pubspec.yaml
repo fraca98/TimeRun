@@ -31,37 +31,35 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  stop_watch_timer: ^2.0.0 #stopwatch
-  material_design_icons_flutter: ^5.0.6996 #icons
-  syncfusion_flutter_gauges: ^20.2.49 #bar
-  timelines: ^0.1.0 #timeline
-  introduction_screen: ^3.0.2 #flutter introduction screen
+  
+  polar: ^3.1.0 #Polar wrapper
+  fitbitter: ^2.0.1 #fitbit
   withings_flutter:
     git:
       url: https://github.com/fraca98/WithingsFlutter
       ref: master
+
   shared_preferences: ^2.0.15 #save
   provider: ^6.0.3 #state management
-  date_time_picker: ^2.1.0 
+  flutter_bloc: ^8.1.1 #for bloc
+  equatable: ^2.0.5 #for bloc
+  flutter_form_bloc: ^0.30.1 #for bloc form
 
   drift: ^2.1.0 #for database
   sqlite3_flutter_libs: ^0.5.0 #for database
   path_provider: ^2.0.0 #for database
   path: ^1.8.2 #for database
 
-  flutter_bloc: ^8.1.1 #for bloc
-  equatable: ^2.0.5 #for bloc
-
-  flutter_form_bloc: ^0.30.1 #for bloc form
-
   get_it: ^7.2.0 #inject db in bloc (access without context)
 
   drift_db_viewer: ^2.0.0 # TODO: remove
   share_plus: ^4.4.0 #share file
 
+  material_design_icons_flutter: ^5.0.6996 #icons
+  syncfusion_flutter_gauges: ^20.2.49 #bar
+  timelines: ^0.1.0 #timeline
   lottie: ^1.4.3 #lottie animation
-
-  polar: ^3.1.0 #Polar wrapper
+  introduction_screen: ^3.0.2 #flutter introduction screen
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -98,8 +96,9 @@ flutter:
   assets:
   - assets/polar.png
   - assets/withings.png
-  - assets/apple.png
+  - assets/applewatch.png
   - assets/bluetooth-devices.json
+  - assets/fitbit.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

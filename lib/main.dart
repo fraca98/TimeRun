@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
 import 'package:timerun/database/AppDatabase.dart';
-
-import 'bloc/intro_bloc/intro_bloc.dart';
+import 'bloc/introfitbit_bloc/introfitbit_bloc.dart';
+import 'bloc/introwithings_bloc/introwithings_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //to perform await/async in main
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
 
   MyApp(this.prefs, {super.key});
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -37,22 +38,16 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.transparent,
     ));
 
-    return MultiBlocProvider(
-      //pass the blocs
-      providers: [
-        BlocProvider(
-          create: (context) => IntroBloc(prefs),
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Flutter Demo',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: prefs.getBool('isIntroEnded') == true
-            ? HomePage()
-            : IntroductionPage(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: prefs.getBool('isIntroEnded') == true
+          ? HomePage()
+          : IntroductionPage(
+              prefs: prefs,
+            ),
     );
   }
 }
