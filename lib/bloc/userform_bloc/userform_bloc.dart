@@ -47,7 +47,7 @@ class WizardFormBloc extends FormBloc<dynamic, dynamic> {
       await db.usersDao.insertNewUser(UsersCompanion(
         name: Value(name.value),
         surname: Value(surname.value),
-        sex: Value(sex.value == "Uomo"),
+        sex: Value(sex.value == "Man"),
       ));
       emitSuccess();
     }

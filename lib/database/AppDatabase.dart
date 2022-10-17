@@ -1,9 +1,12 @@
+import 'dart:ffi';
+
 import 'package:drift/drift.dart';
 import 'dart:io';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:timerun/database/intervalsDao.dart';
+import 'package:timerun/database/polarratesDao.dart';
 import 'package:timerun/database/sessionDao.dart';
 import 'package:timerun/database/userDao.dart';
 part 'AppDatabase.g.dart';
@@ -43,11 +46,19 @@ class Intervals extends Table {
   IntColumn get deltatime => integer()();
 }
 
+// this will generate the table called "PolarRates" to store HR of Polar during intervals
+class PolarRates extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get idInterval => integer().references(Intervals, #id, onDelete: KeyAction.cascade)();
+  IntColumn get timestamp => integer()();
+  IntColumn get value => integer()();
+}
+
 // this annotation tells drift to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
 @DriftDatabase(
-    tables: [Users, Sessions, Intervals],
-    daos: [UsersDao, SessionsDao, IntervalsDao])
+    tables: [Users, Sessions, Intervals, PolarRates],
+    daos: [UsersDao, SessionsDao, IntervalsDao,PolarRatesDao])
 class AppDatabase extends _$AppDatabase {
   // we tell the database where to store the data with this constructor
   AppDatabase() : super(_openConnection());

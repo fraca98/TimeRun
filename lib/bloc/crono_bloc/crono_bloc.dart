@@ -22,11 +22,15 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   StreamSubscription<int>? tickerSubscription;
   StreamSubscription? hrSubscription;
 
+  List<int> polarTimestamp = [];
+  List<int> polarValue = [];
+
   CronoBloc({
     required int idUser,
     required List<String> sessionDevices,
     required int numSession,
   }) : super(CronoStateInit(progressIndex: 0, duration: 0, hr: 0)) {
+    //TODO: fix the initial state
     hrSubscription = Polar().heartRateStream.listen(
       (event) {
         print(event.data.hr);
@@ -43,12 +47,23 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
                 hr: event.data.hr));
           }
           if (state is CronoStateRunning) {
+            //if the value for the starting timestamp is already registered do NOT insert it
+            int actualTimestamp =
+                (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
+            if (polarTimestamp.contains(actualTimestamp) == false) {
+              polarTimestamp.add(actualTimestamp);
+              polarValue.add(event.data.hr);
+            }
+
             emit(CronoStateRunning(
                 progressIndex: progressIndex,
                 duration: state.duration,
                 hr: event.data.hr));
           }
           if (state is CronoStatePause) {
+            polarTimestamp.add(
+                (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor());
+            polarValue.add(event.data.hr);
             emit(CronoStatePause(
                 progressIndex: progressIndex,
                 duration: state.duration,
@@ -87,7 +102,6 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         }
       },
     );
-
     on<CronoEventPlay>(
       (event, emit) {
         emit(CronoStateRunning(
@@ -98,6 +112,10 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         starttimestamp =
             (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
         //print('starttimestamp: $starttimestamp');
+
+        polarTimestamp.add(starttimestamp!);
+        polarValue.add(state.hr);
+
         tickerSubscription?.cancel();
         tickerSubscription = ticker
             .tick(ticks: event.duration)
@@ -125,6 +143,17 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       endtimestamp =
           (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
       //print('endtimestamp: $endtimestamp');
+
+      //if already present do NOT insert endtimestamp and value
+      if (polarTimestamp.contains(endtimestamp) == false) {
+        polarTimestamp.add(endtimestamp!);
+        polarValue.add(state.hr);
+      }
+
+      /*print(polarTimestamp);
+      print(polarValue);
+      print(starttimestamp);
+      print(endtimestamp);*/
     });
 
     on<CronoEventResume>(
@@ -155,13 +184,22 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         //print(idSession);
       }
 
-      await db.intervalsDao.inserNewInterval(IntervalsCompanion(
+      int idInterv = await db.intervalsDao.inserNewInterval(IntervalsCompanion(
+        //Save the new interval
         idSession: Value(idSession!),
         status: Value(status[progressIndex]),
         startstimestamp: Value(starttimestamp!),
         endtimestamp: Value(endtimestamp!),
         deltatime: Value(endtimestamp! - starttimestamp!),
       ));
+
+      for (int i = 0; i < polarTimestamp.length; i++) {
+        await db.polarRatesDao.insert(PolarRatesCompanion(
+            idInterval: Value(idInterv),
+            timestamp: Value(polarTimestamp[i]),
+            value: Value(polarValue[i])));
+      } //save values of heart for Polar in the PolarRates table
+
       progressIndex++;
 
       if (progressIndex == 5) {
@@ -193,6 +231,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         //print('Cancel timestamp');
         //print('starttimestamp: $starttimestamp');
         //print('endtimestamp: $endtimestamp');
+        polarTimestamp.clear();
+        polarValue.clear();
       },
     );
 
@@ -206,6 +246,12 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           await db.sessionsDao
               .deleteSession(idSession!); //delete the session if already saved
         } else {}
+
+        starttimestamp = null;
+        endtimestamp = null;
+        polarTimestamp.clear();
+        polarValue.clear();
+
         hrSubscription!.cancel(); //stop collecting heart data
         Polar().disconnectFromDevice(polarIdentifier); //disconnect polar
         emit(CronoStateDeletedSession(
