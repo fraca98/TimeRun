@@ -185,7 +185,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             startsession: Value(starttimestamp!),
             device1: Value(sessionDevices[0]),
             device2: Value(sessionDevices[1]),
-            numsession: Value(numSession)));
+            numsession: Value(numSession),
+            download: sessionDevices.contains(devices[0]) || sessionDevices.contains(devices[1]) ? Value(false) : Value(true))); //if contains Withings or Fitbit set download to false
         //print(idSession);
       }
 
@@ -209,7 +210,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
       if (progressIndex == 5) {
         //end the session of data collection
-        await db.sessionsDao.updateSession(
+        await db.sessionsDao.updateEndSession(
             idSession!, endtimestamp!); //update endtimestamp of session
         numSession ==
                 1 //update the completed (number of completed session for the user)

@@ -278,9 +278,7 @@ class DetailPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<DetailBloc>().add(DetailEventDeleteUser(
-                  id: user
-                      .id)); //ok cause i pop first the dialog, so its context
+              context.read<DetailBloc>().add(DetailEventDeleteUser()); //ok cause i pop first the dialog, so its context
             },
             child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],

@@ -9,9 +9,4 @@ abstract class DetailEvent extends Equatable {
 
 
 
-class DetailEventDeleteUser extends DetailEvent {
-  int id;
-  DetailEventDeleteUser({required this.id});
-  @override
-  List<Object> get props => [id];
-}
+class DetailEventDeleteUser extends DetailEvent {}

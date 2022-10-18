@@ -20,7 +20,8 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
     return into(sessions).insert(session);
   }
 
-  Future updateSession(int idSession, int endsession) =>
+  Future updateEndSession(
+          int idSession, int endsession) => //update endtimestamp of session
       (update(sessions)..where((t) => t.id.equals(idSession)))
           .write(SessionsCompanion(endsession: Value(endsession)));
 
@@ -29,8 +30,8 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
     return (delete(sessions)..where((t) => t.id.equals(id))).go();
   }
 
-  Stream<List<Session>> watchSessionUser(int idUser){
-    return (select(sessions)..where((tbl) => tbl.iduser.equals(idUser))).watch();
+  Stream<List<Session>> watchSessionUser(int idUser) {
+    return (select(sessions)..where((tbl) => tbl.iduser.equals(idUser)))
+        .watch();
   }
-
 }

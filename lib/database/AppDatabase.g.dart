@@ -296,6 +296,7 @@ class Session extends DataClass implements Insertable<Session> {
   final int? endsession;
   final String device1;
   final String device2;
+  final bool download;
   const Session(
       {required this.id,
       required this.iduser,
@@ -303,7 +304,8 @@ class Session extends DataClass implements Insertable<Session> {
       required this.startsession,
       this.endsession,
       required this.device1,
-      required this.device2});
+      required this.device2,
+      required this.download});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -316,6 +318,7 @@ class Session extends DataClass implements Insertable<Session> {
     }
     map['device1'] = Variable<String>(device1);
     map['device2'] = Variable<String>(device2);
+    map['download'] = Variable<bool>(download);
     return map;
   }
 
@@ -330,6 +333,7 @@ class Session extends DataClass implements Insertable<Session> {
           : Value(endsession),
       device1: Value(device1),
       device2: Value(device2),
+      download: Value(download),
     );
   }
 
@@ -344,6 +348,7 @@ class Session extends DataClass implements Insertable<Session> {
       endsession: serializer.fromJson<int?>(json['endsession']),
       device1: serializer.fromJson<String>(json['device1']),
       device2: serializer.fromJson<String>(json['device2']),
+      download: serializer.fromJson<bool>(json['download']),
     );
   }
   @override
@@ -357,6 +362,7 @@ class Session extends DataClass implements Insertable<Session> {
       'endsession': serializer.toJson<int?>(endsession),
       'device1': serializer.toJson<String>(device1),
       'device2': serializer.toJson<String>(device2),
+      'download': serializer.toJson<bool>(download),
     };
   }
 
@@ -367,7 +373,8 @@ class Session extends DataClass implements Insertable<Session> {
           int? startsession,
           Value<int?> endsession = const Value.absent(),
           String? device1,
-          String? device2}) =>
+          String? device2,
+          bool? download}) =>
       Session(
         id: id ?? this.id,
         iduser: iduser ?? this.iduser,
@@ -376,6 +383,7 @@ class Session extends DataClass implements Insertable<Session> {
         endsession: endsession.present ? endsession.value : this.endsession,
         device1: device1 ?? this.device1,
         device2: device2 ?? this.device2,
+        download: download ?? this.download,
       );
   @override
   String toString() {
@@ -386,14 +394,15 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('startsession: $startsession, ')
           ..write('endsession: $endsession, ')
           ..write('device1: $device1, ')
-          ..write('device2: $device2')
+          ..write('device2: $device2, ')
+          ..write('download: $download')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, iduser, numsession, startsession, endsession, device1, device2);
+  int get hashCode => Object.hash(id, iduser, numsession, startsession,
+      endsession, device1, device2, download);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -404,7 +413,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.startsession == this.startsession &&
           other.endsession == this.endsession &&
           other.device1 == this.device1 &&
-          other.device2 == this.device2);
+          other.device2 == this.device2 &&
+          other.download == this.download);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -415,6 +425,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<int?> endsession;
   final Value<String> device1;
   final Value<String> device2;
+  final Value<bool> download;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.iduser = const Value.absent(),
@@ -423,6 +434,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.endsession = const Value.absent(),
     this.device1 = const Value.absent(),
     this.device2 = const Value.absent(),
+    this.download = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -432,6 +444,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.endsession = const Value.absent(),
     required String device1,
     required String device2,
+    this.download = const Value.absent(),
   })  : iduser = Value(iduser),
         numsession = Value(numsession),
         startsession = Value(startsession),
@@ -445,6 +458,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<int>? endsession,
     Expression<String>? device1,
     Expression<String>? device2,
+    Expression<bool>? download,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -454,6 +468,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (endsession != null) 'endsession': endsession,
       if (device1 != null) 'device1': device1,
       if (device2 != null) 'device2': device2,
+      if (download != null) 'download': download,
     });
   }
 
@@ -464,7 +479,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       Value<int>? startsession,
       Value<int?>? endsession,
       Value<String>? device1,
-      Value<String>? device2}) {
+      Value<String>? device2,
+      Value<bool>? download}) {
     return SessionsCompanion(
       id: id ?? this.id,
       iduser: iduser ?? this.iduser,
@@ -473,6 +489,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       endsession: endsession ?? this.endsession,
       device1: device1 ?? this.device1,
       device2: device2 ?? this.device2,
+      download: download ?? this.download,
     );
   }
 
@@ -500,6 +517,9 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (device2.present) {
       map['device2'] = Variable<String>(device2.value);
     }
+    if (download.present) {
+      map['download'] = Variable<bool>(download.value);
+    }
     return map;
   }
 
@@ -512,7 +532,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('startsession: $startsession, ')
           ..write('endsession: $endsession, ')
           ..write('device1: $device1, ')
-          ..write('device2: $device2')
+          ..write('device2: $device2, ')
+          ..write('download: $download')
           ..write(')'))
         .toString();
   }
@@ -563,9 +584,25 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
   late final GeneratedColumn<String> device2 = GeneratedColumn<String>(
       'device2', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  final VerificationMeta _downloadMeta = const VerificationMeta('download');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, iduser, numsession, startsession, endsession, device1, device2];
+  late final GeneratedColumn<bool> download = GeneratedColumn<bool>(
+      'download', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK (download IN (0, 1))',
+      defaultValue: Constant(false));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        iduser,
+        numsession,
+        startsession,
+        endsession,
+        device1,
+        device2,
+        download
+      ];
   @override
   String get aliasedName => _alias ?? 'sessions';
   @override
@@ -618,6 +655,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     } else if (isInserting) {
       context.missing(_device2Meta);
     }
+    if (data.containsKey('download')) {
+      context.handle(_downloadMeta,
+          download.isAcceptableOrUnknown(data['download']!, _downloadMeta));
+    }
     return context;
   }
 
@@ -641,6 +682,8 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
           .read(DriftSqlType.string, data['${effectivePrefix}device1'])!,
       device2: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}device2'])!,
+      download: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}download'])!,
     );
   }
 
