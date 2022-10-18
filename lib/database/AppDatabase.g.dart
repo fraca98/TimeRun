@@ -1222,20 +1222,519 @@ class $PolarRatesTable extends PolarRates
   }
 }
 
+class FitbitRate extends DataClass implements Insertable<FitbitRate> {
+  final int id;
+  final int idInterval;
+  final int timestamp;
+  final int value;
+  const FitbitRate(
+      {required this.id,
+      required this.idInterval,
+      required this.timestamp,
+      required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_interval'] = Variable<int>(idInterval);
+    map['timestamp'] = Variable<int>(timestamp);
+    map['value'] = Variable<int>(value);
+    return map;
+  }
+
+  FitbitRatesCompanion toCompanion(bool nullToAbsent) {
+    return FitbitRatesCompanion(
+      id: Value(id),
+      idInterval: Value(idInterval),
+      timestamp: Value(timestamp),
+      value: Value(value),
+    );
+  }
+
+  factory FitbitRate.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FitbitRate(
+      id: serializer.fromJson<int>(json['id']),
+      idInterval: serializer.fromJson<int>(json['idInterval']),
+      timestamp: serializer.fromJson<int>(json['timestamp']),
+      value: serializer.fromJson<int>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idInterval': serializer.toJson<int>(idInterval),
+      'timestamp': serializer.toJson<int>(timestamp),
+      'value': serializer.toJson<int>(value),
+    };
+  }
+
+  FitbitRate copyWith({int? id, int? idInterval, int? timestamp, int? value}) =>
+      FitbitRate(
+        id: id ?? this.id,
+        idInterval: idInterval ?? this.idInterval,
+        timestamp: timestamp ?? this.timestamp,
+        value: value ?? this.value,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FitbitRate(')
+          ..write('id: $id, ')
+          ..write('idInterval: $idInterval, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, idInterval, timestamp, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FitbitRate &&
+          other.id == this.id &&
+          other.idInterval == this.idInterval &&
+          other.timestamp == this.timestamp &&
+          other.value == this.value);
+}
+
+class FitbitRatesCompanion extends UpdateCompanion<FitbitRate> {
+  final Value<int> id;
+  final Value<int> idInterval;
+  final Value<int> timestamp;
+  final Value<int> value;
+  const FitbitRatesCompanion({
+    this.id = const Value.absent(),
+    this.idInterval = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.value = const Value.absent(),
+  });
+  FitbitRatesCompanion.insert({
+    this.id = const Value.absent(),
+    required int idInterval,
+    required int timestamp,
+    required int value,
+  })  : idInterval = Value(idInterval),
+        timestamp = Value(timestamp),
+        value = Value(value);
+  static Insertable<FitbitRate> custom({
+    Expression<int>? id,
+    Expression<int>? idInterval,
+    Expression<int>? timestamp,
+    Expression<int>? value,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idInterval != null) 'id_interval': idInterval,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (value != null) 'value': value,
+    });
+  }
+
+  FitbitRatesCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? idInterval,
+      Value<int>? timestamp,
+      Value<int>? value}) {
+    return FitbitRatesCompanion(
+      id: id ?? this.id,
+      idInterval: idInterval ?? this.idInterval,
+      timestamp: timestamp ?? this.timestamp,
+      value: value ?? this.value,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idInterval.present) {
+      map['id_interval'] = Variable<int>(idInterval.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<int>(timestamp.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<int>(value.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FitbitRatesCompanion(')
+          ..write('id: $id, ')
+          ..write('idInterval: $idInterval, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $FitbitRatesTable extends FitbitRates
+    with TableInfo<$FitbitRatesTable, FitbitRate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FitbitRatesTable(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
+  final VerificationMeta _idIntervalMeta = const VerificationMeta('idInterval');
+  @override
+  late final GeneratedColumn<int> idInterval = GeneratedColumn<int>(
+      'id_interval', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: 'REFERENCES intervals (id) ON DELETE CASCADE');
+  final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  final VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<int> value = GeneratedColumn<int>(
+      'value', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, idInterval, timestamp, value];
+  @override
+  String get aliasedName => _alias ?? 'fitbit_rates';
+  @override
+  String get actualTableName => 'fitbit_rates';
+  @override
+  VerificationContext validateIntegrity(Insertable<FitbitRate> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_interval')) {
+      context.handle(
+          _idIntervalMeta,
+          idInterval.isAcceptableOrUnknown(
+              data['id_interval']!, _idIntervalMeta));
+    } else if (isInserting) {
+      context.missing(_idIntervalMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FitbitRate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FitbitRate(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      idInterval: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id_interval'])!,
+      timestamp: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
+      value: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}value'])!,
+    );
+  }
+
+  @override
+  $FitbitRatesTable createAlias(String alias) {
+    return $FitbitRatesTable(attachedDatabase, alias);
+  }
+}
+
+class WithingsRate extends DataClass implements Insertable<WithingsRate> {
+  final int id;
+  final int idInterval;
+  final int timestamp;
+  final int value;
+  const WithingsRate(
+      {required this.id,
+      required this.idInterval,
+      required this.timestamp,
+      required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_interval'] = Variable<int>(idInterval);
+    map['timestamp'] = Variable<int>(timestamp);
+    map['value'] = Variable<int>(value);
+    return map;
+  }
+
+  WithingsRatesCompanion toCompanion(bool nullToAbsent) {
+    return WithingsRatesCompanion(
+      id: Value(id),
+      idInterval: Value(idInterval),
+      timestamp: Value(timestamp),
+      value: Value(value),
+    );
+  }
+
+  factory WithingsRate.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WithingsRate(
+      id: serializer.fromJson<int>(json['id']),
+      idInterval: serializer.fromJson<int>(json['idInterval']),
+      timestamp: serializer.fromJson<int>(json['timestamp']),
+      value: serializer.fromJson<int>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idInterval': serializer.toJson<int>(idInterval),
+      'timestamp': serializer.toJson<int>(timestamp),
+      'value': serializer.toJson<int>(value),
+    };
+  }
+
+  WithingsRate copyWith(
+          {int? id, int? idInterval, int? timestamp, int? value}) =>
+      WithingsRate(
+        id: id ?? this.id,
+        idInterval: idInterval ?? this.idInterval,
+        timestamp: timestamp ?? this.timestamp,
+        value: value ?? this.value,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('WithingsRate(')
+          ..write('id: $id, ')
+          ..write('idInterval: $idInterval, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, idInterval, timestamp, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WithingsRate &&
+          other.id == this.id &&
+          other.idInterval == this.idInterval &&
+          other.timestamp == this.timestamp &&
+          other.value == this.value);
+}
+
+class WithingsRatesCompanion extends UpdateCompanion<WithingsRate> {
+  final Value<int> id;
+  final Value<int> idInterval;
+  final Value<int> timestamp;
+  final Value<int> value;
+  const WithingsRatesCompanion({
+    this.id = const Value.absent(),
+    this.idInterval = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.value = const Value.absent(),
+  });
+  WithingsRatesCompanion.insert({
+    this.id = const Value.absent(),
+    required int idInterval,
+    required int timestamp,
+    required int value,
+  })  : idInterval = Value(idInterval),
+        timestamp = Value(timestamp),
+        value = Value(value);
+  static Insertable<WithingsRate> custom({
+    Expression<int>? id,
+    Expression<int>? idInterval,
+    Expression<int>? timestamp,
+    Expression<int>? value,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idInterval != null) 'id_interval': idInterval,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (value != null) 'value': value,
+    });
+  }
+
+  WithingsRatesCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? idInterval,
+      Value<int>? timestamp,
+      Value<int>? value}) {
+    return WithingsRatesCompanion(
+      id: id ?? this.id,
+      idInterval: idInterval ?? this.idInterval,
+      timestamp: timestamp ?? this.timestamp,
+      value: value ?? this.value,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idInterval.present) {
+      map['id_interval'] = Variable<int>(idInterval.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<int>(timestamp.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<int>(value.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WithingsRatesCompanion(')
+          ..write('id: $id, ')
+          ..write('idInterval: $idInterval, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $WithingsRatesTable extends WithingsRates
+    with TableInfo<$WithingsRatesTable, WithingsRate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WithingsRatesTable(this.attachedDatabase, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
+  final VerificationMeta _idIntervalMeta = const VerificationMeta('idInterval');
+  @override
+  late final GeneratedColumn<int> idInterval = GeneratedColumn<int>(
+      'id_interval', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: 'REFERENCES intervals (id) ON DELETE CASCADE');
+  final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  final VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<int> value = GeneratedColumn<int>(
+      'value', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, idInterval, timestamp, value];
+  @override
+  String get aliasedName => _alias ?? 'withings_rates';
+  @override
+  String get actualTableName => 'withings_rates';
+  @override
+  VerificationContext validateIntegrity(Insertable<WithingsRate> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_interval')) {
+      context.handle(
+          _idIntervalMeta,
+          idInterval.isAcceptableOrUnknown(
+              data['id_interval']!, _idIntervalMeta));
+    } else if (isInserting) {
+      context.missing(_idIntervalMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+          _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WithingsRate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WithingsRate(
+      id: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      idInterval: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}id_interval'])!,
+      timestamp: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
+      value: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}value'])!,
+    );
+  }
+
+  @override
+  $WithingsRatesTable createAlias(String alias) {
+    return $WithingsRatesTable(attachedDatabase, alias);
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   late final $UsersTable users = $UsersTable(this);
   late final $SessionsTable sessions = $SessionsTable(this);
   late final $IntervalsTable intervals = $IntervalsTable(this);
   late final $PolarRatesTable polarRates = $PolarRatesTable(this);
+  late final $FitbitRatesTable fitbitRates = $FitbitRatesTable(this);
+  late final $WithingsRatesTable withingsRates = $WithingsRatesTable(this);
   late final UsersDao usersDao = UsersDao(this as AppDatabase);
   late final SessionsDao sessionsDao = SessionsDao(this as AppDatabase);
   late final IntervalsDao intervalsDao = IntervalsDao(this as AppDatabase);
   late final PolarRatesDao polarRatesDao = PolarRatesDao(this as AppDatabase);
+  late final FitbitRatesDao fitbitRatesDao =
+      FitbitRatesDao(this as AppDatabase);
+  late final WithingsRatesDao withingsRatesDao =
+      WithingsRatesDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, dynamic>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [users, sessions, intervals, polarRates];
+      [users, sessions, intervals, polarRates, fitbitRates, withingsRates];
 }

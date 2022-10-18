@@ -109,6 +109,11 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             duration: event.duration,
             hr: state.hr));
 
+        starttimestamp = null;
+        endtimestamp = null;
+        polarTimestamp.clear();
+        polarValue.clear();
+
         starttimestamp =
             (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
         //print('starttimestamp: $starttimestamp');
@@ -201,9 +206,6 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       } //save values of heart for Polar in the PolarRates table
 
       progressIndex++;
-
-      polarTimestamp.clear(); //clear timestamp/values array for Polar
-      polarValue.clear();
 
       if (progressIndex == 5) {
         //end the session of data collection
