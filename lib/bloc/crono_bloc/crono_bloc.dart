@@ -190,7 +190,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         status: Value(status[progressIndex]),
         startstimestamp: Value(starttimestamp!),
         endtimestamp: Value(endtimestamp!),
-        deltatime: Value(endtimestamp! - starttimestamp!),
+        deltatime: Value(endtimestamp! - starttimestamp! + 1), //delta + 1
       ));
 
       for (int i = 0; i < polarTimestamp.length; i++) {
@@ -201,6 +201,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       } //save values of heart for Polar in the PolarRates table
 
       progressIndex++;
+
+      polarTimestamp.clear(); //clear timestamp/values array for Polar
+      polarValue.clear();
 
       if (progressIndex == 5) {
         //end the session of data collection
