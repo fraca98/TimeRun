@@ -29,6 +29,7 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateDeletedUser) {
                 return false;
               } else {
+                context.read<DetailBloc>().subStreamSession!.cancel();
                 Navigator.pop(context);
                 return false;
               }
@@ -197,6 +198,7 @@ class DetailPage extends StatelessWidget {
                             return AlertSession(
                               selectable: selectable,
                               id: user.id,
+                              supercontext: context,
                             );
                           });
                     },
@@ -267,6 +269,7 @@ class DetailPage extends StatelessWidget {
                                 return AlertSession(
                                   selectable: selectable,
                                   id: user.id,
+                                  supercontext: context,
                                 );
                               });
                         },

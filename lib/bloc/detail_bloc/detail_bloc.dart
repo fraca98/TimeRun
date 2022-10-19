@@ -7,25 +7,24 @@ part 'detail_event.dart';
 part 'detail_state.dart';
 
 class DetailBloc extends Bloc<DetailEvent, DetailState> {
+  AppDatabase db = GetIt.I<AppDatabase>();
+  StreamSubscription? subStreamSession;
   DetailBloc(int id) : super(DetailStateLoading()) {
-    AppDatabase db = GetIt.I<AppDatabase>();
     Stream<List<Session>> streamSession = db.sessionsDao.watchSessionUser(id);
 
-    streamSession.listen((event) async {
-      if (isClosed == false) {
-        //TODO:ask
-        if (event.isEmpty) {
-          emit(DetailStateLoaded(session1: null, session2: null));
-        } else if (event.length == 1) {
-          emit(DetailStateLoaded(session1: event[0], session2: null));
-        } else if (event.length == 2) {
-          emit(DetailStateLoaded(session1: event[0], session2: event[1]));
-        } else {}
-      }
+    subStreamSession = streamSession.listen((event) async {
+      if (event.isEmpty) {
+        emit(DetailStateLoaded(session1: null, session2: null));
+      } else if (event.length == 1) {
+        emit(DetailStateLoaded(session1: event[0], session2: null));
+      } else if (event.length == 2) {
+        emit(DetailStateLoaded(session1: event[0], session2: event[1]));
+      } else {}
     });
 
     on<DetailEventDeleteUser>(
       (event, emit) async {
+        subStreamSession!.cancel();
         emit(DetailStateDeletingUser());
         await db.usersDao
             .deleteUser(id); //on cascade deletes linked Sessions, Intervals

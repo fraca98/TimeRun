@@ -16,4 +16,9 @@ class WithingsRatesDao extends DatabaseAccessor<AppDatabase>
     //insert data
     return into(withingsRates).insert(data);
   }
+
+  
+  Future deleteInterval (int idInterval){
+    return (delete(withingsRates)..where((tbl) => tbl.idInterval.equals(idInterval))).go();
+  }
 }

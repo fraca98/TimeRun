@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
 import 'package:timerun/database/AppDatabase.dart';
-import 'bloc/introfitbit_bloc/introfitbit_bloc.dart';
-import 'bloc/introwithings_bloc/introwithings_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //to perform await/async in main

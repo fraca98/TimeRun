@@ -62,6 +62,7 @@ class HomePage extends StatelessWidget {
         ),
         body: BlocBuilder<HomeBloc, HomeState>(
           builder: (context, state) {
+            print(state);
             if (state is HomeStateLoading) {
               return Center(child: CircularProgressIndicator());
             }

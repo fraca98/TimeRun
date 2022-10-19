@@ -4,6 +4,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
+import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
 
@@ -11,11 +12,13 @@ class DataCollectionPage extends StatelessWidget {
   final int id;
   final List<String> sessionDevices;
   final int numSession;
+  BuildContext supercontext;
 
   DataCollectionPage(
       {required this.numSession,
       required this.sessionDevices,
       required this.id,
+      required this.supercontext,
       super.key});
 
   @override
@@ -32,6 +35,7 @@ class DataCollectionPage extends StatelessWidget {
             Navigator.pop(context);
           }
           if (state is CronoStateCompleted) {
+            supercontext.read<DetailBloc>().subStreamSession!.resume();
             Navigator.pop(context);
           }
         },

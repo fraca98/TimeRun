@@ -10,7 +10,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
   bool connected = false;
   Polar polar = Polar();
   BluetoothBloc() : super(BluetoothStateConnect()) {
-    polar.deviceConnectingStream.listen((event) {
+    polar.deviceConnectingStream.listen((event) { //TODO:check
       print('Connecting: ${event.name}');
     });
     polar.deviceConnectedStream.listen((event) {

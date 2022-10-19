@@ -8,11 +8,13 @@ class BluetoothPage extends StatelessWidget {
   final int id;
   final List<String> sessionDevices;
   final int numSession;
+  BuildContext supercontext;
 
   BluetoothPage(
       {required this.numSession,
       required this.sessionDevices,
       required this.id,
+      required this.supercontext,
       super.key});
 
   @override
@@ -29,6 +31,7 @@ class BluetoothPage extends StatelessWidget {
                           id: id,
                           numSession: numSession,
                           sessionDevices: sessionDevices,
+                          supercontext: supercontext,
                         )));
           }
         },

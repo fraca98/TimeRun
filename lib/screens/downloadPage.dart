@@ -28,6 +28,7 @@ class DownloadPage extends StatelessWidget {
                 return false;
               } else {
                 ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                context.read<DownloadBloc>().subSession!.cancel();
                 return true;
               }
             },
