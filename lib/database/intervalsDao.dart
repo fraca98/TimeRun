@@ -12,12 +12,14 @@ class IntervalsDao extends DatabaseAccessor<AppDatabase>
   // of this object.
   IntervalsDao(AppDatabase db) : super(db);
 
-  Future<List<Interval>> get allEntries =>
-      select(intervals).get(); //get all the intervals
-
   Future<int> inserNewInterval(IntervalsCompanion interval) {
     //insert a new interval and return the id (use IntervalsCompanion cause id is autoincremental)
     return into(intervals).insert(interval);
   }
 
+  Future<List<Interval>> getIntervalBySession(int idSession) {
+    //get intervals list by idSession
+    return (select(intervals)..where((tbl) => tbl.idSession.equals(idSession)))
+        .get();
+  }
 }

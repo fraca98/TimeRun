@@ -7,6 +7,4 @@ abstract class DetailEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-
-
 class DetailEventDeleteUser extends DetailEvent {}

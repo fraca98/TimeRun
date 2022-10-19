@@ -25,13 +25,28 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
       (update(sessions)..where((t) => t.id.equals(idSession)))
           .write(SessionsCompanion(endsession: Value(endsession)));
 
+  Future updateDown1(int idSession, bool value) => //update download1 of session
+      (update(sessions)..where((t) => t.id.equals(idSession)))
+          .write(SessionsCompanion(download1: Value(value)));
+
+  Future updateDown2(int idSession, bool value) => //update download2 of session
+      (update(sessions)..where((t) => t.id.equals(idSession)))
+          .write(SessionsCompanion(download2: Value(value)));
+
   Future<int> deleteSession(int id) {
     //delete session given the id of the session
     return (delete(sessions)..where((t) => t.id.equals(id))).go();
   }
 
   Stream<List<Session>> watchSessionUser(int idUser) {
+    //watches changes of list of Sessions given idUser
     return (select(sessions)..where((tbl) => tbl.iduser.equals(idUser)))
         .watch();
+  }
+
+  Stream<Session> watchSession(int idSession) {
+    //watch changes in a single Session given idSession
+    return (select(sessions)..where((tbl) => tbl.id.equals(idSession)))
+        .watchSingle();
   }
 }

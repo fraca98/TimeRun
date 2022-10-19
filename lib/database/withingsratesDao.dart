@@ -12,7 +12,8 @@ class WithingsRatesDao extends DatabaseAccessor<AppDatabase>
   // of this object.
   WithingsRatesDao(AppDatabase db) : super(db);
 
-  Future<int> insert(WithingsRatesCompanion data) async { //insert data
+  Future<int> insert(WithingsRatesCompanion data) async {
+    //insert data
     return into(withingsRates).insert(data);
   }
 }

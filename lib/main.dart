@@ -21,6 +21,8 @@ void main() async {
   getIt.registerSingleton<AppDatabase>(
       database); //pass the database in getIt to access it everywhere (use it cause with no context we can't use provider in BLOC)
 
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
   runApp(MyApp(prefs));
 }
 

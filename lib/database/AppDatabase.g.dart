@@ -216,7 +216,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       'sex', aliasedName, false,
       type: DriftSqlType.bool,
       requiredDuringInsert: true,
-      defaultConstraints: 'CHECK (sex IN (0, 1))');
+      defaultConstraints: 'CHECK ("sex" IN (0, 1))');
   final VerificationMeta _completedMeta = const VerificationMeta('completed');
   @override
   late final GeneratedColumn<int> completed = GeneratedColumn<int>(
@@ -296,7 +296,8 @@ class Session extends DataClass implements Insertable<Session> {
   final int? endsession;
   final String device1;
   final String device2;
-  final bool download;
+  final bool download1;
+  final bool download2;
   const Session(
       {required this.id,
       required this.iduser,
@@ -305,7 +306,8 @@ class Session extends DataClass implements Insertable<Session> {
       this.endsession,
       required this.device1,
       required this.device2,
-      required this.download});
+      required this.download1,
+      required this.download2});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -318,7 +320,8 @@ class Session extends DataClass implements Insertable<Session> {
     }
     map['device1'] = Variable<String>(device1);
     map['device2'] = Variable<String>(device2);
-    map['download'] = Variable<bool>(download);
+    map['download1'] = Variable<bool>(download1);
+    map['download2'] = Variable<bool>(download2);
     return map;
   }
 
@@ -333,7 +336,8 @@ class Session extends DataClass implements Insertable<Session> {
           : Value(endsession),
       device1: Value(device1),
       device2: Value(device2),
-      download: Value(download),
+      download1: Value(download1),
+      download2: Value(download2),
     );
   }
 
@@ -348,7 +352,8 @@ class Session extends DataClass implements Insertable<Session> {
       endsession: serializer.fromJson<int?>(json['endsession']),
       device1: serializer.fromJson<String>(json['device1']),
       device2: serializer.fromJson<String>(json['device2']),
-      download: serializer.fromJson<bool>(json['download']),
+      download1: serializer.fromJson<bool>(json['download1']),
+      download2: serializer.fromJson<bool>(json['download2']),
     );
   }
   @override
@@ -362,7 +367,8 @@ class Session extends DataClass implements Insertable<Session> {
       'endsession': serializer.toJson<int?>(endsession),
       'device1': serializer.toJson<String>(device1),
       'device2': serializer.toJson<String>(device2),
-      'download': serializer.toJson<bool>(download),
+      'download1': serializer.toJson<bool>(download1),
+      'download2': serializer.toJson<bool>(download2),
     };
   }
 
@@ -374,7 +380,8 @@ class Session extends DataClass implements Insertable<Session> {
           Value<int?> endsession = const Value.absent(),
           String? device1,
           String? device2,
-          bool? download}) =>
+          bool? download1,
+          bool? download2}) =>
       Session(
         id: id ?? this.id,
         iduser: iduser ?? this.iduser,
@@ -383,7 +390,8 @@ class Session extends DataClass implements Insertable<Session> {
         endsession: endsession.present ? endsession.value : this.endsession,
         device1: device1 ?? this.device1,
         device2: device2 ?? this.device2,
-        download: download ?? this.download,
+        download1: download1 ?? this.download1,
+        download2: download2 ?? this.download2,
       );
   @override
   String toString() {
@@ -395,14 +403,15 @@ class Session extends DataClass implements Insertable<Session> {
           ..write('endsession: $endsession, ')
           ..write('device1: $device1, ')
           ..write('device2: $device2, ')
-          ..write('download: $download')
+          ..write('download1: $download1, ')
+          ..write('download2: $download2')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, iduser, numsession, startsession,
-      endsession, device1, device2, download);
+      endsession, device1, device2, download1, download2);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -414,7 +423,8 @@ class Session extends DataClass implements Insertable<Session> {
           other.endsession == this.endsession &&
           other.device1 == this.device1 &&
           other.device2 == this.device2 &&
-          other.download == this.download);
+          other.download1 == this.download1 &&
+          other.download2 == this.download2);
 }
 
 class SessionsCompanion extends UpdateCompanion<Session> {
@@ -425,7 +435,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   final Value<int?> endsession;
   final Value<String> device1;
   final Value<String> device2;
-  final Value<bool> download;
+  final Value<bool> download1;
+  final Value<bool> download2;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.iduser = const Value.absent(),
@@ -434,7 +445,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.endsession = const Value.absent(),
     this.device1 = const Value.absent(),
     this.device2 = const Value.absent(),
-    this.download = const Value.absent(),
+    this.download1 = const Value.absent(),
+    this.download2 = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -444,7 +456,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     this.endsession = const Value.absent(),
     required String device1,
     required String device2,
-    this.download = const Value.absent(),
+    this.download1 = const Value.absent(),
+    this.download2 = const Value.absent(),
   })  : iduser = Value(iduser),
         numsession = Value(numsession),
         startsession = Value(startsession),
@@ -458,7 +471,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     Expression<int>? endsession,
     Expression<String>? device1,
     Expression<String>? device2,
-    Expression<bool>? download,
+    Expression<bool>? download1,
+    Expression<bool>? download2,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -468,7 +482,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       if (endsession != null) 'endsession': endsession,
       if (device1 != null) 'device1': device1,
       if (device2 != null) 'device2': device2,
-      if (download != null) 'download': download,
+      if (download1 != null) 'download1': download1,
+      if (download2 != null) 'download2': download2,
     });
   }
 
@@ -480,7 +495,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       Value<int?>? endsession,
       Value<String>? device1,
       Value<String>? device2,
-      Value<bool>? download}) {
+      Value<bool>? download1,
+      Value<bool>? download2}) {
     return SessionsCompanion(
       id: id ?? this.id,
       iduser: iduser ?? this.iduser,
@@ -489,7 +505,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
       endsession: endsession ?? this.endsession,
       device1: device1 ?? this.device1,
       device2: device2 ?? this.device2,
-      download: download ?? this.download,
+      download1: download1 ?? this.download1,
+      download2: download2 ?? this.download2,
     );
   }
 
@@ -517,8 +534,11 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     if (device2.present) {
       map['device2'] = Variable<String>(device2.value);
     }
-    if (download.present) {
-      map['download'] = Variable<bool>(download.value);
+    if (download1.present) {
+      map['download1'] = Variable<bool>(download1.value);
+    }
+    if (download2.present) {
+      map['download2'] = Variable<bool>(download2.value);
     }
     return map;
   }
@@ -533,7 +553,8 @@ class SessionsCompanion extends UpdateCompanion<Session> {
           ..write('endsession: $endsession, ')
           ..write('device1: $device1, ')
           ..write('device2: $device2, ')
-          ..write('download: $download')
+          ..write('download1: $download1, ')
+          ..write('download2: $download2')
           ..write(')'))
         .toString();
   }
@@ -557,7 +578,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
       'iduser', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES users (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "users" ("id") ON DELETE CASCADE');
   final VerificationMeta _numsessionMeta = const VerificationMeta('numsession');
   @override
   late final GeneratedColumn<int> numsession = GeneratedColumn<int>(
@@ -584,13 +605,21 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
   late final GeneratedColumn<String> device2 = GeneratedColumn<String>(
       'device2', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _downloadMeta = const VerificationMeta('download');
+  final VerificationMeta _download1Meta = const VerificationMeta('download1');
   @override
-  late final GeneratedColumn<bool> download = GeneratedColumn<bool>(
-      'download', aliasedName, false,
+  late final GeneratedColumn<bool> download1 = GeneratedColumn<bool>(
+      'download1', aliasedName, false,
       type: DriftSqlType.bool,
       requiredDuringInsert: false,
-      defaultConstraints: 'CHECK (download IN (0, 1))',
+      defaultConstraints: 'CHECK ("download1" IN (0, 1))',
+      defaultValue: Constant(false));
+  final VerificationMeta _download2Meta = const VerificationMeta('download2');
+  @override
+  late final GeneratedColumn<bool> download2 = GeneratedColumn<bool>(
+      'download2', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: 'CHECK ("download2" IN (0, 1))',
       defaultValue: Constant(false));
   @override
   List<GeneratedColumn> get $columns => [
@@ -601,7 +630,8 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
         endsession,
         device1,
         device2,
-        download
+        download1,
+        download2
       ];
   @override
   String get aliasedName => _alias ?? 'sessions';
@@ -655,9 +685,13 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     } else if (isInserting) {
       context.missing(_device2Meta);
     }
-    if (data.containsKey('download')) {
-      context.handle(_downloadMeta,
-          download.isAcceptableOrUnknown(data['download']!, _downloadMeta));
+    if (data.containsKey('download1')) {
+      context.handle(_download1Meta,
+          download1.isAcceptableOrUnknown(data['download1']!, _download1Meta));
+    }
+    if (data.containsKey('download2')) {
+      context.handle(_download2Meta,
+          download2.isAcceptableOrUnknown(data['download2']!, _download2Meta));
     }
     return context;
   }
@@ -682,8 +716,10 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
           .read(DriftSqlType.string, data['${effectivePrefix}device1'])!,
       device2: attachedDatabase.options.types
           .read(DriftSqlType.string, data['${effectivePrefix}device2'])!,
-      download: attachedDatabase.options.types
-          .read(DriftSqlType.bool, data['${effectivePrefix}download'])!,
+      download1: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}download1'])!,
+      download2: attachedDatabase.options.types
+          .read(DriftSqlType.bool, data['${effectivePrefix}download2'])!,
     );
   }
 
@@ -917,7 +953,7 @@ class $IntervalsTable extends Intervals
       'id_session', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES sessions (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "sessions" ("id") ON DELETE CASCADE');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -1194,7 +1230,7 @@ class $PolarRatesTable extends PolarRates
       'id_interval', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES intervals (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "intervals" ("id") ON DELETE CASCADE');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   @override
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
@@ -1440,7 +1476,7 @@ class $FitbitRatesTable extends FitbitRates
       'id_interval', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES intervals (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "intervals" ("id") ON DELETE CASCADE');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   @override
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
@@ -1687,7 +1723,7 @@ class $WithingsRatesTable extends WithingsRates
       'id_interval', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints: 'REFERENCES intervals (id) ON DELETE CASCADE');
+      defaultConstraints: 'REFERENCES "intervals" ("id") ON DELETE CASCADE');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   @override
   late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(

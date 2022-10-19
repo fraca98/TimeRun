@@ -23,6 +23,11 @@ class Users extends Table {
   TextColumn get surname => text()();
   BoolColumn get sex => boolean()(); // true : Man, false : Woman
   IntColumn get completed => integer().withDefault(Constant(0))();
+  /*
+  0: no session
+  1: 1/2 session
+  2: 2/2 session
+  */
 }
 
 // this will generate the table called "Sessions"
@@ -35,6 +40,8 @@ class Sessions extends Table {
   IntColumn get endsession => integer().nullable()();
   TextColumn get device1 => text()();
   TextColumn get device2 => text()();
+  BoolColumn get download1 => boolean().withDefault(Constant(false))();
+  BoolColumn get download2 => boolean().withDefault(Constant(false))();
 }
 
 // this will generate the table called "Intervals"

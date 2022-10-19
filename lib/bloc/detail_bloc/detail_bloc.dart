@@ -7,7 +7,6 @@ part 'detail_event.dart';
 part 'detail_state.dart';
 
 class DetailBloc extends Bloc<DetailEvent, DetailState> {
-  bool hasnewsession = false;
   DetailBloc(int id) : super(DetailStateLoading()) {
     AppDatabase db = GetIt.I<AppDatabase>();
     Stream<List<Session>> streamSession = db.sessionsDao.watchSessionUser(id);

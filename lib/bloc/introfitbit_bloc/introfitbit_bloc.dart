@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fitbitter/fitbitter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timerun/model/credentials.dart';
 
 part 'introfitbit_event.dart';
 part 'introfitbit_state.dart';
@@ -15,8 +16,8 @@ class IntroFitbitBloc extends Bloc<IntroFitbitEvent, IntroFitbitState> {
     on<LoadIntroFitbitEvent>((event, emit) async {
       emit(IntroFitbitLoading());
       FitbitCredentials? fitbitCredentials = await FitbitConnector.authorize(
-          clientID: '238CG7',
-          clientSecret: '6814538ffe2fa5708f85373a80bc2d4e',
+          clientID: clientFitbit[0],
+          clientSecret: clientFitbit[1],
           redirectUri: 'example://fitbit/auth',
           callbackUrlScheme: 'example');
       if (fitbitCredentials != null) {

@@ -132,7 +132,7 @@ class DataCollectionPage extends StatelessWidget {
             children: [
               Spacer(),
               Text(
-                state.hr.toString(),
+                state.hr == 0 ? '?' : state.hr.toString(),
                 style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
               ),
               Text(

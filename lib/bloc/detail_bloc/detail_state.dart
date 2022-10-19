@@ -12,7 +12,7 @@ class DetailStateLoading extends DetailState {}
 class DetailStateLoaded extends DetailState {
   Session? session1;
   Session? session2;
-  
+
   DetailStateLoaded({this.session1, this.session2});
 
   @override

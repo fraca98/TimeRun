@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
+import 'package:timerun/screens/downloadPage.dart';
 import 'package:timerun/widget/alertsession.dart';
 import '../database/AppDatabase.dart';
 
@@ -200,7 +201,25 @@ class DetailPage extends StatelessWidget {
                           });
                     },
                   )
-                : null,
+                : state.session1!.download1 && state.session1!.download2
+                    ? Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          MdiIcons.check,
+                          color: Colors.green,
+                        ),
+                      )
+                    : IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DownloadPage(
+                                        idSession: state.session1!.id,
+                                        numTile: 1,
+                                      )));
+                        },
+                        icon: Icon(MdiIcons.download)),
           ),
         ),
         SizedBox(
@@ -233,24 +252,44 @@ class DetailPage extends StatelessWidget {
               MdiIcons.circle,
               color: state.session2 == null ? Colors.grey : Colors.green,
             ),
-            trailing: state.session1 == null || state.session2 != null
+            trailing: state.session1 == null
                 ? null
-                : IconButton(
-                    icon: Icon(MdiIcons.play),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (_) {
-                            List<String> selectable = [...devices];
-                            selectable.remove(state.session1?.device1);
-                            selectable.remove(state.session1?.device2);
-                            return AlertSession(
-                              selectable: selectable,
-                              id: user.id,
-                            );
-                          });
-                    },
-                  ),
+                : state.session2 == null
+                    ? IconButton(
+                        icon: Icon(MdiIcons.play),
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (_) {
+                                List<String> selectable = [...devices];
+                                selectable.remove(state.session1?.device1);
+                                selectable.remove(state.session1?.device2);
+                                return AlertSession(
+                                  selectable: selectable,
+                                  id: user.id,
+                                );
+                              });
+                        },
+                      )
+                    : state.session2!.download2
+                        ? Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              MdiIcons.check,
+                              color: Colors.green,
+                            ),
+                          )
+                        : IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DownloadPage(
+                                            idSession: state.session2!.id,
+                                            numTile: 2,
+                                          )));
+                            },
+                            icon: Icon(MdiIcons.download)),
           ),
         ),
         SizedBox(
@@ -278,7 +317,8 @@ class DetailPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.read<DetailBloc>().add(DetailEventDeleteUser()); //ok cause i pop first the dialog, so its context
+              context.read<DetailBloc>().add(
+                  DetailEventDeleteUser()); //ok cause i pop first the dialog, so its context
             },
             child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],

@@ -31,77 +31,73 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     required int numSession,
   }) : super(CronoStateInit(progressIndex: 0, duration: 0, hr: 0)) {
     //TODO: fix the initial state
-    hrSubscription = Polar().heartRateStream.listen(
-      (event) {
-        print(event.data.hr);
-        if (event.data.hr != 0) {
-          if (state is CronoStateInit) {
-            emit(CronoStatePlay(
-                progressIndex: progressIndex, duration: 0, hr: event.data.hr));
-          }
+    hrSubscription = Polar().heartRateStream.listen((event) {
+      print(event.data.hr);
+      if (state is CronoStateInit) {
+        emit(CronoStatePlay(
+            progressIndex: progressIndex, duration: 0, hr: event.data.hr));
+      }
 
-          if (state is CronoStatePlay) {
-            emit(CronoStatePlay(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateRunning) {
-            //if the value for the starting timestamp is already registered do NOT insert it
-            int actualTimestamp =
-                (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
-            if (polarTimestamp.contains(actualTimestamp) == false) {
-              polarTimestamp.add(actualTimestamp);
-              polarValue.add(event.data.hr);
-            }
-
-            emit(CronoStateRunning(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStatePause) {
-            polarTimestamp.add(
-                (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor());
-            polarValue.add(event.data.hr);
-            emit(CronoStatePause(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateStop) {
-            emit(CronoStateStop(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateSaving) {
-            emit(CronoStateSaving(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateCompleted) {
-            emit(CronoStateCompleted(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateDeletingSession) {
-            emit(CronoStateDeletingSession(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
-          if (state is CronoStateDeletedSession) {
-            emit(CronoStateDeletedSession(
-                progressIndex: progressIndex,
-                duration: state.duration,
-                hr: event.data.hr));
-          }
+      if (state is CronoStatePlay) {
+        emit(CronoStatePlay(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateRunning) {
+        //if the value for the starting timestamp is already registered do NOT insert it
+        int actualTimestamp =
+            (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
+        if (polarTimestamp.contains(actualTimestamp) == false) {
+          polarTimestamp.add(actualTimestamp);
+          polarValue.add(event.data.hr);
         }
-      },
-    );
+
+        emit(CronoStateRunning(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStatePause) {
+        polarTimestamp.add(
+            (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor());
+        polarValue.add(event.data.hr);
+        emit(CronoStatePause(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateStop) {
+        emit(CronoStateStop(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateSaving) {
+        emit(CronoStateSaving(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateCompleted) {
+        emit(CronoStateCompleted(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateDeletingSession) {
+        emit(CronoStateDeletingSession(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+      if (state is CronoStateDeletedSession) {
+        emit(CronoStateDeletedSession(
+            progressIndex: progressIndex,
+            duration: state.duration,
+            hr: event.data.hr));
+      }
+    });
     on<CronoEventPlay>(
       (event, emit) {
         emit(CronoStateRunning(
@@ -180,13 +176,13 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (progressIndex == 0) {
         //if i save (for progressindex = 0)
         idSession = await db.sessionsDao.inserNewSession(SessionsCompanion(
-            //insert a new session
-            iduser: Value(idUser),
-            startsession: Value(starttimestamp!),
-            device1: Value(sessionDevices[0]),
-            device2: Value(sessionDevices[1]),
-            numsession: Value(numSession),
-            download: sessionDevices.contains(devices[0]) || sessionDevices.contains(devices[1]) ? Value(false) : Value(true))); //if contains Withings or Fitbit set download to false
+          //insert a new session
+          iduser: Value(idUser),
+          startsession: Value(starttimestamp!),
+          device1: Value(sessionDevices[0]),
+          device2: Value(sessionDevices[1]),
+          numsession: Value(numSession),
+        )); //download 1,2 by default false
         //print(idSession);
       }
 
