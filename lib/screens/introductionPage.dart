@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:introduction_screen/introduction_screen.dart';
+import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../bloc/introfitbit_bloc/introfitbit_bloc.dart';
@@ -182,11 +183,7 @@ class IntroductionPage extends StatelessWidget {
           },
         ),
         image: Center(
-          child: Icon(
-            MdiIcons.run,
-            size: 250,
-            color: Colors.black,
-          ),
+          child: LottieBuilder.asset('assets/run.json',frameRate: FrameRate.max,),
         ),
         footer: BlocBuilder<IntroFitbitBloc, IntroFitbitState>(
             builder: (context, fitbitstate) {

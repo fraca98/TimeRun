@@ -34,7 +34,8 @@ class DownloadPage extends StatelessWidget {
             },
             child: Scaffold(
               appBar: AppBar(
-                title: Text('Session $numTile'),
+                title: Text('Session $numTile',
+                    style: TextStyle(fontFamily: 'Poppins')),
                 centerTitle: true,
                 automaticallyImplyLeading: state is DownloadStateInitial ||
                         state is DownloadStateLoading
@@ -51,7 +52,8 @@ class DownloadPage extends StatelessWidget {
                     children: [
                       ListTile(
                           leading: Icon(MdiIcons.circleSmall),
-                          title: Text(state.session.device1),
+                          title: Text(state.session.device1,
+                              style: TextStyle(fontFamily: 'Poppins')),
                           trailing: state.session.download1
                               ? Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -75,7 +77,8 @@ class DownloadPage extends StatelessWidget {
                       ),
                       ListTile(
                           leading: Icon(MdiIcons.circleSmall),
-                          title: Text(state.session.device2),
+                          title: Text(state.session.device2,
+                              style: TextStyle(fontFamily: 'Poppins')),
                           trailing: state.session.download2
                               ? Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -102,7 +105,8 @@ class DownloadPage extends StatelessWidget {
                     children: [
                       ListTile(
                           leading: Icon(MdiIcons.circleSmall),
-                          title: Text(state.session.device1),
+                          title: Text(state.session.device1,
+                              style: TextStyle(fontFamily: 'Poppins')),
                           trailing: state.session.download1
                               ? Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -112,14 +116,18 @@ class DownloadPage extends StatelessWidget {
                                   ),
                                 )
                               : state.numTile == 1
-                                  ? CircularProgressIndicator()
+                                  ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(),
+                                  )
                                   : null),
                       SizedBox(
                         height: 30,
                       ),
                       ListTile(
                           leading: Icon(MdiIcons.circleSmall),
-                          title: Text(state.session.device2),
+                          title: Text(state.session.device2,
+                              style: TextStyle(fontFamily: 'Poppins')),
                           trailing: state.session.download2
                               ? Padding(
                                   padding: EdgeInsets.all(8.0),
@@ -129,7 +137,10 @@ class DownloadPage extends StatelessWidget {
                                   ),
                                 )
                               : state.numTile == 2
-                                  ? CircularProgressIndicator()
+                                  ? Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(),
+                                  )
                                   : null),
                     ],
                   );

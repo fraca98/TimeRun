@@ -66,7 +66,7 @@ class BluetoothPage extends StatelessWidget {
                       Container(
                           height: 300,
                           child: LottieBuilder.asset(
-                              'assets/bluetooth-devices.json')),
+                              'assets/bluetooth-devices.json', frameRate: FrameRate.max,)),
                       SizedBox(
                         height: 50,
                       ),
