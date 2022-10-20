@@ -10,8 +10,8 @@ part 'introfitbit_state.dart';
 class IntroFitbitBloc extends Bloc<IntroFitbitEvent, IntroFitbitState> {
   IntroFitbitBloc(SharedPreferences? prefs)
       : super(prefs?.getString('fitbitAccessToken') != null
-                ? IntroFitbitLoaded() //all'inizio carica questo se non ho salvato l'accesToken
-                : IntroFitbitInitial() //altrimenti carica lo stato dove è stato caricato
+                ? IntroFitbitLoaded() //load this if i have not the accessToken of Fitbit
+                : IntroFitbitInitial() //else load this
             ) {
     on<LoadIntroFitbitEvent>((event, emit) async {
       emit(IntroFitbitLoading());
@@ -22,9 +22,9 @@ class IntroFitbitBloc extends Bloc<IntroFitbitEvent, IntroFitbitState> {
           callbackUrlScheme: 'example');
       if (fitbitCredentials != null) {
         await prefs?.setString('fitbitUserID', fitbitCredentials.userID);
-        await prefs?.setString('fitbitCredentialsAccessToken',
+        await prefs?.setString('fitbitAccessToken',
             fitbitCredentials.fitbitAccessToken);
-        await prefs?.setString('fitbitCredentialsRefreshToken',
+        await prefs?.setString('fitbitRefreshToken',
             fitbitCredentials.fitbitRefreshToken);
         emit(IntroFitbitLoaded());
       } else {

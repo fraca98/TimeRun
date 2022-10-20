@@ -49,7 +49,7 @@ class Intervals extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get idSession =>
       integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
-  TextColumn get status => text()();
+  IntColumn get runstatus => integer()();
   IntColumn get startstimestamp => integer()();
   IntColumn get endtimestamp => integer()();
   IntColumn get deltatime => integer()();

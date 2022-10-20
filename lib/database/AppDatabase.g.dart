@@ -732,14 +732,14 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
 class Interval extends DataClass implements Insertable<Interval> {
   final int id;
   final int idSession;
-  final String status;
+  final int runstatus;
   final int startstimestamp;
   final int endtimestamp;
   final int deltatime;
   const Interval(
       {required this.id,
       required this.idSession,
-      required this.status,
+      required this.runstatus,
       required this.startstimestamp,
       required this.endtimestamp,
       required this.deltatime});
@@ -748,7 +748,7 @@ class Interval extends DataClass implements Insertable<Interval> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['id_session'] = Variable<int>(idSession);
-    map['status'] = Variable<String>(status);
+    map['runstatus'] = Variable<int>(runstatus);
     map['startstimestamp'] = Variable<int>(startstimestamp);
     map['endtimestamp'] = Variable<int>(endtimestamp);
     map['deltatime'] = Variable<int>(deltatime);
@@ -759,7 +759,7 @@ class Interval extends DataClass implements Insertable<Interval> {
     return IntervalsCompanion(
       id: Value(id),
       idSession: Value(idSession),
-      status: Value(status),
+      runstatus: Value(runstatus),
       startstimestamp: Value(startstimestamp),
       endtimestamp: Value(endtimestamp),
       deltatime: Value(deltatime),
@@ -772,7 +772,7 @@ class Interval extends DataClass implements Insertable<Interval> {
     return Interval(
       id: serializer.fromJson<int>(json['id']),
       idSession: serializer.fromJson<int>(json['idSession']),
-      status: serializer.fromJson<String>(json['status']),
+      runstatus: serializer.fromJson<int>(json['runstatus']),
       startstimestamp: serializer.fromJson<int>(json['startstimestamp']),
       endtimestamp: serializer.fromJson<int>(json['endtimestamp']),
       deltatime: serializer.fromJson<int>(json['deltatime']),
@@ -784,7 +784,7 @@ class Interval extends DataClass implements Insertable<Interval> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'idSession': serializer.toJson<int>(idSession),
-      'status': serializer.toJson<String>(status),
+      'runstatus': serializer.toJson<int>(runstatus),
       'startstimestamp': serializer.toJson<int>(startstimestamp),
       'endtimestamp': serializer.toJson<int>(endtimestamp),
       'deltatime': serializer.toJson<int>(deltatime),
@@ -794,14 +794,14 @@ class Interval extends DataClass implements Insertable<Interval> {
   Interval copyWith(
           {int? id,
           int? idSession,
-          String? status,
+          int? runstatus,
           int? startstimestamp,
           int? endtimestamp,
           int? deltatime}) =>
       Interval(
         id: id ?? this.id,
         idSession: idSession ?? this.idSession,
-        status: status ?? this.status,
+        runstatus: runstatus ?? this.runstatus,
         startstimestamp: startstimestamp ?? this.startstimestamp,
         endtimestamp: endtimestamp ?? this.endtimestamp,
         deltatime: deltatime ?? this.deltatime,
@@ -811,7 +811,7 @@ class Interval extends DataClass implements Insertable<Interval> {
     return (StringBuffer('Interval(')
           ..write('id: $id, ')
           ..write('idSession: $idSession, ')
-          ..write('status: $status, ')
+          ..write('runstatus: $runstatus, ')
           ..write('startstimestamp: $startstimestamp, ')
           ..write('endtimestamp: $endtimestamp, ')
           ..write('deltatime: $deltatime')
@@ -821,14 +821,14 @@ class Interval extends DataClass implements Insertable<Interval> {
 
   @override
   int get hashCode => Object.hash(
-      id, idSession, status, startstimestamp, endtimestamp, deltatime);
+      id, idSession, runstatus, startstimestamp, endtimestamp, deltatime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Interval &&
           other.id == this.id &&
           other.idSession == this.idSession &&
-          other.status == this.status &&
+          other.runstatus == this.runstatus &&
           other.startstimestamp == this.startstimestamp &&
           other.endtimestamp == this.endtimestamp &&
           other.deltatime == this.deltatime);
@@ -837,14 +837,14 @@ class Interval extends DataClass implements Insertable<Interval> {
 class IntervalsCompanion extends UpdateCompanion<Interval> {
   final Value<int> id;
   final Value<int> idSession;
-  final Value<String> status;
+  final Value<int> runstatus;
   final Value<int> startstimestamp;
   final Value<int> endtimestamp;
   final Value<int> deltatime;
   const IntervalsCompanion({
     this.id = const Value.absent(),
     this.idSession = const Value.absent(),
-    this.status = const Value.absent(),
+    this.runstatus = const Value.absent(),
     this.startstimestamp = const Value.absent(),
     this.endtimestamp = const Value.absent(),
     this.deltatime = const Value.absent(),
@@ -852,19 +852,19 @@ class IntervalsCompanion extends UpdateCompanion<Interval> {
   IntervalsCompanion.insert({
     this.id = const Value.absent(),
     required int idSession,
-    required String status,
+    required int runstatus,
     required int startstimestamp,
     required int endtimestamp,
     required int deltatime,
   })  : idSession = Value(idSession),
-        status = Value(status),
+        runstatus = Value(runstatus),
         startstimestamp = Value(startstimestamp),
         endtimestamp = Value(endtimestamp),
         deltatime = Value(deltatime);
   static Insertable<Interval> custom({
     Expression<int>? id,
     Expression<int>? idSession,
-    Expression<String>? status,
+    Expression<int>? runstatus,
     Expression<int>? startstimestamp,
     Expression<int>? endtimestamp,
     Expression<int>? deltatime,
@@ -872,7 +872,7 @@ class IntervalsCompanion extends UpdateCompanion<Interval> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (idSession != null) 'id_session': idSession,
-      if (status != null) 'status': status,
+      if (runstatus != null) 'runstatus': runstatus,
       if (startstimestamp != null) 'startstimestamp': startstimestamp,
       if (endtimestamp != null) 'endtimestamp': endtimestamp,
       if (deltatime != null) 'deltatime': deltatime,
@@ -882,14 +882,14 @@ class IntervalsCompanion extends UpdateCompanion<Interval> {
   IntervalsCompanion copyWith(
       {Value<int>? id,
       Value<int>? idSession,
-      Value<String>? status,
+      Value<int>? runstatus,
       Value<int>? startstimestamp,
       Value<int>? endtimestamp,
       Value<int>? deltatime}) {
     return IntervalsCompanion(
       id: id ?? this.id,
       idSession: idSession ?? this.idSession,
-      status: status ?? this.status,
+      runstatus: runstatus ?? this.runstatus,
       startstimestamp: startstimestamp ?? this.startstimestamp,
       endtimestamp: endtimestamp ?? this.endtimestamp,
       deltatime: deltatime ?? this.deltatime,
@@ -905,8 +905,8 @@ class IntervalsCompanion extends UpdateCompanion<Interval> {
     if (idSession.present) {
       map['id_session'] = Variable<int>(idSession.value);
     }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
+    if (runstatus.present) {
+      map['runstatus'] = Variable<int>(runstatus.value);
     }
     if (startstimestamp.present) {
       map['startstimestamp'] = Variable<int>(startstimestamp.value);
@@ -925,7 +925,7 @@ class IntervalsCompanion extends UpdateCompanion<Interval> {
     return (StringBuffer('IntervalsCompanion(')
           ..write('id: $id, ')
           ..write('idSession: $idSession, ')
-          ..write('status: $status, ')
+          ..write('runstatus: $runstatus, ')
           ..write('startstimestamp: $startstimestamp, ')
           ..write('endtimestamp: $endtimestamp, ')
           ..write('deltatime: $deltatime')
@@ -954,11 +954,11 @@ class $IntervalsTable extends Intervals
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       defaultConstraints: 'REFERENCES "sessions" ("id") ON DELETE CASCADE');
-  final VerificationMeta _statusMeta = const VerificationMeta('status');
+  final VerificationMeta _runstatusMeta = const VerificationMeta('runstatus');
   @override
-  late final GeneratedColumn<String> status = GeneratedColumn<String>(
-      'status', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<int> runstatus = GeneratedColumn<int>(
+      'runstatus', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   final VerificationMeta _startstimestampMeta =
       const VerificationMeta('startstimestamp');
   @override
@@ -978,7 +978,7 @@ class $IntervalsTable extends Intervals
       type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, idSession, status, startstimestamp, endtimestamp, deltatime];
+      [id, idSession, runstatus, startstimestamp, endtimestamp, deltatime];
   @override
   String get aliasedName => _alias ?? 'intervals';
   @override
@@ -997,11 +997,11 @@ class $IntervalsTable extends Intervals
     } else if (isInserting) {
       context.missing(_idSessionMeta);
     }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    if (data.containsKey('runstatus')) {
+      context.handle(_runstatusMeta,
+          runstatus.isAcceptableOrUnknown(data['runstatus']!, _runstatusMeta));
     } else if (isInserting) {
-      context.missing(_statusMeta);
+      context.missing(_runstatusMeta);
     }
     if (data.containsKey('startstimestamp')) {
       context.handle(
@@ -1038,8 +1038,8 @@ class $IntervalsTable extends Intervals
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       idSession: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}id_session'])!,
-      status: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      runstatus: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}runstatus'])!,
       startstimestamp: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}startstimestamp'])!,
       endtimestamp: attachedDatabase.options.types

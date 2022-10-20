@@ -189,7 +189,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       int idInterv = await db.intervalsDao.inserNewInterval(IntervalsCompanion(
         //Save the new interval
         idSession: Value(idSession!),
-        status: Value(status[progressIndex]),
+        runstatus: Value(progressIndex),
         startstimestamp: Value(starttimestamp!),
         endtimestamp: Value(endtimestamp!),
         deltatime: Value(endtimestamp! - starttimestamp! + 1), //delta + 1

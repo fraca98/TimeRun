@@ -10,8 +10,8 @@ part 'introwithings_state.dart';
 class IntroWithingsBloc extends Bloc<IntroWithingsEvent, IntroWithingsState> {
   IntroWithingsBloc(SharedPreferences? prefs)
       : super(prefs?.getString('withingsAccessToken') != null
-                ? IntroWithingsLoaded() //all'inizio carica questo se non ho salvato l'accesToken
-                : IntroWithingsInitial() //altrimenti carica lo stato dove è stato caricato
+                ? IntroWithingsLoaded() //load this if the accessToken of Withings is not saved
+                : IntroWithingsInitial() //else load this
             ) {
     on<LoadIntroWithingsEvent>((event, emit) async {
       emit(IntroWithingsLoading());
