@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:polar/polar.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
@@ -9,22 +10,25 @@ import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
 
 class DataCollectionPage extends StatelessWidget {
+  final Polar polar;
   final int id;
   final List<String> sessionDevices;
   final int numSession;
-  BuildContext supercontext;
+  BuildContext detailcontext;
 
   DataCollectionPage(
-      {required this.numSession,
+      {required this.polar,
+        required this.numSession,
       required this.sessionDevices,
       required this.id,
-      required this.supercontext,
+      required this.detailcontext,
       super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => CronoBloc(
+        polar: polar,
         idUser: id,
         sessionDevices: sessionDevices,
         numSession: numSession,
@@ -35,7 +39,7 @@ class DataCollectionPage extends StatelessWidget {
             Navigator.pop(context);
           }
           if (state is CronoStateCompleted) {
-            supercontext.read<DetailBloc>().subStreamSession!.resume();
+            detailcontext.read<DetailBloc>().subStreamSession!.resume();
             Navigator.pop(context);
           }
         },

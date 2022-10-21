@@ -11,7 +11,7 @@ abstract class CronoState extends Equatable {
 }
 
 class CronoStateInit extends CronoState{
-  CronoStateInit({required super.progressIndex, required super.duration, required super.hr});
+  CronoStateInit({super.progressIndex = 0, super.duration = 0, super.hr = 0});
 }
 
 class CronoStatePlay extends CronoState {

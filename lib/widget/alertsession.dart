@@ -7,11 +7,11 @@ class AlertSession extends StatefulWidget {
   //Dialog alert session when start
   var selectable;
   int id;
-  BuildContext supercontext;
+  BuildContext detailcontext;
 
   AlertSession({
     super.key,
-    required this.supercontext,
+    required this.detailcontext,
     required this.selectable,
     required this.id,
   });
@@ -87,7 +87,7 @@ class _AlertSessionState extends State<AlertSession> {
                     }
                   }
                   Navigator.pop(context);
-                  widget.supercontext
+                  widget.detailcontext
                       .read<DetailBloc>()
                       .subStreamSession!
                       .pause();
@@ -98,7 +98,7 @@ class _AlertSessionState extends State<AlertSession> {
                         id: widget.id,
                         numSession: numSession,
                         sessionDevices: sessionDevices,
-                        supercontext: widget.supercontext,
+                        detailcontext: widget.detailcontext,
                       ),
                     ),
                   );

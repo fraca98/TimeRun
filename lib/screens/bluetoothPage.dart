@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/bluetooth_bloc/bluetooth_bloc.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
 
@@ -8,13 +9,13 @@ class BluetoothPage extends StatelessWidget {
   final int id;
   final List<String> sessionDevices;
   final int numSession;
-  BuildContext supercontext;
+  BuildContext detailcontext;
 
   BluetoothPage(
       {required this.numSession,
       required this.sessionDevices,
       required this.id,
-      required this.supercontext,
+      required this.detailcontext,
       super.key});
 
   @override
@@ -27,11 +28,12 @@ class BluetoothPage extends StatelessWidget {
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DataCollectionPage(
+                    builder: (_) => DataCollectionPage(
+                          polar: context.read<BluetoothBloc>().polar,
                           id: id,
                           numSession: numSession,
                           sessionDevices: sessionDevices,
-                          supercontext: supercontext,
+                          detailcontext: detailcontext,
                         )));
           }
         },
@@ -42,67 +44,77 @@ class BluetoothPage extends StatelessWidget {
                 if (state is BluetoothStateConnect) {
                   context.read<BluetoothBloc>().add(
                       BluetoothEventDisconnect()); //disconnect the Polar Device when i go back
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   return true;
                 } else {
                   return false;
                 }
               },
               child: Scaffold(
-                appBar: AppBar(
-                  title: Text(
-                    'Connect the Polar device',
-                    style: TextStyle(fontFamily: 'Poppins'),
+                  appBar: AppBar(
+                    title: Text(
+                      'Connect the Polar device',
+                      style: TextStyle(fontFamily: 'Poppins'),
+                    ),
+                    centerTitle: true,
+                    automaticallyImplyLeading:
+                        state is BluetoothStateConnect ? true : false,
                   ),
-                  centerTitle: true,
-                  automaticallyImplyLeading:
-                      state is BluetoothStateConnect ? true : false,
-                ),
-                body: Center(
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 50,
-                      ),
-                      Container(
+                  body: BlocListener<BluetoothBloc, BluetoothState>(
+                    listener: ((context, state) {
+                      String? message;
+                      if (state is BluetoothStateConnect &&
+                          state.sett != null) {
+                        switch (state.sett) {
+                          case 0:
+                            message = "Activate the GPS";
+                            break;
+                          case 1:
+                            message = "Activate the Bluetooth";
+                            break;
+                          case 2:
+                            message = "Activate the GPS and the Bluetooth";
+                            break;
+                          default:
+                        }
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          dismissDirection: DismissDirection.none,
+                          content: Row(
+                            children: [
+                              state.sett! == 0 || state.sett! == 2
+                                  ? Icon(
+                                      MdiIcons.crosshairsGps,
+                                      color: Colors.white,
+                                    )
+                                  : SizedBox(),
+                              state.sett! == 1 || state.sett! == 2
+                                  ? Icon(
+                                      MdiIcons.bluetooth,
+                                      color: Colors.white,
+                                    )
+                                  : SizedBox(),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              message != null ? Text(message) : SizedBox(),
+                            ],
+                          ),
+                          duration: Duration(days: 365),
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      }
+                    }),
+                    child: Center(
+                      child: Container(
                           height: 300,
                           child: LottieBuilder.asset(
-                              'assets/bluetooth-devices.json', frameRate: FrameRate.max,)),
-                      SizedBox(
-                        height: 50,
-                      ),
-                      BlocBuilder<BluetoothBloc, BluetoothState>(
-                        builder: (context, state) {
-                          if (state is BluetoothStateConnect) {
-                            return ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  shape: StadiumBorder()),
-                              onPressed: () {
-                                context
-                                    .read<BluetoothBloc>()
-                                    .add(BluetoothEventDisconnect()); //disconnect if i press button to be sure device is not connected
-                                context
-                                    .read<BluetoothBloc>()
-                                    .add(BluetoothEventPressConnect());
-                              },
-                              child: Text(
-                                'Connect Polar',
-                                style: TextStyle(
-                                    fontFamily: 'Poppins', fontSize: 20),
-                              ),
-                            );
-                          }
-
-                          if (state is BluetoothStateConnected) {
-                            return CircularProgressIndicator();
-                          } else {
-                            return Text('Error BluetoothBloc');
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                            'assets/bluetooth-devices.json',
+                            frameRate: FrameRate.max,
+                          )),
+                    ),
+                  )),
             );
           },
         ),

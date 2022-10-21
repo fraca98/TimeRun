@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/screens/homePage.dart';
 import 'package:timerun/screens/introductionPage.dart';
 import 'package:timerun/database/AppDatabase.dart';
+
+import 'bloc/observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); //to perform await/async in main
@@ -20,14 +23,15 @@ void main() async {
 
   getIt.registerSingleton<SharedPreferences>(prefs);
 
-  runApp(MyApp(prefs));
+  BlocOverrides.runZoned(() {
+    runApp(MyApp(prefs));
+  }, blocObserver: SimpleBlocObserver());
 }
 
 class MyApp extends StatelessWidget {
   SharedPreferences prefs;
 
   MyApp(this.prefs, {super.key});
-
 
   // This widget is the root of your application.
   @override

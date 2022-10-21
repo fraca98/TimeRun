@@ -24,7 +24,6 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
     on<DetailEventDeleteUser>(
       (event, emit) async {
-        subStreamSession!.cancel();
         emit(DetailStateDeletingUser());
         await db.usersDao
             .deleteUser(id); //on cascade deletes linked Sessions, Intervals
@@ -32,5 +31,10 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         emit(DetailStateDeletedUser());
       },
     );
+  }
+  @override
+  Future<void> close() {
+    subStreamSession!.cancel();
+    return super.close();
   }
 }
