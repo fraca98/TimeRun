@@ -84,13 +84,13 @@ class BluetoothPage extends StatelessWidget {
                             children: [
                               state.sett! == 0 || state.sett! == 2
                                   ? Icon(
-                                      MdiIcons.crosshairsGps,
+                                      MdiIcons.crosshairsOff,
                                       color: Colors.white,
                                     )
                                   : SizedBox(),
                               state.sett! == 1 || state.sett! == 2
                                   ? Icon(
-                                      MdiIcons.bluetooth,
+                                      MdiIcons.bluetoothOff,
                                       color: Colors.white,
                                     )
                                   : SizedBox(),

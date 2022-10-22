@@ -103,6 +103,7 @@ flutter:
   - assets/bluetooth-devices.json
   - assets/fitbit.png
   - assets/run.json
+  - assets/database-store.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

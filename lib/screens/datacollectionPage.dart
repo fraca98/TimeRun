@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:polar/polar.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
@@ -18,7 +19,7 @@ class DataCollectionPage extends StatelessWidget {
 
   DataCollectionPage(
       {required this.polar,
-        required this.numSession,
+      required this.numSession,
       required this.sessionDevices,
       required this.id,
       required this.detailcontext,
@@ -35,17 +36,18 @@ class DataCollectionPage extends StatelessWidget {
       ),
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
-          if (state is CronoStateDeletedSession) {
-            Navigator.pop(context);
-          }
           if (state is CronoStateCompleted) {
-            detailcontext.read<DetailBloc>().subStreamSession!.resume();
+            detailcontext
+                .read<DetailBloc>()
+                .subStreamSession
+                ?.resume(); //resume stream for detail
             Navigator.pop(context);
           }
         },
         builder: (context, state) {
           return WillPopScope(
             onWillPop: () async {
+              //Manage navigation
               if (state is CronoStatePlay ||
                   state is CronoStatePause ||
                   state is CronoStateStop) {
@@ -65,35 +67,89 @@ class DataCollectionPage extends StatelessWidget {
                   automaticallyImplyLeading: state is CronoStateInit ||
                           state is CronoStateSaving ||
                           state is CronoStateCompleted ||
-                          state is CronoStateDeletingSession ||
-                          state is CronoStateDeletedSession ||
                           state is CronoStateRunning
                       ? false
                       : true,
                 ),
-                body: state is CronoStateInit
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Column(
-                        children: [
-                          _polar(context, state),
-                          Divider(
-                            thickness: 2,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          _crono(context, state),
-                          Spacer(),
-                          _buttonsTimer(context, state),
-                          Container(
-                            height: 120,
-                            width: MediaQuery.of(context).size.width,
-                            child: _progressbar(context, state),
+                body: BlocListener<CronoBloc, CronoState>(
+                  listener: (context, state) {
+                    /*SnackBar snackBar;
+                    state.errorMessage != null
+                        ? snackBar = SnackBar(
+                            dismissDirection: DismissDirection.none,
+                            content: Container(
+                              height: 50,
+                              child: Row(
+                                children: [
+                                  state.errorMessage!.contains('Bluetooth')
+                                      ? Icon(
+                                          MdiIcons.bluetoothOff,
+                                          color: Colors.white,
+                                        )
+                                      : Icon(
+                                          MdiIcons.contactlessPayment,
+                                          color: Colors.white,
+                                        ),
+                                  SizedBox(
+                                    width: 15,
+                                  ),
+                                  Text(state.errorMessage!),
+                                ],
+                              ),
+                            ),
+                            duration: Duration(days: 365),
                           )
-                        ],
-                      )),
+                        : snackBar = SnackBar(content: SizedBox()); //this is a fake snackbar
+                    //print(state.errorMessage);
+                    //To Manage Snackbar for errors
+                    if (state is CronoStatePlay && state.errorMessage != null) {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else if (state is CronoStatePause &&
+                        state.errorMessage != null) {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else if (state is CronoStateStop &&
+                        state.errorMessage != null) {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    } else {
+                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                    }*/
+                  },
+                  child: state is CronoStateInit
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : state is CronoStateSaving ||
+                              state is CronoStateCompleted
+                          ? Center(
+                              child: LottieBuilder.asset(
+                                'assets/database-store.json',
+                                repeat: true,
+                                frameRate: FrameRate.max,
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                _polar(context, state),
+                                Divider(
+                                  thickness: 2,
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                _crono(context, state),
+                                Spacer(),
+                                _buttonsTimer(context, state),
+                                Container(
+                                  height: 120,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: _progressbar(context, state),
+                                )
+                              ],
+                            ),
+                )),
           );
         },
       ),
@@ -194,13 +250,6 @@ class DataCollectionPage extends StatelessWidget {
                   style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
                 )
               : Container(),
-          state is CronoStateDeletingSession ||
-                  state is CronoStateDeletedSession
-              ? Text(
-                  'Deleting this session ...',
-                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-                )
-              : Container(),
           state is CronoStatePlay ||
                   state is CronoStatePause ||
                   state is CronoStateStop ||
@@ -244,10 +293,7 @@ class DataCollectionPage extends StatelessWidget {
   }
 
   Widget _buttonsTimer(BuildContext context, CronoState state) {
-    if (state is CronoStateSaving ||
-        state is CronoStateCompleted ||
-        state is CronoStateDeletingSession ||
-        state is CronoStateDeletedSession) {
+    if (state is CronoStateSaving || state is CronoStateCompleted) {
       return CircularProgressIndicator();
     }
     if (state is CronoStatePlay) {
@@ -422,7 +468,9 @@ class DataCollectionPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.pop(context);
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               context.read<CronoBloc>().add(CronoEventDeleteSession());
+              Navigator.pop(context);
             },
             child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
       ],

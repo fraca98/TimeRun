@@ -77,10 +77,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   @override
   Future<void> close() async {
-    polarConnect!.cancel();
-    polarConnected!.cancel();
-    polarDisconnect!.cancel();
-    settingsSubSub!.cancel();
+    polarConnect?.cancel();
+    polarConnected?.cancel();
+    polarDisconnect?.cancel();
+    settingsSubSub?.cancel();
 
     return super.close();
   }

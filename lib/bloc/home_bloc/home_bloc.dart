@@ -24,7 +24,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   @override
   Future<void> close() {
-    subUsers!.cancel();
+    subUsers?.cancel();
     return super.close();
   }
 }

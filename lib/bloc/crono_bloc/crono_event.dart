@@ -4,7 +4,7 @@ abstract class CronoEvent extends Equatable {
   const CronoEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class CronoEventPlay extends CronoEvent {
@@ -15,7 +15,13 @@ class CronoEventPlay extends CronoEvent {
   List<Object> get props => [duration];
 }
 
-class CronoEventPause extends CronoEvent {}
+class CronoEventPause extends CronoEvent {
+  String? errorMessage;
+  CronoEventPause({this.errorMessage});
+
+  @override
+  List<Object?> get props => [errorMessage];
+}
 
 class CronoEventStop extends CronoEvent {}
 

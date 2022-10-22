@@ -34,7 +34,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
   }
   @override
   Future<void> close() {
-    subStreamSession!.cancel();
+    subStreamSession?.cancel();
     return super.close();
   }
 }
