@@ -25,13 +25,9 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
       (update(sessions)..where((t) => t.id.equals(idSession)))
           .write(SessionsCompanion(endsession: Value(endsession)));
 
-  Future updateDown1(int idSession, bool value) => //update download1 of session
+  Future updateDown(int idSession, bool value) => //update download of session
       (update(sessions)..where((t) => t.id.equals(idSession)))
-          .write(SessionsCompanion(download1: Value(value)));
-
-  Future updateDown2(int idSession, bool value) => //update download2 of session
-      (update(sessions)..where((t) => t.id.equals(idSession)))
-          .write(SessionsCompanion(download2: Value(value)));
+          .write(SessionsCompanion(download: Value(value)));
 
   Future<int> deleteSession(int id) {
     //delete session given the id of the session

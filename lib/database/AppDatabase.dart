@@ -40,8 +40,7 @@ class Sessions extends Table {
   IntColumn get endsession => integer().nullable()();
   TextColumn get device1 => text()();
   TextColumn get device2 => text()();
-  BoolColumn get download1 => boolean().withDefault(Constant(false))();
-  BoolColumn get download2 => boolean().withDefault(Constant(false))();
+  BoolColumn get download => boolean().withDefault(Constant(false))();
 }
 
 // this will generate the table called "Intervals"

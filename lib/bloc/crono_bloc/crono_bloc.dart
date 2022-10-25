@@ -46,7 +46,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (state is CronoStatePlay) {
         emit(CronoStatePlay(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStatePlay).duration,
             hr: 0,
             errorMessage: error));
       }
@@ -56,14 +56,14 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (state is CronoStatePause) {
         emit(CronoStatePause(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStatePause).duration,
             hr: 0,
             errorMessage: error));
       }
       if (state is CronoStateStop) {
         emit(CronoStateStop(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStateStop).duration,
             hr: 0,
             errorMessage: error));
       }
@@ -88,7 +88,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (state is CronoStatePlay) {
         emit(CronoStatePlay(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStatePlay).duration,
             hr: event.data.hr,
             errorMessage: error));
       }
@@ -101,7 +101,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               value: Value(event.data.hr)));
           emit(CronoStateRunning(
               progressIndex: progressIndex,
-              duration: state.duration,
+              duration: (state as CronoStateRunning).duration,
               hr: event.data.hr));
         } else {
           add(CronoEventPause(errorMessage: error));
@@ -111,37 +111,31 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (state is CronoStatePause) {
         emit(CronoStatePause(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStatePause).duration,
             hr: event.data.hr,
             errorMessage: error));
       }
       if (state is CronoStateStop) {
         emit(CronoStateStop(
             progressIndex: progressIndex,
-            duration: state.duration,
+            duration: (state as CronoStateStop).duration,
             hr: event.data.hr,
             errorMessage: error));
       }
       if (state is CronoStateSaving) {
         //saving and complete should remove all {}
-        emit(CronoStateSaving(
-            progressIndex: progressIndex,
-            duration: state.duration,
-            hr: event.data.hr));
+        emit(CronoStateSaving());
       }
       if (state is CronoStateCompleted) {
-        emit(CronoStateCompleted(
-            progressIndex: progressIndex,
-            duration: state.duration,
-            hr: event.data.hr));
+        emit(CronoStateCompleted());
       }
     });
     on<CronoEventPlay>((event, emit) {
-      if (state.hr != 0) {
+      if ((state as CronoStateExt).hr != 0) {
         emit(CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
-            hr: state.hr));
+            hr: (state as CronoStateExt).hr));
 
         tickerSubscription?.cancel();
         tickerSubscription = ticker
@@ -156,12 +150,12 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         event.errorMessage == null
             ? emit(CronoStatePause(
                 progressIndex: progressIndex,
-                duration: state.duration,
-                hr: state.hr,
+                duration: (state as CronoStateExt).duration,
+                hr: (state as CronoStateExt).hr,
               ))
             : emit(CronoStatePause(
                 progressIndex: progressIndex,
-                duration: state.duration,
+                duration: (state as CronoStateExt).duration,
                 hr: 0,
                 errorMessage: event.errorMessage));
       },
@@ -169,17 +163,17 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventStop>((event, emit) {
       tickerSubscription?.cancel();
-      state.errorMessage == null
+      (state as CronoStateExt).errorMessage == null
           ? emit(CronoStateStop(
               progressIndex: progressIndex,
-              duration: state.duration,
-              hr: state.hr,
+              duration: (state as CronoStateExt).duration,
+              hr: (state as CronoStateExt).hr,
             ))
           : emit(CronoStateStop(
               progressIndex: progressIndex,
-              duration: state.duration,
+              duration: (state as CronoStateExt).duration,
               hr: 0,
-              errorMessage: state.errorMessage,
+              errorMessage: (state as CronoStateExt).errorMessage,
             ));
 
       /*print(polarToSave);
@@ -191,12 +185,12 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventResume>(
       (event, emit) {
-        if (state.hr != 0) {
+        if ((state as CronoStateExt).hr != 0) {
           tickerSubscription?.resume();
           emit(CronoStateRunning(
               progressIndex: progressIndex,
-              duration: state.duration,
-              hr: state.hr));
+              duration: (state as CronoStateExt).duration,
+              hr: (state as CronoStateExt).hr));
         }
       },
     );
@@ -207,7 +201,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStatePlay(
             progressIndex: progressIndex,
             duration: 0,
-            hr: state.hr,
+            hr: (state as CronoStateExt).hr,
             errorMessage: 'Empty interval, retry'));
       } else {
         progressIndex++;
@@ -219,10 +213,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           bluePolar?.cancel();
           polar.disconnectFromDevice(polarIdentifier); //disconnect Polar
 
-          emit(CronoStateSaving(
-              progressIndex: progressIndex,
-              duration: state.duration,
-              hr: state.hr));
+          emit(CronoStateSaving());
 
           int idSession = await db.sessionsDao.inserNewSession(
               SessionsCompanion(
@@ -259,13 +250,10 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
           await Future.delayed(Duration(seconds: 2)); //to show animation
 
-          emit(CronoStateCompleted(
-              progressIndex: progressIndex,
-              duration: state.duration,
-              hr: state.hr));
+          emit(CronoStateCompleted());
         } else {
           emit(CronoStatePlay(
-              progressIndex: progressIndex, duration: 0, hr: state.hr, errorMessage: state.errorMessage));
+              progressIndex: progressIndex, duration: 0, hr: (state as CronoStateExt).hr, errorMessage: (state as CronoStateExt).errorMessage));
         }
       }
     });
@@ -274,7 +262,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       (event, emit) {
         polarToSave[progressIndex].clear();
         emit(CronoStatePlay(
-            progressIndex: progressIndex, duration: 0, hr: state.hr));
+            progressIndex: progressIndex, duration: 0, hr: (state as CronoStateExt).hr));
       },
     );
 
@@ -291,9 +279,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
-            hr: state
-                .hr)); //polar.list ultimo hr // una lista di polarratescompanion
-      }, //metodi batch per inserire tutti insieme (documnetazione drift)
+            hr: (state as CronoStateRunning)
+                .hr));
+      },
     );
   }
 
@@ -305,19 +293,3 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     return super.close();
   }
 }
-
-/*introdurre listener se si stacca bluetooth
-check se gli stati sono corretti in sequenza
-sistemare salvataggio stati...*/
-
-/*introdurre check 
--connessione bluetooth
--0 HR -> nocontact
--0HR -> Spento
-*/
-//meglio usare una snackbar (ex.saving, deleting ...)
-
-//considerazioni su primo e ultimo timestamp: battito?
-
-//In questo caso ho adottato: listen su CronoStateRunning per ogni evento con hr != 0
-// quindi salvo un polar HR quando lo ascolto e sono in running (Non faccio considerazioni su play, stop , pause col valore precedente)

@@ -1,11 +1,18 @@
 part of 'crono_bloc.dart';
 
 abstract class CronoState extends Equatable {
+  CronoState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class CronoStateExt extends CronoState {
   int progressIndex;
   int duration;
   int hr;
   String? errorMessage;
-  CronoState(
+  CronoStateExt(
       {required this.progressIndex,
       required this.duration,
       required this.hr,
@@ -16,10 +23,10 @@ abstract class CronoState extends Equatable {
 }
 
 class CronoStateInit extends CronoState {
-  CronoStateInit({super.progressIndex = 0, super.duration = 0, super.hr = 0});
+  CronoStateInit();
 }
 
-class CronoStatePlay extends CronoState {
+class CronoStatePlay extends CronoStateExt {
   CronoStatePlay(
       {required super.progressIndex,
       required super.duration,
@@ -27,14 +34,14 @@ class CronoStatePlay extends CronoState {
       super.errorMessage});
 }
 
-class CronoStateRunning extends CronoState {
+class CronoStateRunning extends CronoStateExt {
   CronoStateRunning(
       {required super.progressIndex,
       required super.duration,
       required super.hr});
 }
 
-class CronoStatePause extends CronoState {
+class CronoStatePause extends CronoStateExt {
   CronoStatePause(
       {required super.progressIndex,
       required super.duration,
@@ -42,7 +49,7 @@ class CronoStatePause extends CronoState {
       super.errorMessage});
 }
 
-class CronoStateStop extends CronoState {
+class CronoStateStop extends CronoStateExt {
   CronoStateStop(
       {required super.progressIndex,
       required super.duration,
@@ -51,15 +58,9 @@ class CronoStateStop extends CronoState {
 }
 
 class CronoStateSaving extends CronoState {
-  CronoStateSaving(
-      {required super.progressIndex,
-      required super.duration,
-      required super.hr});
+  CronoStateSaving();
 }
 
 class CronoStateCompleted extends CronoState {
-  CronoStateCompleted(
-      {required super.progressIndex,
-      required super.duration,
-      required super.hr});
+  CronoStateCompleted();
 }

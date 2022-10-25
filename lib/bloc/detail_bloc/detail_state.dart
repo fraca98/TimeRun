@@ -9,11 +9,18 @@ abstract class DetailState extends Equatable {
 
 class DetailStateLoading extends DetailState {}
 
-class DetailStateLoaded extends DetailState {
+class DetailStateExt extends DetailState {
   Session? session1;
   Session? session2;
 
-  DetailStateLoaded({this.session1, this.session2});
+  DetailStateExt({this.session1, this.session2});
+
+  @override
+  List<Object?> get props => [session1, session2];
+}
+
+class DetailStateLoaded extends DetailStateExt {
+  DetailStateLoaded({super.session1, super.session2});
 
   @override
   List<Object?> get props => [session1, session2];
@@ -22,3 +29,12 @@ class DetailStateLoaded extends DetailState {
 class DetailStateDeletingUser extends DetailState {} //deleting user
 
 class DetailStateDeletedUser extends DetailState {} //user deleted
+
+class DetailStateDownloading extends DetailStateExt {
+  int downSession;
+  DetailStateDownloading(
+      {super.session1, super.session2, required this.downSession});
+
+  @override
+  List<Object?> get props => [session1, session2, downSession];
+}

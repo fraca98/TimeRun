@@ -6,12 +6,21 @@ class TimerText extends StatelessWidget {
   const TimerText({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final duration = context.select((CronoBloc bloc) => bloc.state.duration);
+    final duration = context.select((CronoBloc bloc) {
+      if (bloc.state is CronoStateExt) {
+        var ext = bloc.state as CronoStateExt;
+        return ext.duration;
+      }
+      else{
+        return null;
+      }
+    });
     final minutesStr =
-        ((duration / 60) % 60).floor().toString().padLeft(2, '0');
+        ((duration! / 60) % 60).floor().toString().padLeft(2, '0');
     final secondsStr = (duration % 60).floor().toString().padLeft(2, '0');
     return Text(
-      '$minutesStr:$secondsStr', style: TextStyle(fontFamily: 'Poppins', fontSize: 60),
+      '$minutesStr:$secondsStr',
+      style: TextStyle(fontFamily: 'Poppins', fontSize: 60),
     );
   }
 }

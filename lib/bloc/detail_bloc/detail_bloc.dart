@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timerun/database/AppDatabase.dart';
+import 'package:timerun/model/device.dart';
 part 'detail_event.dart';
 part 'detail_state.dart';
 
@@ -31,6 +32,43 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         emit(DetailStateDeletedUser());
       },
     );
+
+    on<DetailEventDownload>(
+      (event, emit) async {
+        print('Pressed download');
+        emit(DetailStateDownloading(
+            session1: (state as DetailStateLoaded).session1,
+            session2: (state as DetailStateLoaded).session2,
+            downSession: event.numSession));
+
+        if (event.numSession == 1) {
+          if ((state as DetailStateDownloading).session1!.device1 ==
+                  devices[0] ||
+              (state as DetailStateDownloading).session1!.device2 ==
+                  devices[0]) {} //Fitbit
+          if ((state as DetailStateDownloading).session1!.device1 ==
+                  devices[1] ||
+              (state as DetailStateDownloading).session1!.device2 ==
+                  devices[1]) {} //Withings
+
+        } else {
+          if ((state as DetailStateDownloading).session2!.device1 ==
+                  devices[0] ||
+              (state as DetailStateDownloading).session2!.device2 ==
+                  devices[0]) {} //Fitbit
+          if ((state as DetailStateDownloading).session2!.device1 ==
+                  devices[1] ||
+              (state as DetailStateDownloading).session2!.device2 ==
+                  devices[1]) {} //Withings
+
+        }
+
+        await Future.delayed(Duration(seconds: 3));
+        emit(DetailStateLoaded(
+            session1: (state as DetailStateDownloading).session1,
+            session2: (state as DetailStateDownloading).session2));
+      },
+    );
   }
   @override
   Future<void> close() {
@@ -38,3 +76,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     return super.close();
   }
 }
+
+_withingsDownload() {}
+
+_fitbitDownload() {}

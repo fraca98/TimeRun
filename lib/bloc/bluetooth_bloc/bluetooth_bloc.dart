@@ -44,7 +44,8 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
         add(BluetoothEventDisconnect());
         emit(BluetoothStateConnect(sett: 1));
       } else {
-        if (state is BluetoothStateConnect && (state as BluetoothStateConnect).sett != null) {
+        if (state is BluetoothStateConnect &&
+            (state as BluetoothStateConnect).sett != null) {
           emit(BluetoothStateConnect());
           add(BluetoothEventConnect());
         }

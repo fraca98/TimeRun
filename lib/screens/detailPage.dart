@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/device.dart';
-import 'package:timerun/screens/downloadPage.dart';
 import 'package:timerun/widget/alertsession.dart';
 import '../database/AppDatabase.dart';
 
@@ -26,7 +25,8 @@ class DetailPage extends StatelessWidget {
           return WillPopScope(
             onWillPop: () async {
               if (state is DetailStateDeletingUser ||
-                  state is DetailStateDeletedUser) {
+                  state is DetailStateDeletedUser ||
+                  state is DetailStateDownloading) {
                 return false;
               } else {
                 Navigator.pop(context);
@@ -36,7 +36,8 @@ class DetailPage extends StatelessWidget {
             child: Scaffold(
               appBar: AppBar(
                 automaticallyImplyLeading: state is DetailStateDeletingUser ||
-                        state is DetailStateDeletedUser
+                        state is DetailStateDeletedUser ||
+                        state is DetailStateDownloading
                     ? false
                     : true,
                 title: Text('User Detail',
@@ -71,7 +72,7 @@ class DetailPage extends StatelessWidget {
                               height: 20,
                             ),
                             Text(
-                              "Delete the user",
+                              "Deleting the user",
                               style: TextStyle(
                                   fontSize: 18, fontFamily: 'Poppins'),
                             )
@@ -83,7 +84,9 @@ class DetailPage extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     );
                   }
-                  if (state is DetailStateLoaded) {
+                  if (state is DetailStateLoaded ||
+                      state is DetailStateDownloading) {
+                    state = state as DetailStateExt;
                     return _body(context, state);
                   } else {
                     return Container();
@@ -97,7 +100,7 @@ class DetailPage extends StatelessWidget {
     );
   }
 
-  Widget _body(BuildContext context, DetailStateLoaded state) {
+  Widget _body(BuildContext context, DetailStateExt state) {
     Color colorFaceIcon;
     if (state.session1 != null && state.session2 != null) {
       colorFaceIcon = Colors.green;
@@ -167,61 +170,71 @@ class DetailPage extends StatelessWidget {
         Container(
           height: 60,
           child: ListTile(
-            title: Text('Session 1', style: TextStyle(fontFamily: 'Poppins')),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 5.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: state.session1 == null
-                      ? [
-                          Text('No Data',
-                              style: TextStyle(fontFamily: 'Poppins'))
-                        ]
-                      : [
-                          Text(state.session1!.device1),
-                          Text(state.session1!.device2)
-                        ]),
-            ),
-            leading: Icon(
-              MdiIcons.circle,
-              color: state.session1 == null ? Colors.grey : Colors.green,
-            ),
-            trailing: state.session1 == null
-                ? IconButton(
-                    icon: Icon(MdiIcons.play),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (_) {
-                            List<String> selectable = [...devices];
-                            return AlertSession(
-                              selectable: selectable,
-                              id: user.id,
-                              detailcontext: context,
-                            );
-                          });
-                    },
-                  )
-                : state.session1!.download1 && state.session1!.download2
-                    ? Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          MdiIcons.check,
-                          color: Colors.green,
-                        ),
-                      )
-                    : IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DownloadPage(
-                                        idSession: state.session1!.id,
-                                        numTile: 1,
-                                      )));
-                        },
-                        icon: Icon(MdiIcons.download)),
-          ),
+              title: Text('Session 1', style: TextStyle(fontFamily: 'Poppins')),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 5.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: state.session1 == null
+                        ? [
+                            Text('No Data',
+                                style: TextStyle(fontFamily: 'Poppins'))
+                          ]
+                        : [
+                            Text(state.session1!.device1),
+                            Text(state.session1!.device2)
+                          ]),
+              ),
+              leading: Icon(
+                MdiIcons.circle,
+                color: state.session1 == null ? Colors.grey : Colors.green,
+              ),
+              trailing: state is DetailStateLoaded
+                  ? state.session1 == null
+                      ? IconButton(
+                          icon: Icon(MdiIcons.play),
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (_) {
+                                  List<String> selectable = [...devices];
+                                  return AlertSession(
+                                    selectable: selectable,
+                                    id: user.id,
+                                    detailcontext: context,
+                                  );
+                                });
+                          },
+                        )
+                      : state.session1!.download
+                          ? Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(
+                                MdiIcons.check,
+                                color: Colors.green,
+                              ),
+                            )
+                          : IconButton(
+                              onPressed: () {
+                                context
+                                    .read<DetailBloc>()
+                                    .add(DetailEventDownload(numSession: 1));
+                              },
+                              icon: Icon(MdiIcons.download))
+                  : (state as DetailStateDownloading).downSession == 1
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : state.session1!.download
+                          ? Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(
+                                MdiIcons.check,
+                                color: Colors.green,
+                              ),
+                            )
+                          : null),
         ),
         SizedBox(
           height: 50,
@@ -255,43 +268,51 @@ class DetailPage extends StatelessWidget {
             ),
             trailing: state.session1 == null
                 ? null
-                : state.session2 == null
-                    ? IconButton(
-                        icon: Icon(MdiIcons.play),
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (_) {
-                                List<String> selectable = [...devices];
-                                selectable.remove(state.session1?.device1);
-                                selectable.remove(state.session1?.device2);
-                                return AlertSession(
-                                  selectable: selectable,
-                                  id: user.id,
-                                  detailcontext: context,
-                                );
-                              });
-                        },
-                      )
-                    : state.session2!.download2
-                        ? Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(
-                              MdiIcons.check,
-                              color: Colors.green,
-                            ),
-                          )
-                        : IconButton(
+                : state is DetailStateLoaded
+                    ? state.session2 == null
+                        ? IconButton(
+                            icon: Icon(MdiIcons.play),
                             onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => DownloadPage(
-                                            idSession: state.session2!.id,
-                                            numTile: 2,
-                                          )));
+                              showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    List<String> selectable = [...devices];
+                                    selectable.remove(state.session1?.device1);
+                                    selectable.remove(state.session1?.device2);
+                                    return AlertSession(
+                                      selectable: selectable,
+                                      id: user.id,
+                                      detailcontext: context,
+                                    );
+                                  });
                             },
-                            icon: Icon(MdiIcons.download)),
+                          )
+                        : state.session2!.download
+                            ? Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(
+                                  MdiIcons.check,
+                                  color: Colors.green,
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  context
+                                      .read<DetailBloc>()
+                                      .add(DetailEventDownload(numSession: 2));
+                                },
+                                icon: Icon(MdiIcons.download))
+                    : (state as DetailStateDownloading).downSession == 2
+                        ? CircularProgressIndicator()
+                        : state.session2!= null && state.session2!.download
+                            ? Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Icon(
+                                  MdiIcons.check,
+                                  color: Colors.green,
+                                ),
+                              )
+                            : null,
           ),
         ),
         SizedBox(
