@@ -44,7 +44,7 @@ class BluetoothPage extends StatelessWidget {
                 if (state is BluetoothStateConnect) {
                   context.read<BluetoothBloc>().add(
                       BluetoothEventDisconnect()); //disconnect the Polar Device when i go back
-                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   return true;
                 } else {
                   return false;
@@ -77,7 +77,7 @@ class BluetoothPage extends StatelessWidget {
                             break;
                           default:
                         }
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           dismissDirection: DismissDirection.none,
                           content: Row(
@@ -103,7 +103,7 @@ class BluetoothPage extends StatelessWidget {
                           duration: Duration(days: 365),
                         ));
                       } else {
-                        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       }
                     }),
                     child: Center(

@@ -23,7 +23,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     while (true) {
       bool gps = await Geolocator.isLocationServiceEnabled();
       bool blue = await FlutterBluePlus.instance.isOn;
-      yield [gps, blue]; //first value GPS, second Bluetooth (true/false enabled)
+      yield [
+        gps,
+        blue
+      ]; //first value GPS, second Bluetooth (true/false enabled)
       await Future.delayed(Duration(seconds: 1));
     }
   }
@@ -32,19 +35,19 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     settingsSubSub = settingsStream().listen((value) {
       //print(value);
       if (value[0] == false && value[1] == false) {
+        add(BluetoothEventDisconnect());
         emit(BluetoothStateConnect(sett: 2));
       } else if (value[0] == false && value[1] == true) {
+        add(BluetoothEventDisconnect());
         emit(BluetoothStateConnect(sett: 0));
       } else if (value[0] == true && value[1] == false) {
+        add(BluetoothEventDisconnect());
         emit(BluetoothStateConnect(sett: 1));
       } else {
-        if (state is BluetoothStateConnect &&
-            (state as BluetoothStateConnect).sett == 0) {
-          //if GPS re-established i need to launch again the connection
-          add(BluetoothEventDisconnect());
+        if (state is BluetoothStateConnect && (state as BluetoothStateConnect).sett != null) {
+          emit(BluetoothStateConnect());
           add(BluetoothEventConnect());
         }
-        emit(BluetoothStateConnect());
       }
     });
 
@@ -72,7 +75,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
       },
     );
     add(BluetoothEventDisconnect()); //to be sure if app crashed or closed inappropiately to be no more connected
-    add(BluetoothEventConnect()); //attemp to connect on start
+    add(BluetoothEventConnect());
   }
 
   @override

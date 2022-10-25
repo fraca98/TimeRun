@@ -14,7 +14,6 @@ class BluetoothStateConnect extends BluetoothState {
   0: GPS not active
   1: Bluetooth not active
   2: GPS+Bluetooth not active
-  3: OK: both Active
   */
 
   @override

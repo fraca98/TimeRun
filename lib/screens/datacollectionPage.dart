@@ -72,50 +72,73 @@ class DataCollectionPage extends StatelessWidget {
                       : true,
                 ),
                 body: BlocListener<CronoBloc, CronoState>(
+                  listenWhen: ((previous, current) {
+                    //print(previous);
+                    //print(current);
+                    if (previous.errorMessage != null &&
+                        previous.errorMessage == current.errorMessage) {
+                      //print('Same error');
+                      return false;
+                    } else if (previous.errorMessage != null &&
+                        previous.errorMessage!.contains('interval') &&
+                        current.errorMessage == null) {
+                      //to show snackbar of empty interval without removing it if there are not errors then
+                      return false;
+                    } else {
+                      return true;
+                    }
+                  }),
                   listener: (context, state) {
-                    /*SnackBar snackBar;
+                    SnackBar snackBar;
                     state.errorMessage != null
-                        ? snackBar = SnackBar(
-                            dismissDirection: DismissDirection.none,
-                            content: Container(
-                              height: 50,
-                              child: Row(
-                                children: [
-                                  state.errorMessage!.contains('Bluetooth')
-                                      ? Icon(
-                                          MdiIcons.bluetoothOff,
-                                          color: Colors.white,
-                                        )
-                                      : Icon(
-                                          MdiIcons.contactlessPayment,
-                                          color: Colors.white,
-                                        ),
-                                  SizedBox(
-                                    width: 15,
-                                  ),
-                                  Text(state.errorMessage!),
-                                ],
-                              ),
-                            ),
-                            duration: Duration(days: 365),
-                          )
-                        : snackBar = SnackBar(content: SizedBox()); //this is a fake snackbar
-                    //print(state.errorMessage);
-                    //To Manage Snackbar for errors
+                        ? state.errorMessage!.contains('interval')
+                            ? snackBar = SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      MdiIcons.noteRemove,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    Text(state.errorMessage!)
+                                  ],
+                                ),
+                                dismissDirection: DismissDirection.none,
+                              )
+                            : snackBar = SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(state.errorMessage!
+                                            .contains('Bluetooth')
+                                        ? MdiIcons.bluetoothOff
+                                        : MdiIcons.contactlessPayment, color: Colors.white,),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    Text(state.errorMessage!)
+                                  ],
+                                ),
+                                duration: Duration(days: 365),
+                                dismissDirection: DismissDirection.none,
+                              )
+                        : snackBar = SnackBar(content: SizedBox());
+
                     if (state is CronoStatePlay && state.errorMessage != null) {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     } else if (state is CronoStatePause &&
                         state.errorMessage != null) {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     } else if (state is CronoStateStop &&
                         state.errorMessage != null) {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     } else {
-                      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-                    }*/
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    }
                   },
                   child: state is CronoStateInit
                       ? Center(
@@ -140,7 +163,9 @@ class DataCollectionPage extends StatelessWidget {
                                   height: 10,
                                 ),
                                 _crono(context, state),
-                                Spacer(),
+                                SizedBox(
+                                  height: 30,
+                                ),
                                 _buttonsTimer(context, state),
                                 Container(
                                   height: 120,
@@ -468,8 +493,8 @@ class DataCollectionPage extends StatelessWidget {
         TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               context.read<CronoBloc>().add(CronoEventDeleteSession());
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               Navigator.pop(context);
             },
             child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
