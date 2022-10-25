@@ -18,8 +18,8 @@ class IntroFitbitBloc extends Bloc<IntroFitbitEvent, IntroFitbitState> {
       FitbitCredentials? fitbitCredentials = await FitbitConnector.authorize(
           clientID: clientFitbit[0],
           clientSecret: clientFitbit[1],
-          redirectUri: 'example://fitbit/auth',
-          callbackUrlScheme: 'example');
+          redirectUri: clientFitbit[2],
+          callbackUrlScheme: 'timerun');
       if (fitbitCredentials != null) {
         await prefs?.setString('fitbitUserID', fitbitCredentials.userID);
         await prefs?.setString('fitbitAccessToken',

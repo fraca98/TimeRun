@@ -135,7 +135,9 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                   (state as DetailStateDownloading).session1!.device1 ==
                       devices[0] ||
               (state as DetailStateDownloading).session1!.device2 ==
-                  devices[0]) {} //Fitbit
+                  devices[0]) {
+            error = true;
+          } //Fitbit
           if (error == false &&
                   (state as DetailStateDownloading).session1!.device1 ==
                       devices[1] ||
@@ -150,7 +152,9 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                   (state as DetailStateDownloading).session2!.device1 ==
                       devices[0] ||
               (state as DetailStateDownloading).session2!.device2 ==
-                  devices[0]) {} //Fitbit
+                  devices[0]) {
+            error = true;
+          } //Fitbit
           if (error == false &&
                   (state as DetailStateDownloading).session2!.device1 ==
                       devices[1] ||
@@ -161,7 +165,8 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           } //Withings
         }
 
-        if (error == false) { //if no error update session as downloaded
+        if (error == false) {
+          //if no error update session as downloaded
           event.numSession == 1
               ? await db.sessionsDao.updateDown(
                   (state as DetailStateDownloading).session1!.id, true)

@@ -109,6 +109,14 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       }
 
       if (state is CronoStatePause) {
+        if (event.data.hr != 0) {
+          //collect Polar data if hr!=0 also in pause
+          polarToSave[progressIndex].add(PolarRatesCompanion(
+              timestamp: Value(
+                  (DateTime.now().toUtc().millisecondsSinceEpoch / 1000)
+                      .floor()),
+              value: Value(event.data.hr)));
+        }
         emit(CronoStatePause(
             progressIndex: progressIndex,
             duration: (state as CronoStatePause).duration,
@@ -253,7 +261,10 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           emit(CronoStateCompleted());
         } else {
           emit(CronoStatePlay(
-              progressIndex: progressIndex, duration: 0, hr: (state as CronoStateExt).hr, errorMessage: (state as CronoStateExt).errorMessage));
+              progressIndex: progressIndex,
+              duration: 0,
+              hr: (state as CronoStateExt).hr,
+              errorMessage: (state as CronoStateExt).errorMessage));
         }
       }
     });
@@ -262,7 +273,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       (event, emit) {
         polarToSave[progressIndex].clear();
         emit(CronoStatePlay(
-            progressIndex: progressIndex, duration: 0, hr: (state as CronoStateExt).hr));
+            progressIndex: progressIndex,
+            duration: 0,
+            hr: (state as CronoStateExt).hr));
       },
     );
 
@@ -279,8 +292,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
-            hr: (state as CronoStateRunning)
-                .hr));
+            hr: (state as CronoStateRunning).hr));
       },
     );
   }

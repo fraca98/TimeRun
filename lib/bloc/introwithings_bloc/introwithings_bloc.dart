@@ -22,8 +22,8 @@ class IntroWithingsBloc extends Bloc<IntroWithingsEvent, IntroWithingsState> {
           clientSecret:
               clientWithings[1],
           scope: 'user.activity,user.metrics,user.sleepevents',
-          redirectUri: 'example://withings/auth',
-          callbackUrlScheme: 'example');
+          redirectUri: clientWithings[2],
+          callbackUrlScheme: 'timerun');
       if (withingsCredentials != null) {
         await prefs?.setString('withingsUserID', withingsCredentials.userID);
         await prefs?.setString(
