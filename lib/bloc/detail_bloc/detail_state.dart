@@ -20,10 +20,11 @@ class DetailStateExt extends DetailState {
 }
 
 class DetailStateLoaded extends DetailStateExt {
-  DetailStateLoaded({super.session1, super.session2});
+  bool? error;
+  DetailStateLoaded({super.session1, super.session2, this.error});
 
   @override
-  List<Object?> get props => [session1, session2];
+  List<Object?> get props => [session1, session2, error];
 }
 
 class DetailStateDeletingUser extends DetailState {} //deleting user

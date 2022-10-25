@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -29,6 +31,7 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateDownloading) {
                 return false;
               } else {
+                ScaffoldMessenger.of(context).removeCurrentSnackBar();
                 Navigator.pop(context);
                 return false;
               }
@@ -47,6 +50,7 @@ class DetailPage extends StatelessWidget {
                   state is DetailStateLoaded
                       ? IconButton(
                           onPressed: () {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             showDialog(
                               context: context,
                               builder: (_) {
@@ -59,7 +63,24 @@ class DetailPage extends StatelessWidget {
                       : Container(),
                 ],
               ),
-              body: BlocBuilder<DetailBloc, DetailState>(
+              body: BlocConsumer<DetailBloc, DetailState>(
+                listener: (context, state) {
+                  if (state is DetailStateLoaded && state.error == true) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Row(
+                      children: [
+                        Icon(
+                          MdiIcons.alertCircle,
+                          color: Colors.white,
+                        ),
+                        SizedBox(
+                          width: 15,
+                        ),
+                        Text('Something went wrong'),
+                      ],
+                    )));
+                  }
+                },
                 builder: (context, state) {
                   if (state is DetailStateDeletingUser ||
                       state is DetailStateDeletedUser) {
@@ -194,6 +215,7 @@ class DetailPage extends StatelessWidget {
                       ? IconButton(
                           icon: Icon(MdiIcons.play),
                           onPressed: () {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             showDialog(
                                 context: context,
                                 builder: (_) {
@@ -216,6 +238,8 @@ class DetailPage extends StatelessWidget {
                             )
                           : IconButton(
                               onPressed: () {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
                                 context
                                     .read<DetailBloc>()
                                     .add(DetailEventDownload(numSession: 1));
@@ -273,6 +297,8 @@ class DetailPage extends StatelessWidget {
                         ? IconButton(
                             icon: Icon(MdiIcons.play),
                             onPressed: () {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
                               showDialog(
                                   context: context,
                                   builder: (_) {
@@ -297,6 +323,8 @@ class DetailPage extends StatelessWidget {
                               )
                             : IconButton(
                                 onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
                                   context
                                       .read<DetailBloc>()
                                       .add(DetailEventDownload(numSession: 2));
@@ -304,7 +332,7 @@ class DetailPage extends StatelessWidget {
                                 icon: Icon(MdiIcons.download))
                     : (state as DetailStateDownloading).downSession == 2
                         ? CircularProgressIndicator()
-                        : state.session2!= null && state.session2!.download
+                        : state.session2 != null && state.session2!.download
                             ? Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: Icon(
@@ -339,6 +367,7 @@ class DetailPage extends StatelessWidget {
         ),
         TextButton(
             onPressed: () {
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
               Navigator.of(context).pop();
               context.read<DetailBloc>().add(
                   DetailEventDeleteUser()); //ok cause i pop first the dialog, so its context

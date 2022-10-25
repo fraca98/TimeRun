@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/database/AppDatabase.dart';
+import 'package:timerun/model/credentials.dart';
 import 'package:timerun/model/device.dart';
 import 'package:withings_flutter/withings_flutter.dart';
 part 'detail_event.dart';
@@ -37,7 +38,8 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       },
     );
 
-    _withingsDownload(int idSession) async {
+    Future<bool> _withingsDownload(int idSession) async {
+      bool error = false;
       List<Interval> interv =
           await db.intervalsDao.getIntervalBySession(idSession);
       print(interv);
@@ -53,9 +55,39 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             enddate: interv[i].endtimestamp,
             dataFields: 'heart_rate',
           ));
+          if ([101, 102, 200, 401].contains(getintradayactivity.status)) {
+            //code for authentication failed
+            //refresh accesstoken
+            WithingsCredentials? newWithCred =
+                await WithingsConnector.refreshToken(
+                    clientID: clientWithings[0],
+                    clientSecret: clientWithings[1],
+                    withingsRefreshToken:
+                        prefs.getString('withingsRefreshToken')!);
+            if (newWithCred != null) {
+              await prefs.setString(
+                  'withingsAccessToken', newWithCred.withingsAccessToken);
+              await prefs.setString(
+                  'withingsRefreshToken', newWithCred.withingsAccessToken);
+              getintradayactivity =
+                  await WithingsMeasureGetIntradayactivityDataManager()
+                      .fetch(WithingsMeasureAPIURL.getIntradayactivity(
+                accessToken: prefs.getString('withingsAccessToken')!,
+                startdate: interv[i].startstimestamp,
+                enddate: interv[i].endtimestamp,
+                dataFields: 'heart_rate',
+              )); //retry the request with refreshed tokens
+            } else {
+              error = true;
+              print('Error refreshing tokens');
+              break;
+            }
+          }
           if (getintradayactivity.status == 0) {
-            if (getintradayactivity.series!.isEmpty) {
-              print('Non ho valori per questo intervallo ${i + 1}');
+            if (getintradayactivity.series == null) {
+              print('I have no values for this interval');
+              error = true;
+              break;
             } else {
               getintradayactivity.series!.forEach((element) {
                 withingsToSave[i].add(WithingsRatesCompanion(
@@ -64,11 +96,26 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                     value: Value(element.heartRate!)));
               });
             }
+          } else {
+            error = true;
+            break;
           }
         }
       } catch (e) {
         print(e);
+        error = true;
       }
+      if (error == false) {
+        withingsToSave.forEach((element) {
+          element.forEach((element) async {
+            await db.withingsRatesDao.insert(WithingsRatesCompanion(
+                idInterval: element.idInterval,
+                timestamp: element.timestamp,
+                value: element.value));
+          });
+        });
+      }
+      return error; //error = true or error = false
     }
 
     _fitbitDownload() {}
@@ -81,35 +128,50 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             session2: (state as DetailStateLoaded).session2,
             downSession: event.numSession));
 
+        bool error = false;
+
         if (event.numSession == 1) {
-          if ((state as DetailStateDownloading).session1!.device1 ==
-                  devices[0] ||
+          if (error == false &&
+                  (state as DetailStateDownloading).session1!.device1 ==
+                      devices[0] ||
               (state as DetailStateDownloading).session1!.device2 ==
                   devices[0]) {} //Fitbit
-          if ((state as DetailStateDownloading).session1!.device1 ==
-                  devices[1] ||
+          if (error == false &&
+                  (state as DetailStateDownloading).session1!.device1 ==
+                      devices[1] ||
               (state as DetailStateDownloading).session1!.device2 ==
                   devices[1]) {
-            await _withingsDownload(
+            error = await _withingsDownload(
                 (state as DetailStateDownloading).session1!.id);
           } //Withings
 
         } else {
-          if ((state as DetailStateDownloading).session2!.device1 ==
-                  devices[0] ||
+          if (error == false &&
+                  (state as DetailStateDownloading).session2!.device1 ==
+                      devices[0] ||
               (state as DetailStateDownloading).session2!.device2 ==
                   devices[0]) {} //Fitbit
-          if ((state as DetailStateDownloading).session2!.device1 ==
-                  devices[1] ||
+          if (error == false &&
+                  (state as DetailStateDownloading).session2!.device1 ==
+                      devices[1] ||
               (state as DetailStateDownloading).session2!.device2 ==
-                  devices[1]) {} //Withings
-
+                  devices[1]) {
+            error = await _withingsDownload(
+                (state as DetailStateDownloading).session2!.id);
+          } //Withings
         }
 
-        /*await Future.delayed(Duration(seconds: 3));
+        if (error == false) { //if no error update session as downloaded
+          event.numSession == 1
+              ? await db.sessionsDao.updateDown(
+                  (state as DetailStateDownloading).session1!.id, true)
+              : await db.sessionsDao.updateDown(
+                  (state as DetailStateDownloading).session2!.id, true);
+        }
         emit(DetailStateLoaded(
             session1: (state as DetailStateDownloading).session1,
-            session2: (state as DetailStateDownloading).session2));*/
+            session2: (state as DetailStateDownloading).session2,
+            error: error)); //error = true or error = false
       },
     );
   }
