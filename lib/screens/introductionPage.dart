@@ -25,7 +25,7 @@ class IntroductionPage extends StatelessWidget {
         ),
       ],
       child: IntroductionScreen(
-        pages: listPages(),
+        pages: listPages(context),
         showDoneButton: false,
         showNextButton: false,
         showBackButton: false,
@@ -35,7 +35,7 @@ class IntroductionPage extends StatelessWidget {
     );
   }
 
-  List<PageViewModel> listPages() {
+  List<PageViewModel> listPages(context) {
     return [
       PageViewModel(
           title: "Welcome",
@@ -44,7 +44,7 @@ class IntroductionPage extends StatelessWidget {
               child: Padding(
                   padding: EdgeInsets.only(top: 30),
                   child:
-                      Container(child: Image.asset('assets/applewatch.png'))))),
+                      Container(width: MediaQuery.of(context).size.width*0.7, child: Image.asset('assets/timerunlogo.png'))))),
       // Fitbit Page
       PageViewModel(
         title: 'Connect your Fitbit account',

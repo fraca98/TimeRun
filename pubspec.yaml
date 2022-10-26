@@ -74,6 +74,21 @@ dev_dependencies:
   drift_dev: ^2.1.0 #for database
   build_runner: ^2.2.0 #for database
 
+  flutter_launcher_icons: ^0.10.0
+  flutter_native_splash: ^2.2.12
+
+flutter_icons: #icon of the app
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/timerunlogo.png"
+  remove_alpha_ios: true
+
+flutter_native_splash: #for the creation of the splash screen
+  color: "#ffffff" #background color set to white
+  image: assets/timerunlogo.png #image on the splash screen
+  android: true #show on android
+  ios: true #show on ios
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -104,6 +119,7 @@ flutter:
   - assets/fitbit.png
   - assets/run.json
   - assets/database-store.json
+  - assets/timerunlogo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

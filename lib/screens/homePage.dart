@@ -29,10 +29,7 @@ class HomePage extends StatelessWidget {
           child: ListView(
             children: [
               DrawerHeader(
-                  child: Text(
-                'TimeRun',
-                style: TextStyle(fontFamily: 'Poppins', fontSize: 22),
-              )),
+                  child: CircleAvatar(child: Image.asset('assets/timerunlogo.png'),backgroundColor: Colors.transparent,)),
               ListTile(
                 onTap: () async {
                   Directory dbFolder = await getApplicationDocumentsDirectory();
