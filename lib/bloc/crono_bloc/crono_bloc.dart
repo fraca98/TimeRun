@@ -109,14 +109,6 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       }
 
       if (state is CronoStatePause) {
-        if (event.data.hr != 0) {
-          //collect Polar data if hr!=0 also in pause
-          polarToSave[progressIndex].add(PolarRatesCompanion(
-              timestamp: Value(
-                  (DateTime.now().toUtc().millisecondsSinceEpoch / 1000)
-                      .floor()),
-              value: Value(event.data.hr)));
-        }
         emit(CronoStatePause(
             progressIndex: progressIndex,
             duration: (state as CronoStatePause).duration,
