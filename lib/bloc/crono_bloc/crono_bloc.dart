@@ -23,6 +23,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   StreamSubscription<int>? tickerSubscription;
   StreamSubscription? hrSubscription;
   StreamSubscription? bluePolar;
+  StreamSubscription? batteryPolar;
 
   List<List<PolarRatesCompanion>> polarToSave =
       List.generate(status.length, (index) => []);
@@ -33,6 +34,54 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     required List<String> sessionDevices,
     required int numSession,
   }) : super(CronoStateInit()) {
+    batteryPolar = polar.batteryLevelStream.listen((event) {
+      print(event.level);
+      if (state is CronoStateInit) {
+        emit(
+          CronoStateInit(battery: event.level),
+        );
+      }
+      if (state is CronoStatePlay) {
+        emit(
+          CronoStatePlay(
+              progressIndex: progressIndex,
+              duration: (state as CronoStatePlay).duration,
+              hr: (state as CronoStatePlay).hr,
+              errorMessage: (state as CronoStatePlay).errorMessage,
+              battery: event.level),
+        );
+      }
+      if (state is CronoStateRunning) {
+        emit(
+          CronoStateRunning(
+              progressIndex: progressIndex,
+              duration: (state as CronoStateRunning).duration,
+              hr: (state as CronoStateRunning).hr,
+              battery: event.level),
+        );
+      }
+      if (state is CronoStatePause) {
+        emit(
+          CronoStatePause(
+              progressIndex: progressIndex,
+              duration: (state as CronoStatePause).duration,
+              hr: (state as CronoStatePause).hr,
+              errorMessage: (state as CronoStatePause).errorMessage,
+              battery: event.level),
+        );
+      }
+      if (state is CronoStateStop) {
+        emit(
+          CronoStateStop(
+              progressIndex: progressIndex,
+              duration: (state as CronoStateStop).duration,
+              hr: (state as CronoStateStop).hr,
+              errorMessage: (state as CronoStateStop).errorMessage,
+              battery: event.level),
+        );
+      }
+    });
+
     bluePolar = polar.deviceDisconnectedStream.listen((event) {
       print('Disconnected from Bluetooth');
       String error = "Disconnected from Bluetooth";
@@ -83,14 +132,16 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             progressIndex: progressIndex,
             duration: 0,
             hr: event.data.hr,
-            errorMessage: error));
+            errorMessage: error,
+            battery: (state as CronoStateInit).battery));
       }
       if (state is CronoStatePlay) {
         emit(CronoStatePlay(
             progressIndex: progressIndex,
             duration: (state as CronoStatePlay).duration,
             hr: event.data.hr,
-            errorMessage: error));
+            errorMessage: error,
+            battery: (state as CronoStatePlay).battery));
       }
       if (state is CronoStateRunning) {
         if (event.data.hr != 0) {
@@ -102,7 +153,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           emit(CronoStateRunning(
               progressIndex: progressIndex,
               duration: (state as CronoStateRunning).duration,
-              hr: event.data.hr));
+              hr: event.data.hr,
+              battery: (state as CronoStateRunning).battery));
         } else {
           add(CronoEventPause(errorMessage: error));
         }
@@ -113,14 +165,16 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             progressIndex: progressIndex,
             duration: (state as CronoStatePause).duration,
             hr: event.data.hr,
-            errorMessage: error));
+            errorMessage: error,
+            battery: (state as CronoStatePause).battery));
       }
       if (state is CronoStateStop) {
         emit(CronoStateStop(
             progressIndex: progressIndex,
             duration: (state as CronoStateStop).duration,
             hr: event.data.hr,
-            errorMessage: error));
+            errorMessage: error,
+            battery: (state as CronoStateStop).battery));
       }
       if (state is CronoStateSaving) {
         //saving and complete should remove all {}
@@ -135,7 +189,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         emit(CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
-            hr: (state as CronoStateExt).hr));
+            hr: (state as CronoStateExt).hr,
+            battery: (state as CronoStateExt).battery));
 
         tickerSubscription?.cancel();
         tickerSubscription = ticker
@@ -152,12 +207,16 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
                 progressIndex: progressIndex,
                 duration: (state as CronoStateExt).duration,
                 hr: (state as CronoStateExt).hr,
+                errorMessage: event.errorMessage,
+                battery: (state as CronoStateExt).battery,
               ))
             : emit(CronoStatePause(
                 progressIndex: progressIndex,
                 duration: (state as CronoStateExt).duration,
                 hr: 0,
-                errorMessage: event.errorMessage));
+                errorMessage: event.errorMessage,
+                battery: (state as CronoStateExt).battery,
+              ));
       },
     );
 
@@ -168,12 +227,15 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               progressIndex: progressIndex,
               duration: (state as CronoStateExt).duration,
               hr: (state as CronoStateExt).hr,
+              errorMessage: (state as CronoStateExt).errorMessage,
+              battery: (state as CronoStateExt).battery,
             ))
           : emit(CronoStateStop(
               progressIndex: progressIndex,
               duration: (state as CronoStateExt).duration,
               hr: 0,
               errorMessage: (state as CronoStateExt).errorMessage,
+              battery: (state as CronoStateExt).battery,
             ));
 
       /*print(polarToSave);
@@ -188,9 +250,11 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         if ((state as CronoStateExt).hr != 0) {
           tickerSubscription?.resume();
           emit(CronoStateRunning(
-              progressIndex: progressIndex,
-              duration: (state as CronoStateExt).duration,
-              hr: (state as CronoStateExt).hr));
+            progressIndex: progressIndex,
+            duration: (state as CronoStateExt).duration,
+            hr: (state as CronoStateExt).hr,
+            battery: (state as CronoStateExt).battery,
+          ));
         }
       },
     );
@@ -199,21 +263,24 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (polarToSave[progressIndex].isEmpty) {
         //No value for this interval so retry
         emit(CronoStatePlay(
-            progressIndex: progressIndex,
-            duration: 0,
-            hr: (state as CronoStateExt).hr,
-            errorMessage: 'Empty interval, retry'));
+          progressIndex: progressIndex,
+          duration: 0,
+          hr: (state as CronoStateExt).hr,
+          errorMessage: 'Empty interval, retry',
+          battery: (state as CronoStateExt).battery,
+        ));
       } else {
         progressIndex++;
 
         if (progressIndex == 5) {
-          //end the session of data collection
-          print(polarToSave);
-          hrSubscription?.cancel(); //stop collecting heart data
-          bluePolar?.cancel();
-          polar.disconnectFromDevice(polarIdentifier); //disconnect Polar
-
           emit(CronoStateSaving());
+
+          //end the session of data collection
+          //print(polarToSave);
+          await hrSubscription?.cancel(); //stop collecting heart data
+          await bluePolar?.cancel();
+          await batteryPolar?.cancel();
+          await polar.disconnectFromDevice(polarIdentifier); //disconnect Polar
 
           int idSession = await db.sessionsDao.inserNewSession(
               SessionsCompanion(
@@ -253,10 +320,12 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           emit(CronoStateCompleted());
         } else {
           emit(CronoStatePlay(
-              progressIndex: progressIndex,
-              duration: 0,
-              hr: (state as CronoStateExt).hr,
-              errorMessage: (state as CronoStateExt).errorMessage));
+            progressIndex: progressIndex,
+            duration: 0,
+            hr: (state as CronoStateExt).hr,
+            errorMessage: (state as CronoStateExt).errorMessage,
+            battery: (state as CronoStateExt).battery,
+          ));
         }
       }
     });
@@ -265,35 +334,44 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       (event, emit) {
         polarToSave[progressIndex].clear();
         emit(CronoStatePlay(
-            progressIndex: progressIndex,
-            duration: 0,
-            hr: (state as CronoStateExt).hr));
+          progressIndex: progressIndex,
+          duration: 0,
+          hr: (state as CronoStateExt).hr,
+          errorMessage: (state as CronoStateExt).errorMessage,
+          battery: (state as CronoStateExt).battery,
+        ));
       },
     );
 
     on<CronoEventDeleteSession>(
       (event, emit) async {
-        hrSubscription?.cancel(); //stop collecting heart data
-        bluePolar?.cancel();
-        polar.disconnectFromDevice(polarIdentifier); //disconnect polar
+        await hrSubscription?.cancel(); //stop collecting heart data
+        await bluePolar?.cancel();
+        await batteryPolar?.cancel();
+        await polar.disconnectFromDevice(polarIdentifier); //disconnect polar
       },
     );
 
     on<CronoEventTicked>(
       (event, emit) {
-        emit(CronoStateRunning(
+        emit(
+          CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
-            hr: (state as CronoStateRunning).hr));
+            hr: (state as CronoStateRunning).hr,
+            battery: (state as CronoStateRunning).battery,
+          ),
+        );
       },
     );
   }
 
   @override
-  Future<void> close() {
-    hrSubscription?.cancel();
-    bluePolar?.cancel();
-    tickerSubscription?.cancel();
+  Future<void> close() async {
+    await hrSubscription?.cancel();
+    await bluePolar?.cancel();
+    await tickerSubscription?.cancel();
+    await batteryPolar?.cancel();
     return super.close();
   }
 }

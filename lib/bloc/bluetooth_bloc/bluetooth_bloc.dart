@@ -65,14 +65,14 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     });
 
     on<BluetoothEventConnect>(
-      (event, emit) {
-        polar.connectToDevice(polarIdentifier);
+      (event, emit) async {
+        await polar.connectToDevice(polarIdentifier);
       },
     );
 
     on<BluetoothEventDisconnect>(
-      (event, emit) {
-        polar.disconnectFromDevice(polarIdentifier);
+      (event, emit) async {
+        await polar.disconnectFromDevice(polarIdentifier);
       },
     );
     add(BluetoothEventDisconnect()); //to be sure if app crashed or closed inappropiately to be no more connected
@@ -81,10 +81,10 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   @override
   Future<void> close() async {
-    polarConnect?.cancel();
-    polarConnected?.cancel();
-    polarDisconnect?.cancel();
-    settingsSubSub?.cancel();
+    await polarConnect?.cancel();
+    await polarConnected?.cancel();
+    await polarDisconnect?.cancel();
+    await settingsSubSub?.cancel();
 
     return super.close();
   }

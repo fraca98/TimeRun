@@ -12,18 +12,25 @@ class CronoStateExt extends CronoState {
   int duration;
   int hr;
   String? errorMessage;
+  int? battery;
   CronoStateExt(
       {required this.progressIndex,
       required this.duration,
       required this.hr,
-      this.errorMessage});
+      this.errorMessage,
+      required this.battery});
 
   @override
-  List<Object?> get props => [progressIndex, duration, hr, errorMessage];
+  List<Object?> get props =>
+      [progressIndex, duration, hr, errorMessage, battery];
 }
 
 class CronoStateInit extends CronoState {
-  CronoStateInit();
+  int? battery;
+  CronoStateInit({this.battery});
+   @override
+  List<Object?> get props =>
+      [battery];
 }
 
 class CronoStatePlay extends CronoStateExt {
@@ -31,14 +38,16 @@ class CronoStatePlay extends CronoStateExt {
       {required super.progressIndex,
       required super.duration,
       required super.hr,
-      super.errorMessage});
+      required super.errorMessage,
+      super.battery});
 }
 
 class CronoStateRunning extends CronoStateExt {
   CronoStateRunning(
       {required super.progressIndex,
       required super.duration,
-      required super.hr});
+      required super.hr,
+      super.battery});
 }
 
 class CronoStatePause extends CronoStateExt {
@@ -46,7 +55,8 @@ class CronoStatePause extends CronoStateExt {
       {required super.progressIndex,
       required super.duration,
       required super.hr,
-      super.errorMessage});
+      required super.errorMessage,
+      super.battery});
 }
 
 class CronoStateStop extends CronoStateExt {
@@ -54,7 +64,8 @@ class CronoStateStop extends CronoStateExt {
       {required super.progressIndex,
       required super.duration,
       required super.hr,
-      super.errorMessage});
+      required super.errorMessage,
+      super.battery});
 }
 
 class CronoStateSaving extends CronoState {

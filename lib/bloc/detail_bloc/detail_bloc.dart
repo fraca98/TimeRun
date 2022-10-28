@@ -149,7 +149,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               await FitbitHeartRateIntradayDataManager(
                       clientID: clientFitbit[0], clientSecret: clientFitbit[1])
                   .fetch(
-            FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel(
+            FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel( //cambia endpoint e vedi
                 fitbitCredentials: FitbitCredentials(
                     userID: prefs.getString('fitbitUserID')!,
                     fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
@@ -167,7 +167,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             error = true;
             break;
           } else {
-            fitbitHeartRateIntradayData.forEach((element) {
+            fitbitHeartRateIntradayData.forEach((element) { //fallo col where
               if ((element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
                               1000)
                           .floor() >=
@@ -298,8 +298,8 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     });
   }
   @override
-  Future<void> close() {
-    subStreamSession?.cancel();
+  Future<void> close() async {
+    await subStreamSession?.cancel();
     return super.close();
   }
 }

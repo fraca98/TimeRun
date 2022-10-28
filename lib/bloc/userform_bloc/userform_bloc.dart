@@ -3,20 +3,10 @@ import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:timerun/database/AppDatabase.dart';
 
-class WizardFormBloc extends FormBloc<dynamic, dynamic> {
+class RegFormBloc extends FormBloc<dynamic, dynamic> {
   final AppDatabase db = GetIt.I<AppDatabase>();
 
-  final username = TextFieldBloc(
-    validators: [FieldBlocValidators.required],
-  );
   //field blocs
-  final name = TextFieldBloc(validators: [
-    FieldBlocValidators.required,
-  ]);
-  final surname = TextFieldBloc(validators: [FieldBlocValidators.required]);
-
-  final height = TextFieldBloc(validators: [FieldBlocValidators.required]);
-  final weight = TextFieldBloc(validators: [FieldBlocValidators.required]);
   final sex = SelectFieldBloc(
     validators: [FieldBlocValidators.required],
     items: ['Man', 'Woman'],
@@ -27,29 +17,38 @@ class WizardFormBloc extends FormBloc<dynamic, dynamic> {
     ],
     initialValue: null,
   );
+  final activity = SelectFieldBloc(
+    validators: [FieldBlocValidators.required],
+    items: ['Low', 'Medium', 'High'],
+  );
 
-  WizardFormBloc() {
+  RegFormBloc() {
     addFieldBlocs(
-      step: 0,
-      fieldBlocs: [name, surname, sex, birthDate],
-    );
-    addFieldBlocs(
-      step: 1,
-      fieldBlocs: [height, weight],
+      fieldBlocs: [sex, birthDate, activity],
     );
   }
 
   @override
   void onSubmitting() async {
-    if (state.currentStep == 0) {
-      emitSuccess();
-    } else if (state.currentStep == 1) {
-      await db.usersDao.insertNewUser(UsersCompanion(
-        name: Value(name.value),
-        surname: Value(surname.value),
-        sex: Value(sex.value == "Man"),
-      ));
-      emitSuccess();
+    late int act;
+    switch (activity.value) {
+      case 'Low':
+        act = 0;
+        break;
+      case 'Medium':
+        act = 1;
+        break;
+      case 'High':
+        act = 2;
+        break;
+      default:
     }
+    await db.usersDao.insertNewUser(
+      UsersCompanion(
+          sex: Value(sex.value == "Man"),
+          activity: Value(act),
+          birthDate: Value(birthDate.value!.year)),
+    );
+    emitSuccess();
   }
 }

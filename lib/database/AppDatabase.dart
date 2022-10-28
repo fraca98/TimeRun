@@ -19,9 +19,9 @@ part 'AppDatabase.g.dart';
 // this will generate a table called "Users"
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get name => text()();
-  TextColumn get surname => text()();
   BoolColumn get sex => boolean()(); // true : Man, false : Woman
+  IntColumn get activity => integer()(); //low = 0, medium = 1, high = 2
+  IntColumn get birthDate => integer()();
   IntColumn get completed => integer().withDefault(Constant(0))();
   /*
   0: no session

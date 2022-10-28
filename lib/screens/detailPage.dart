@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -148,36 +146,59 @@ class DetailPage extends StatelessWidget {
               TableRow(children: [
                 Column(children: [
                   Text(
-                    'Name',
+                    '#ID',
                     style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(user.name,
+                  Text(user.id.toString(),
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
               TableRow(children: [
-                Column(children: [
-                  Text(
-                    'Surname',
-                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
-                  )
-                ]),
-                Column(children: [
-                  Text(user.surname,
-                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
-                ]),
+                //fake TableRow to add space
+                SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  height: 10,
+                )
               ]),
               TableRow(children: [
                 Column(children: [
                   Text(
-                    'Sex',
+                    'BirthYear',
                     style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(user.sex ? 'Man' : 'Woman',
+                  Text(user.birthDate.toString(),
+                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
+                ]),
+              ]),
+              TableRow(children: [
+                //fake TableRow to add space
+                SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  height: 10,
+                )
+              ]),
+              TableRow(children: [
+                Column(children: [
+                  Text(
+                    'Activity Level',
+                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
+                  )
+                ]),
+                Column(children: [
+                  Text(
+                      user.activity == 0
+                          ? 'Low'
+                          : user.activity == 1
+                              ? 'Medium'
+                              : 'High',
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -222,7 +243,7 @@ class DetailPage extends StatelessWidget {
                                   List<String> selectable = [...devices];
                                   return AlertSession(
                                     selectable: selectable,
-                                    id: user.id,
+                                    user: user,
                                     detailcontext: context,
                                   );
                                 });
@@ -307,7 +328,7 @@ class DetailPage extends StatelessWidget {
                                     selectable.remove(state.session1?.device2);
                                     return AlertSession(
                                       selectable: selectable,
-                                      id: user.id,
+                                      user: user,
                                       detailcontext: context,
                                     );
                                   });

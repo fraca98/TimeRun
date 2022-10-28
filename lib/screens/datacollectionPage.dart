@@ -9,10 +9,11 @@ import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
+import '../database/AppDatabase.dart';
 
 class DataCollectionPage extends StatelessWidget {
   final Polar polar;
-  final int id;
+  final User user;
   final List<String> sessionDevices;
   final int numSession;
   BuildContext detailcontext;
@@ -21,7 +22,7 @@ class DataCollectionPage extends StatelessWidget {
       {required this.polar,
       required this.numSession,
       required this.sessionDevices,
-      required this.id,
+      required this.user,
       required this.detailcontext,
       super.key});
 
@@ -30,7 +31,7 @@ class DataCollectionPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => CronoBloc(
         polar: polar,
-        idUser: id,
+        idUser: user.id,
         sessionDevices: sessionDevices,
         numSession: numSession,
       ),
@@ -192,26 +193,112 @@ class DataCollectionPage extends StatelessWidget {
   }
 
   Widget _polar(BuildContext context, CronoStateExt state) {
+    final double maxHrValue =
+        (220 - (DateTime.now().year - user.birthDate)).toDouble();
     String text;
     switch (state.progressIndex) {
       case 0:
-        text = 'Stay at rest';
+        text = 'Keep the indicator in the white zone';
         break;
       case 1:
-        text = "Keep the indicator in the green zone";
+        text = "Keep the indicator in the blue zone";
         break;
       case 2:
-        text = "Keep the indicator in the yellow zone";
+        text = "Keep the indicator in the green zone";
         break;
       case 3:
-        text = "Keep the indicator in the orange zone";
+        text = "Keep the indicator in the yellow zone";
         break;
       case 4:
-        text = "Keep the indicator in the red zone";
+        text = "Keep the indicator in the orange zone";
         break;
       default:
         text = '';
     }
+    Icon batteryIcon;
+    String batteryLevel;
+    if (state.battery != null) {
+      if (state.errorMessage != null &&
+          state.errorMessage!.contains('Bluetooth')) {
+        batteryIcon = Icon(MdiIcons.batteryUnknown);
+        batteryLevel = '';
+      } else {
+        if (state.battery! == 100) {
+          batteryIcon = Icon(
+            MdiIcons.battery,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! > 100 && state.battery! >= 90) {
+          batteryIcon = Icon(
+            MdiIcons.battery90,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 90 && state.battery! >= 80) {
+          batteryIcon = Icon(
+            MdiIcons.battery80,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 80 && state.battery! >= 70) {
+          batteryIcon = Icon(
+            MdiIcons.battery70,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 70 && state.battery! >= 60) {
+          batteryIcon = Icon(
+            MdiIcons.battery60,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 60 && state.battery! >= 50) {
+          batteryIcon = Icon(
+            MdiIcons.battery50,
+            color: Colors.green,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 50 && state.battery! >= 40) {
+          batteryIcon = Icon(
+            MdiIcons.battery40,
+            color: Colors.orange,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 40 && state.battery! >= 30) {
+          batteryIcon = Icon(
+            MdiIcons.battery30,
+            color: Colors.orange,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 30 && state.battery! >= 20) {
+          batteryIcon = Icon(
+            MdiIcons.battery20,
+            color: Colors.red,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 20 && state.battery! >= 10) {
+          batteryIcon = Icon(
+            MdiIcons.battery10,
+            color: Colors.red,
+          );
+          batteryLevel = state.battery.toString();
+        } else if (state.battery! < 10) {
+          batteryIcon = Icon(
+            MdiIcons.batteryOff,
+            color: Colors.red,
+          );
+          batteryLevel = state.battery.toString();
+        } else {
+          batteryIcon = Icon(MdiIcons.alert); //if something wrong
+          batteryLevel = 'Error';
+        }
+      }
+    } else {
+      batteryIcon = Icon(MdiIcons.batteryUnknown);
+      batteryLevel = '';
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(
         vertical: 16,
@@ -221,9 +308,27 @@ class DataCollectionPage extends StatelessWidget {
         children: [
           Container(
             margin: EdgeInsets.only(top: 5, left: 8, right: 8, bottom: 10),
-            child: Image.asset(
-              'assets/polar.png',
-              width: 200,
+            child: Stack(
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  child: Image.asset(
+                    'assets/polar.png',
+                    width: 200,
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.centerRight,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      batteryIcon,
+                      Text(batteryLevel),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
           Row(
@@ -248,26 +353,36 @@ class DataCollectionPage extends StatelessWidget {
             padding: EdgeInsets.only(left: 5, right: 5, bottom: 10, top: 10),
             child: SfLinearGauge(
               minimum: 40,
-              maximum: 200,
+              maximum: 220,
               ranges: [
                 LinearGaugeRange(
-                  startValue: 40,
-                  endValue: 98,
+                  startValue: 0,
+                  endValue: 0.5 * maxHrValue,
+                  color: Colors.white,
+                ),
+                LinearGaugeRange(
+                  startValue: 0.5 * maxHrValue,
+                  endValue: 0.6 * maxHrValue,
+                  color: Colors.lightBlueAccent,
+                ),
+                LinearGaugeRange(
+                  startValue: 0.6 * maxHrValue,
+                  endValue: 0.7 * maxHrValue,
                   color: Colors.greenAccent,
                 ),
                 LinearGaugeRange(
-                  startValue: 98,
-                  endValue: 137,
+                  startValue: 0.7 * maxHrValue,
+                  endValue: 0.8 * maxHrValue,
                   color: Colors.yellowAccent,
                 ),
                 LinearGaugeRange(
-                  startValue: 137,
-                  endValue: 176,
+                  startValue: 0.8 * maxHrValue,
+                  endValue: 0.9 * maxHrValue,
                   color: Colors.orangeAccent,
                 ),
                 LinearGaugeRange(
-                  startValue: 176,
-                  endValue: 200,
+                  startValue: 0.9 * maxHrValue,
+                  endValue: 220,
                   color: Colors.redAccent,
                 ),
               ],
@@ -279,12 +394,6 @@ class DataCollectionPage extends StatelessWidget {
               ],
             ),
           ),
-          state is CronoStateSaving || state is CronoStateCompleted
-              ? Text(
-                  'Saving ...',
-                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
-                )
-              : Container(),
           state is CronoStatePlay ||
                   state is CronoStatePause ||
                   state is CronoStateStop ||
@@ -328,9 +437,6 @@ class DataCollectionPage extends StatelessWidget {
   }
 
   Widget _buttonsTimer(BuildContext context, CronoState state) {
-    if (state is CronoStateSaving || state is CronoStateCompleted) {
-      return CircularProgressIndicator();
-    }
     if (state is CronoStatePlay) {
       return FloatingActionButton(
         onPressed: () {
@@ -399,9 +505,6 @@ class DataCollectionPage extends StatelessWidget {
           ),
         ],
       );
-    }
-    if (state is CronoStateCompleted) {
-      return Container();
     } else {
       return Text('Error CronoBloc');
     }

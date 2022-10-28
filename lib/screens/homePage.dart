@@ -29,7 +29,10 @@ class HomePage extends StatelessWidget {
           child: ListView(
             children: [
               DrawerHeader(
-                  child: CircleAvatar(child: Image.asset('assets/timerunlogo.png'),backgroundColor: Colors.transparent,)),
+                  child: CircleAvatar(
+                child: Image.asset('assets/timerunlogo.png'),
+                backgroundColor: Colors.transparent,
+              )),
               ListTile(
                 onTap: () async {
                   Directory dbFolder = await getApplicationDocumentsDirectory();
@@ -104,10 +107,7 @@ class HomePage extends StatelessWidget {
                                   : MdiIcons.faceWoman,
                               color: color,
                             ),
-                            title: Text(
-                                '${state.users[index].name} ${state.users[index].surname}'),
-                            subtitle:
-                                Text(state.users[index].sex ? 'Man' : 'Woman'),
+                            title: Text('${state.users[index].id}'),
                             trailing: Icon(MdiIcons.arrowRight),
                           ),
                         );

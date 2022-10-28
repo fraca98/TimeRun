@@ -9,23 +9,23 @@ part of 'AppDatabase.dart';
 // ignore_for_file: type=lint
 class User extends DataClass implements Insertable<User> {
   final int id;
-  final String name;
-  final String surname;
   final bool sex;
+  final int activity;
+  final int birthDate;
   final int completed;
   const User(
       {required this.id,
-      required this.name,
-      required this.surname,
       required this.sex,
+      required this.activity,
+      required this.birthDate,
       required this.completed});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['name'] = Variable<String>(name);
-    map['surname'] = Variable<String>(surname);
     map['sex'] = Variable<bool>(sex);
+    map['activity'] = Variable<int>(activity);
+    map['birth_date'] = Variable<int>(birthDate);
     map['completed'] = Variable<int>(completed);
     return map;
   }
@@ -33,9 +33,9 @@ class User extends DataClass implements Insertable<User> {
   UsersCompanion toCompanion(bool nullToAbsent) {
     return UsersCompanion(
       id: Value(id),
-      name: Value(name),
-      surname: Value(surname),
       sex: Value(sex),
+      activity: Value(activity),
+      birthDate: Value(birthDate),
       completed: Value(completed),
     );
   }
@@ -45,9 +45,9 @@ class User extends DataClass implements Insertable<User> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return User(
       id: serializer.fromJson<int>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      surname: serializer.fromJson<String>(json['surname']),
       sex: serializer.fromJson<bool>(json['sex']),
+      activity: serializer.fromJson<int>(json['activity']),
+      birthDate: serializer.fromJson<int>(json['birthDate']),
       completed: serializer.fromJson<int>(json['completed']),
     );
   }
@@ -56,100 +56,100 @@ class User extends DataClass implements Insertable<User> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'name': serializer.toJson<String>(name),
-      'surname': serializer.toJson<String>(surname),
       'sex': serializer.toJson<bool>(sex),
+      'activity': serializer.toJson<int>(activity),
+      'birthDate': serializer.toJson<int>(birthDate),
       'completed': serializer.toJson<int>(completed),
     };
   }
 
   User copyWith(
           {int? id,
-          String? name,
-          String? surname,
           bool? sex,
+          int? activity,
+          int? birthDate,
           int? completed}) =>
       User(
         id: id ?? this.id,
-        name: name ?? this.name,
-        surname: surname ?? this.surname,
         sex: sex ?? this.sex,
+        activity: activity ?? this.activity,
+        birthDate: birthDate ?? this.birthDate,
         completed: completed ?? this.completed,
       );
   @override
   String toString() {
     return (StringBuffer('User(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('surname: $surname, ')
           ..write('sex: $sex, ')
+          ..write('activity: $activity, ')
+          ..write('birthDate: $birthDate, ')
           ..write('completed: $completed')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, surname, sex, completed);
+  int get hashCode => Object.hash(id, sex, activity, birthDate, completed);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is User &&
           other.id == this.id &&
-          other.name == this.name &&
-          other.surname == this.surname &&
           other.sex == this.sex &&
+          other.activity == this.activity &&
+          other.birthDate == this.birthDate &&
           other.completed == this.completed);
 }
 
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> id;
-  final Value<String> name;
-  final Value<String> surname;
   final Value<bool> sex;
+  final Value<int> activity;
+  final Value<int> birthDate;
   final Value<int> completed;
   const UsersCompanion({
     this.id = const Value.absent(),
-    this.name = const Value.absent(),
-    this.surname = const Value.absent(),
     this.sex = const Value.absent(),
+    this.activity = const Value.absent(),
+    this.birthDate = const Value.absent(),
     this.completed = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
-    required String name,
-    required String surname,
     required bool sex,
+    required int activity,
+    required int birthDate,
     this.completed = const Value.absent(),
-  })  : name = Value(name),
-        surname = Value(surname),
-        sex = Value(sex);
+  })  : sex = Value(sex),
+        activity = Value(activity),
+        birthDate = Value(birthDate);
   static Insertable<User> custom({
     Expression<int>? id,
-    Expression<String>? name,
-    Expression<String>? surname,
     Expression<bool>? sex,
+    Expression<int>? activity,
+    Expression<int>? birthDate,
     Expression<int>? completed,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (name != null) 'name': name,
-      if (surname != null) 'surname': surname,
       if (sex != null) 'sex': sex,
+      if (activity != null) 'activity': activity,
+      if (birthDate != null) 'birth_date': birthDate,
       if (completed != null) 'completed': completed,
     });
   }
 
   UsersCompanion copyWith(
       {Value<int>? id,
-      Value<String>? name,
-      Value<String>? surname,
       Value<bool>? sex,
+      Value<int>? activity,
+      Value<int>? birthDate,
       Value<int>? completed}) {
     return UsersCompanion(
       id: id ?? this.id,
-      name: name ?? this.name,
-      surname: surname ?? this.surname,
       sex: sex ?? this.sex,
+      activity: activity ?? this.activity,
+      birthDate: birthDate ?? this.birthDate,
       completed: completed ?? this.completed,
     );
   }
@@ -160,14 +160,14 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (surname.present) {
-      map['surname'] = Variable<String>(surname.value);
-    }
     if (sex.present) {
       map['sex'] = Variable<bool>(sex.value);
+    }
+    if (activity.present) {
+      map['activity'] = Variable<int>(activity.value);
+    }
+    if (birthDate.present) {
+      map['birth_date'] = Variable<int>(birthDate.value);
     }
     if (completed.present) {
       map['completed'] = Variable<int>(completed.value);
@@ -179,9 +179,9 @@ class UsersCompanion extends UpdateCompanion<User> {
   String toString() {
     return (StringBuffer('UsersCompanion(')
           ..write('id: $id, ')
-          ..write('name: $name, ')
-          ..write('surname: $surname, ')
           ..write('sex: $sex, ')
+          ..write('activity: $activity, ')
+          ..write('birthDate: $birthDate, ')
           ..write('completed: $completed')
           ..write(')'))
         .toString();
@@ -200,16 +200,6 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultConstraints: 'PRIMARY KEY AUTOINCREMENT');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
-  @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  final VerificationMeta _surnameMeta = const VerificationMeta('surname');
-  @override
-  late final GeneratedColumn<String> surname = GeneratedColumn<String>(
-      'surname', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
   final VerificationMeta _sexMeta = const VerificationMeta('sex');
   @override
   late final GeneratedColumn<bool> sex = GeneratedColumn<bool>(
@@ -217,6 +207,16 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: DriftSqlType.bool,
       requiredDuringInsert: true,
       defaultConstraints: 'CHECK ("sex" IN (0, 1))');
+  final VerificationMeta _activityMeta = const VerificationMeta('activity');
+  @override
+  late final GeneratedColumn<int> activity = GeneratedColumn<int>(
+      'activity', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  final VerificationMeta _birthDateMeta = const VerificationMeta('birthDate');
+  @override
+  late final GeneratedColumn<int> birthDate = GeneratedColumn<int>(
+      'birth_date', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   final VerificationMeta _completedMeta = const VerificationMeta('completed');
   @override
   late final GeneratedColumn<int> completed = GeneratedColumn<int>(
@@ -225,7 +225,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       requiredDuringInsert: false,
       defaultValue: Constant(0));
   @override
-  List<GeneratedColumn> get $columns => [id, name, surname, sex, completed];
+  List<GeneratedColumn> get $columns =>
+      [id, sex, activity, birthDate, completed];
   @override
   String get aliasedName => _alias ?? 'users';
   @override
@@ -238,23 +239,23 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('surname')) {
-      context.handle(_surnameMeta,
-          surname.isAcceptableOrUnknown(data['surname']!, _surnameMeta));
-    } else if (isInserting) {
-      context.missing(_surnameMeta);
-    }
     if (data.containsKey('sex')) {
       context.handle(
           _sexMeta, sex.isAcceptableOrUnknown(data['sex']!, _sexMeta));
     } else if (isInserting) {
       context.missing(_sexMeta);
+    }
+    if (data.containsKey('activity')) {
+      context.handle(_activityMeta,
+          activity.isAcceptableOrUnknown(data['activity']!, _activityMeta));
+    } else if (isInserting) {
+      context.missing(_activityMeta);
+    }
+    if (data.containsKey('birth_date')) {
+      context.handle(_birthDateMeta,
+          birthDate.isAcceptableOrUnknown(data['birth_date']!, _birthDateMeta));
+    } else if (isInserting) {
+      context.missing(_birthDateMeta);
     }
     if (data.containsKey('completed')) {
       context.handle(_completedMeta,
@@ -271,12 +272,12 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     return User(
       id: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      surname: attachedDatabase.options.types
-          .read(DriftSqlType.string, data['${effectivePrefix}surname'])!,
       sex: attachedDatabase.options.types
           .read(DriftSqlType.bool, data['${effectivePrefix}sex'])!,
+      activity: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}activity'])!,
+      birthDate: attachedDatabase.options.types
+          .read(DriftSqlType.int, data['${effectivePrefix}birth_date'])!,
       completed: attachedDatabase.options.types
           .read(DriftSqlType.int, data['${effectivePrefix}completed'])!,
     );

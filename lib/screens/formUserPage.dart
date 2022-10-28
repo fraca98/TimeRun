@@ -17,112 +17,84 @@ class FormUserPage extends StatelessWidget {
             });
         return false;
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'User Form',
-            style: TextStyle(fontFamily: 'Poppins'),
-          ),
-          centerTitle: true,
-        ),
-        body: BlocProvider(
-          create: (context) => WizardFormBloc(),
-          child: FormBlocListener<WizardFormBloc, dynamic, dynamic>(
-            onSubmissionFailed: (context, state) => LoadingDialog.hide(context),
-            onSubmitting: (context, state) => LoadingDialog.show(context),
-            onSuccess: (context, state) async {
-              LoadingDialog.hide(context);
-              if (state.stepCompleted == state.lastStep) {
-                Navigator.pop(context);
-              }
-            },
-            child: StepperFormBlocBuilder<WizardFormBloc>(
+      child: BlocProvider(
+        create: (context) => RegFormBloc(),
+        child: Builder(builder: (context) {
+          final formBloc = context.read<RegFormBloc>();
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(
+                'User Form',
+                style: TextStyle(fontFamily: 'Poppins'),
+              ),
+              centerTitle: true,
+            ),
+            body: FormBlocListener<RegFormBloc, dynamic, dynamic>(
+              onSubmissionFailed: (context, state) =>
+                  LoadingDialog.hide(context),
+              onSubmitting: (context, state) => LoadingDialog.show(context),
+              onSuccess: (context, state) async {
+                LoadingDialog.hide(context);
+                if (state.stepCompleted == state.lastStep) {
+                  Navigator.pop(context);
+                }
+              },
+              child: SingleChildScrollView(
                 physics: ClampingScrollPhysics(),
-                type: StepperType.vertical,
-                stepsBuilder: ((formBloc) {
-                  return [_anagraficaStep(formBloc!), _bioStep(formBloc)];
-                })),
-          ),
-        ),
-      ),
-    );
-  }
-
-  FormBlocStep _anagraficaStep(WizardFormBloc formBloc) {
-    return FormBlocStep(
-      title: const Text('Anagrafica'),
-      content: Column(
-        children: <Widget>[
-          TextFieldBlocBuilder(
-            textFieldBloc: formBloc.name,
-            keyboardType: TextInputType.name,
-            enableOnlyWhenFormBlocCanSubmit: true,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              prefixIcon: Icon(Icons.person),
-            ),
-          ),
-          TextFieldBlocBuilder(
-            textFieldBloc: formBloc.surname,
-            keyboardType: TextInputType.name,
-            enableOnlyWhenFormBlocCanSubmit: true,
-            decoration: const InputDecoration(
-              labelText: 'Surname',
-              prefixIcon: Icon(Icons.person),
-            ),
-          ),
-          RadioButtonGroupFieldBlocBuilder<String>(
-            selectFieldBloc: formBloc.sex,
-            itemBuilder: (context, value) => FieldItem(
-              child: Text(value),
-            ),
-            decoration: const InputDecoration(
-              labelText: 'Sex',
-              prefixIcon: SizedBox(),
-            ),
-          ),
-          DateTimeFieldBlocBuilder(
-            dateTimeFieldBloc: formBloc.birthDate,
-            firstDate: DateTime(1900),
-            initialDate: DateTime.now(),
-            lastDate: DateTime.now(),
-            format: DateFormat('yyyy-MM-dd'),
-            decoration: const InputDecoration(
-              labelText: 'Date of birth',
-              prefixIcon: Icon(Icons.cake),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  FormBlocStep _bioStep(WizardFormBloc formBloc) {
-    return FormBlocStep(
-        title: Text('Bio'),
-        content: Column(
-          children: <Widget>[
-            TextFieldBlocBuilder(
-              textFieldBloc: formBloc.height,
-              keyboardType: TextInputType.number,
-              enableOnlyWhenFormBlocCanSubmit: true,
-              decoration: const InputDecoration(
-                  labelText: 'Height',
-                  prefixIcon: Icon(Icons.height),
-                  suffix: Text('cm')),
-            ),
-            TextFieldBlocBuilder(
-              textFieldBloc: formBloc.weight,
-              keyboardType: TextInputType.number,
-              enableOnlyWhenFormBlocCanSubmit: true,
-              decoration: const InputDecoration(
-                labelText: 'Weight',
-                prefixIcon: Icon(MdiIcons.weight),
-                suffix: Text('Kg'),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      RadioButtonGroupFieldBlocBuilder<String>(
+                        selectFieldBloc: formBloc.sex,
+                        itemBuilder: (context, value) => FieldItem(
+                          child: Text(value),
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Sex',
+                          prefixIcon: SizedBox(),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      DateTimeFieldBlocBuilder(
+                        dateTimeFieldBloc: formBloc.birthDate,
+                        firstDate: DateTime(1900),
+                        initialDate: DateTime.now(),
+                        lastDate: DateTime.now(),
+                        format: DateFormat('yyyy'),
+                        decoration: const InputDecoration(
+                          labelText: 'Year of birth',
+                          prefixIcon: Icon(Icons.cake),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      RadioButtonGroupFieldBlocBuilder<String>(
+                        selectFieldBloc: formBloc.activity,
+                        itemBuilder: (context, value) => FieldItem(
+                          child: Text(value),
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Activity level',
+                          prefixIcon: SizedBox(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
-        ));
+            floatingActionButton: FloatingActionButton(
+              onPressed: formBloc.submit,
+              child: const Icon(Icons.send),
+            ),
+          );
+        }),
+      ),
+    );
   }
 
   // set up the AlertDialog when go back
@@ -130,8 +102,7 @@ class FormUserPage extends StatelessWidget {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
       title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text(
-          "Are you sure to go back ? All data will be lost",
+      content: Text("Are you sure to go back ? All data will be lost",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),

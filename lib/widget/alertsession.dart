@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/screens/bluetoothPage.dart';
+import '../database/AppDatabase.dart';
 
 class AlertSession extends StatefulWidget {
   //Dialog alert session when start
   var selectable;
-  int id;
+  User user;
   BuildContext detailcontext;
 
   AlertSession({
     super.key,
     required this.detailcontext,
     required this.selectable,
-    required this.id,
+    required this.user,
   });
 
   @override
@@ -95,7 +96,7 @@ class _AlertSessionState extends State<AlertSession> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => BluetoothPage(
-                        id: widget.id,
+                        user: widget.user,
                         numSession: numSession,
                         sessionDevices: sessionDevices,
                         detailcontext: widget.detailcontext,

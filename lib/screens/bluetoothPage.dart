@@ -4,9 +4,10 @@ import 'package:lottie/lottie.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:timerun/bloc/bluetooth_bloc/bluetooth_bloc.dart';
 import 'package:timerun/screens/datacollectionPage.dart';
+import '../database/AppDatabase.dart';
 
 class BluetoothPage extends StatelessWidget {
-  final int id;
+  final User user;
   final List<String> sessionDevices;
   final int numSession;
   BuildContext detailcontext;
@@ -14,7 +15,7 @@ class BluetoothPage extends StatelessWidget {
   BluetoothPage(
       {required this.numSession,
       required this.sessionDevices,
-      required this.id,
+      required this.user,
       required this.detailcontext,
       super.key});
 
@@ -30,7 +31,7 @@ class BluetoothPage extends StatelessWidget {
                 MaterialPageRoute(
                     builder: (_) => DataCollectionPage(
                           polar: context.read<BluetoothBloc>().polar,
-                          id: id,
+                          user: user,
                           numSession: numSession,
                           sessionDevices: sessionDevices,
                           detailcontext: detailcontext,
