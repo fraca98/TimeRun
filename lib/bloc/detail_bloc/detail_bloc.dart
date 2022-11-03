@@ -149,7 +149,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               await FitbitHeartRateIntradayDataManager(
                       clientID: clientFitbit[0], clientSecret: clientFitbit[1])
                   .fetch(
-            FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel( //cambia endpoint e vedi
+            FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel(
                 fitbitCredentials: FitbitCredentials(
                     userID: prefs.getString('fitbitUserID')!,
                     fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
@@ -163,35 +163,20 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           print(fitbitHeartRateIntradayData);
 
           if (fitbitHeartRateIntradayData.isEmpty) {
-            print('No complex data for this interval');
+            print('No data for this interval');
             error = true;
             break;
           } else {
-            fitbitHeartRateIntradayData.forEach((element) { //fallo col where
-              if ((element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
-                              1000)
-                          .floor() >=
-                      interv[i].startstimestamp &&
-                  (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
-                              1000)
-                          .floor() <=
-                      interv[i].endtimestamp) {
-                fitbitToSave[i].add(FitbitRatesCompanion(
-                  idInterval: Value(interv[i].id),
-                  timestamp: Value((element.dateOfMonitoring!
-                              .toUtc()
-                              .millisecondsSinceEpoch /
-                          1000)
-                      .floor()),
-                  value: Value(element.value!.toInt()),
-                ));
-              }
+            fitbitHeartRateIntradayData.forEach((element) {
+              fitbitToSave[i].add(FitbitRatesCompanion(
+                idInterval: Value(interv[i].id),
+                timestamp: Value(
+                    (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
+                            1000)
+                        .floor()),
+                value: Value(element.value!.toInt()),
+              ));
             });
-            if (fitbitToSave[i].isEmpty) {
-              print('Error no elements for this interval');
-              error = true;
-              break;
-            }
           }
         }
       } catch (e) {
@@ -226,7 +211,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           var fitbitToSave = await _fitbitDownload(
               (state as DetailStateDownloading).session1!.id);
           fitbitToSave != null ? error = false : error = true;
-          print('1f');
+          //print('1f');
         } //Fitbit
         if (error == false &&
             ((state as DetailStateDownloading).session1!.device1 ==
@@ -236,7 +221,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           var withingsToSave = await _withingsDownload(
               (state as DetailStateDownloading).session1!.id);
           withingsToSave != null ? error = false : error = true;
-          print('1w');
+          //print('1w');
         } //Withings
 
       } else {
@@ -248,7 +233,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           var fitbitToSave = await _fitbitDownload(
               (state as DetailStateDownloading).session2!.id);
           fitbitToSave != null ? error = false : error = true;
-          print('2f');
+          //print('2f');
         } //Fitbit
         if (error == false &&
             ((state as DetailStateDownloading).session2!.device1 ==
@@ -258,7 +243,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           var withingsToSave = await _withingsDownload(
               (state as DetailStateDownloading).session2!.id);
           withingsToSave != null ? error = false : error = true;
-          print('2w');
+          //print('2w');
         } //Withings
       }
 

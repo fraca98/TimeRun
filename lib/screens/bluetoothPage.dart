@@ -45,7 +45,7 @@ class BluetoothPage extends StatelessWidget {
                 if (state is BluetoothStateConnect) {
                   context.read<BluetoothBloc>().add(
                       BluetoothEventDisconnect()); //disconnect the Polar Device when i go back
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).removeCurrentSnackBar();
                   return true;
                 } else {
                   return false;
