@@ -146,6 +146,10 @@ class DataCollectionPage extends StatelessWidget {
                           state.errorMessage != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      } else if (state is CronoStateRunning &&
+                          state.errorMessage != null) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       }
@@ -290,8 +294,8 @@ class DataCollectionPage extends StatelessWidget {
           );
           batteryLevel = state.battery.toString();
         } else {
-          batteryIcon = Icon(MdiIcons.alert); //if something wrong
-          batteryLevel = 'Error';
+          batteryIcon = Icon(MdiIcons.batteryUnknown);
+          batteryLevel = '';
         }
       }
     } else {

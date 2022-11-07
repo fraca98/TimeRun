@@ -47,6 +47,7 @@ class CronoStateRunning extends CronoStateExt {
       {required super.progressIndex,
       required super.duration,
       required super.hr,
+      super.errorMessage,
       super.battery});
 }
 

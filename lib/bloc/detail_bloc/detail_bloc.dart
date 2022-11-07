@@ -47,59 +47,57 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       List<List<WithingsRatesCompanion>> withingsToSave =
           List.generate(interv.length, (index) => []);
       try {
-        for (int i = 0; i < interv.length; i++) {
-          WithingsMeasureGetIntradayactivityData getintradayactivity =
-              await WithingsMeasureGetIntradayactivityDataManager()
-                  .fetch(WithingsMeasureAPIURL.getIntradayactivity(
-            accessToken: prefs.getString('withingsAccessToken')!,
-            startdate: interv[i].startstimestamp,
-            enddate: interv[i].endtimestamp,
-            dataFields: 'heart_rate',
-          ));
-          if ([101, 102, 200, 401].contains(getintradayactivity.status)) {
-            //code for authentication failed
-            //refresh accesstoken
-            WithingsCredentials? newWithCred =
-                await WithingsConnector.refreshToken(
-                    clientID: clientWithings[0],
-                    clientSecret: clientWithings[1],
-                    withingsRefreshToken:
-                        prefs.getString('withingsRefreshToken')!);
-            if (newWithCred != null) {
-              await prefs.setString(
-                  'withingsAccessToken', newWithCred.withingsAccessToken);
-              await prefs.setString(
-                  'withingsRefreshToken', newWithCred.withingsRefreshToken);
-              getintradayactivity =
-                  await WithingsMeasureGetIntradayactivityDataManager()
-                      .fetch(WithingsMeasureAPIURL.getIntradayactivity(
-                accessToken: prefs.getString('withingsAccessToken')!,
-                startdate: interv[i].startstimestamp,
-                enddate: interv[i].endtimestamp,
-                dataFields: 'heart_rate',
-              )); //retry the request with refreshed tokens
-            } else {
-              error = true;
-              print('Error refreshing tokens');
-              break;
-            }
+        WithingsMeasureGetIntradayactivityData getWithingsSession =
+            await WithingsMeasureGetIntradayactivityDataManager()
+                .fetch(WithingsMeasureAPIURL.getIntradayactivity(
+          accessToken: prefs.getString('withingsAccessToken')!,
+          startdate: interv[0].startstimestamp,
+          enddate: interv[interv.length - 1].endtimestamp,
+          dataFields: 'heart_rate',
+        ));
+        if ([101, 102, 200, 401].contains(getWithingsSession.status)) {
+          //code for authentication failed
+          //refresh accesstoken
+          WithingsCredentials? newWithCred =
+              await WithingsConnector.refreshToken(
+                  clientID: clientWithings[0],
+                  clientSecret: clientWithings[1],
+                  withingsRefreshToken:
+                      prefs.getString('withingsRefreshToken')!);
+          if (newWithCred != null) {
+            await prefs.setString(
+                'withingsAccessToken', newWithCred.withingsAccessToken);
+            await prefs.setString(
+                'withingsRefreshToken', newWithCred.withingsRefreshToken);
+            getWithingsSession =
+                await WithingsMeasureGetIntradayactivityDataManager()
+                    .fetch(WithingsMeasureAPIURL.getIntradayactivity(
+              accessToken: prefs.getString('withingsAccessToken')!,
+              startdate: interv[0].startstimestamp,
+              enddate: interv[interv.length - 1].endtimestamp,
+              dataFields: 'heart_rate',
+            )); //retry the request with refreshed tokens
+          } else {
+            error = true;
+            print('Error refreshing tokens');
           }
-          if (getintradayactivity.status == 0) {
-            if (getintradayactivity.series == null) {
-              print('I have no values for this interval');
-              error = true;
-              break;
-            } else {
-              getintradayactivity.series!.forEach((element) {
+        }
+        if (getWithingsSession.status == 0) {
+          if (getWithingsSession.series == null) {
+            print('I have no values for this session');
+            error = true;
+          } else {
+            for (int i = 0; i < interv.length; i++) {
+              var intToSave = getWithingsSession.series!.where((element) =>
+                  element.timestamp! >= interv[i].startstimestamp &&
+                  element.timestamp! <= interv[i].endtimestamp);
+              intToSave.forEach((element) {
                 withingsToSave[i].add(WithingsRatesCompanion(
                     idInterval: Value(interv[i].id),
                     timestamp: Value(element.timestamp!),
                     value: Value(element.heartRate!)));
               });
             }
-          } else {
-            error = true;
-            break;
           }
         }
       } catch (e) {
@@ -122,60 +120,69 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       List<List<FitbitRatesCompanion>> fitbitToSave =
           List.generate(interv.length, (index) => []);
       try {
-        for (int i = 0; i < interv.length; i++) {
-          bool valid = await FitbitConnector.isTokenValid(
+        bool valid = await FitbitConnector.isTokenValid(
+          fitbitCredentials: FitbitCredentials(
+              //check if token still valid
+              userID: prefs.getString('fitbitUserID')!,
+              fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
+              fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
+        );
+        if (valid == false) {
+          FitbitCredentials newFitbitCredentials =
+              await FitbitConnector.refreshToken(
+            clientID: clientFitbit[0],
+            clientSecret: clientFitbit[1],
             fitbitCredentials: FitbitCredentials(
-                //check if token still valid
                 userID: prefs.getString('fitbitUserID')!,
                 fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
                 fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
           );
-          if (valid == false) {
-            FitbitCredentials newFitbitCredentials =
-                await FitbitConnector.refreshToken(
-              clientID: clientFitbit[0],
-              clientSecret: clientFitbit[1],
+          await prefs.setString(
+              'fitbitAccessToken', newFitbitCredentials.fitbitAccessToken);
+          await prefs.setString(
+              'fitbitRefreshToken', newFitbitCredentials.fitbitRefreshToken);
+        }
+        List<FitbitHeartRateIntradayData> getFitbitSession =
+            await FitbitHeartRateIntradayDataManager(
+                    clientID: clientFitbit[0], clientSecret: clientFitbit[1])
+                .fetch(
+          FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel(
               fitbitCredentials: FitbitCredentials(
                   userID: prefs.getString('fitbitUserID')!,
                   fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
                   fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
-            );
-            await prefs.setString(
-                'fitbitAccessToken', newFitbitCredentials.fitbitAccessToken);
-            await prefs.setString(
-                'fitbitRefreshToken', newFitbitCredentials.fitbitRefreshToken);
-          }
-          List<FitbitHeartRateIntradayData> fitbitHeartRateIntradayData =
-              await FitbitHeartRateIntradayDataManager(
-                      clientID: clientFitbit[0], clientSecret: clientFitbit[1])
-                  .fetch(
-            FitbitHeartRateIntradayAPIURL.dateRangeAndDetailLevel(
-                fitbitCredentials: FitbitCredentials(
-                    userID: prefs.getString('fitbitUserID')!,
-                    fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
-                    fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
-                startDate: DateTime.fromMillisecondsSinceEpoch(
-                    interv[i].startstimestamp * 1000),
-                endDate: DateTime.fromMillisecondsSinceEpoch(
-                    interv[i].endtimestamp * 1000),
-                intradayDetailLevel: IntradayDetailLevel.ONE_SECOND),
-          ) as List<FitbitHeartRateIntradayData>;
-          print(fitbitHeartRateIntradayData);
-
-          if (fitbitHeartRateIntradayData.isEmpty) {
-            print('No data for this interval');
-            error = true;
-            break;
-          } else {
-            fitbitHeartRateIntradayData.forEach((element) {
-              fitbitToSave[i].add(FitbitRatesCompanion(
-                idInterval: Value(interv[i].id),
-                timestamp: Value(
-                    (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
+              startDate: DateTime.fromMillisecondsSinceEpoch(
+                  interv[0].startstimestamp * 1000),
+              endDate: DateTime.fromMillisecondsSinceEpoch(
+                  interv[interv.length - 1].endtimestamp * 1000),
+              intradayDetailLevel: IntradayDetailLevel.ONE_SECOND),
+        ) as List<FitbitHeartRateIntradayData>;
+        if (getFitbitSession.isEmpty) {
+          print('No data for this session');
+          error = true;
+        } else {
+          for (int i = 0; i < interv.length; i++) {
+            var intToSave = getFitbitSession.where((element) =>
+                (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
                             1000)
-                        .floor()),
-                value: Value(element.value!.toInt()),
-              ));
+                        .floor() >=
+                    interv[i].startstimestamp &&
+                (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
+                            1000)
+                        .floor() <=
+                    interv[i].endtimestamp);
+            intToSave.forEach((element) {
+              fitbitToSave[i].add(
+                FitbitRatesCompanion(
+                  idInterval: Value(interv[i].id),
+                  timestamp: Value((element.dateOfMonitoring!
+                              .toUtc()
+                              .millisecondsSinceEpoch /
+                          1000)
+                      .floor()),
+                  value: Value(element.value!.toInt()),
+                ),
+              );
             });
           }
         }
@@ -208,7 +215,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                     devices[0] ||
                 (state as DetailStateDownloading).session1!.device2 ==
                     devices[0])) {
-          var fitbitToSave = await _fitbitDownload(
+          fitbitToSave = await _fitbitDownload(
               (state as DetailStateDownloading).session1!.id);
           fitbitToSave != null ? error = false : error = true;
           //print('1f');
@@ -218,19 +225,18 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                     devices[1] ||
                 (state as DetailStateDownloading).session1!.device2 ==
                     devices[1])) {
-          var withingsToSave = await _withingsDownload(
+          withingsToSave = await _withingsDownload(
               (state as DetailStateDownloading).session1!.id);
           withingsToSave != null ? error = false : error = true;
           //print('1w');
         } //Withings
-
       } else {
         if (error == false &&
             ((state as DetailStateDownloading).session2!.device1 ==
                     devices[0] ||
                 (state as DetailStateDownloading).session2!.device2 ==
                     devices[0])) {
-          var fitbitToSave = await _fitbitDownload(
+          fitbitToSave = await _fitbitDownload(
               (state as DetailStateDownloading).session2!.id);
           fitbitToSave != null ? error = false : error = true;
           //print('2f');
@@ -240,13 +246,12 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                     devices[1] ||
                 (state as DetailStateDownloading).session2!.device2 ==
                     devices[1])) {
-          var withingsToSave = await _withingsDownload(
+          withingsToSave = await _withingsDownload(
               (state as DetailStateDownloading).session2!.id);
           withingsToSave != null ? error = false : error = true;
           //print('2w');
         } //Withings
       }
-
       if (error == false) {
         fitbitToSave?.forEach((element) {
           element.forEach((element) async {
@@ -256,7 +261,6 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 value: element.value));
           });
         });
-
         withingsToSave?.forEach((element) {
           element.forEach((element) async {
             await db.withingsRatesDao.insert(WithingsRatesCompanion(
@@ -265,7 +269,6 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 value: element.value));
           });
         });
-
         //if no error update session as downloaded
         event.numSession == 1
             ? await db.sessionsDao.updateDown(

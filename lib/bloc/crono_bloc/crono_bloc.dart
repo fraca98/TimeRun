@@ -24,6 +24,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   StreamSubscription? hrSubscription;
   StreamSubscription? bluePolar;
   StreamSubscription? batteryPolar;
+  int? startstimestamp;
+  int? endtimestamp;
+  List<timestampInterval> listTimestampIntervals = [];
 
   List<List<PolarRatesCompanion>> polarToSave =
       List.generate(status.length, (index) => []);
@@ -154,9 +157,15 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               progressIndex: progressIndex,
               duration: (state as CronoStateRunning).duration,
               hr: event.data.hr,
+              errorMessage: error,
               battery: (state as CronoStateRunning).battery));
         } else {
-          add(CronoEventPause(errorMessage: error));
+          emit(CronoStateRunning(
+              progressIndex: progressIndex,
+              duration: (state as CronoStateRunning).duration,
+              hr: event.data.hr,
+              errorMessage: error,
+              battery: (state as CronoStateRunning).battery));
         }
       }
 
@@ -191,7 +200,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             duration: event.duration,
             hr: (state as CronoStateExt).hr,
             battery: (state as CronoStateExt).battery));
-
+        startstimestamp =
+            (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
         tickerSubscription?.cancel();
         tickerSubscription = ticker
             .tick(ticks: event.duration)
@@ -201,6 +211,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventPause>(
       (event, emit) {
+        endtimestamp =
+            (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
         tickerSubscription?.pause();
         event.errorMessage == null
             ? emit(CronoStatePause(
@@ -222,6 +234,11 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventStop>((event, emit) {
       tickerSubscription?.cancel();
+      if (endtimestamp != null) {
+      } else {
+        endtimestamp =
+            (DateTime.now().toUtc().millisecondsSinceEpoch / 1000).floor();
+      }
       (state as CronoStateExt).errorMessage == null
           ? emit(CronoStateStop(
               progressIndex: progressIndex,
@@ -270,11 +287,14 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           battery: (state as CronoStateExt).battery,
         ));
       } else {
+        listTimestampIntervals.add(
+            timestampInterval(start: startstimestamp!, end: endtimestamp!));
+        startstimestamp = null;
+        endtimestamp = null;
         progressIndex++;
 
-        if (progressIndex == 5) {
+        if (progressIndex == status.length) {
           emit(CronoStateSaving());
-
           //end the session of data collection
           //print(polarToSave);
           await hrSubscription?.cancel(); //stop collecting heart data
@@ -286,8 +306,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               SessionsCompanion(
                   iduser: Value(idUser),
                   numsession: Value(numSession),
-                  startsession: polarToSave[0].first.timestamp,
-                  endsession: polarToSave[status.length - 1].last.timestamp,
+                  startsession: Value(listTimestampIntervals.first.start),
+                  endsession: Value(listTimestampIntervals.last.end),
                   device1: Value(sessionDevices[0]),
                   device2: Value(sessionDevices[1])));
 
@@ -297,10 +317,10 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
               //Save the new interval
               idSession: Value(idSession),
               runstatus: Value(i),
-              startstimestamp: polarToSave[i].first.timestamp,
-              endtimestamp: polarToSave[i].last.timestamp,
-              deltatime: Value(polarToSave[i].last.timestamp.value -
-                  polarToSave[i].first.timestamp.value),
+              startstimestamp: Value(listTimestampIntervals[i].start),
+              endtimestamp: Value(listTimestampIntervals[i].end),
+              deltatime: Value(listTimestampIntervals[i].end -
+                  listTimestampIntervals[i].start),
             ));
             for (int j = 0; j < polarToSave[i].length; j++) {
               await db.polarRatesDao.insert(PolarRatesCompanion(
@@ -332,6 +352,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventDelete>(
       (event, emit) {
+        startstimestamp = null;
+        endtimestamp = null;
         polarToSave[progressIndex].clear();
         emit(CronoStatePlay(
           progressIndex: progressIndex,
@@ -359,6 +381,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             progressIndex: progressIndex,
             duration: event.duration,
             hr: (state as CronoStateRunning).hr,
+            errorMessage: (state as CronoStateRunning).errorMessage,
             battery: (state as CronoStateRunning).battery,
           ),
         );
@@ -374,4 +397,10 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     await batteryPolar?.cancel();
     return super.close();
   }
+}
+
+class timestampInterval {
+  int start;
+  int end;
+  timestampInterval({required this.start, required this.end});
 }
