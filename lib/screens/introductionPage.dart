@@ -39,7 +39,7 @@ class IntroductionPage extends StatelessWidget {
     return [
       PageViewModel(
           title: "Welcome",
-          body: "This application allows to ...",
+          body: "This application allows to run a particular trial, which purpose is to verify the accuracy of heart data from multiple smartwatches in different heart zones",
           image: Center(
               child: Padding(
                   padding: EdgeInsets.only(top: 30),

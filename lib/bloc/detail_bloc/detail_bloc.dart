@@ -88,7 +88,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         }
         if (getWithingsSession.status == 0) {
           if (getWithingsSession.series == null) {
-            print('I have no values for this session');
+            print('No data for this session');
             error = true;
           } else {
             for (int i = 0; i < interv.length; i++) {
@@ -291,7 +291,6 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
     on<DetailEventExport>(
       (event, emit) async {
-        print('export ${event.numSession}');
         var status = await Permission.storage.status;
         if (!status.isGranted) {
           await Permission.storage.request();
