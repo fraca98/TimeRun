@@ -16,3 +16,11 @@ class DetailEventDownload extends DetailEvent {
   @override
   List<Object?> get props => [numSession];
 }
+
+class DetailEventExport extends DetailEvent {
+  int numSession;
+  DetailEventExport({required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
+
+  @override
+  List<Object?> get props => [numSession];
+}

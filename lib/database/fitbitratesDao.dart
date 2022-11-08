@@ -12,7 +12,14 @@ class FitbitRatesDao extends DatabaseAccessor<AppDatabase>
   // of this object.
   FitbitRatesDao(AppDatabase db) : super(db);
 
-  Future<int> insert(FitbitRatesCompanion data) async { //insert data
+  Future<int> insert(FitbitRatesCompanion data) async {
+    //insert data
     return into(fitbitRates).insert(data);
+  }
+
+  Future<List<FitbitRate>> fitbitByInterval(int idInterval) {
+    return (select(fitbitRates)
+          ..where((tbl) => tbl.idInterval.equals(idInterval)))
+        .get();
   }
 }

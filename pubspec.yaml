@@ -57,7 +57,10 @@ dependencies:
   get_it: ^7.2.0 #inject db in bloc (access without context)
 
   drift_db_viewer: ^2.0.0 #view db in app
+  csv: ^5.0.1 #save to csv
   share_plus: ^4.4.0 #share file
+
+  permission_handler: ^10.2.0 #permissions
 
   material_design_icons_flutter: ^5.0.6996 #icons
   syncfusion_flutter_gauges: ^20.2.49 #bar

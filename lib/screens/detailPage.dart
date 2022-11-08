@@ -14,7 +14,7 @@ class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DetailBloc(user.id),
+      create: (context) => DetailBloc(user),
       child: BlocConsumer<DetailBloc, DetailState>(
         listener: (context, state) {
           if (state is DetailStateDeletedUser) {
@@ -250,13 +250,15 @@ class DetailPage extends StatelessWidget {
                           },
                         )
                       : state.session1!.download
-                          ? Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(
-                                MdiIcons.check,
-                                color: Colors.green,
-                              ),
-                            )
+                          ? IconButton(
+                              onPressed: () {
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
+                                context
+                                    .read<DetailBloc>()
+                                    .add(DetailEventExport(numSession: 1));
+                              },
+                              icon: Icon(MdiIcons.shareVariant))
                           : IconButton(
                               onPressed: () {
                                 ScaffoldMessenger.of(context)
@@ -271,15 +273,7 @@ class DetailPage extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: CircularProgressIndicator(),
                         )
-                      : state.session1!.download
-                          ? Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(
-                                MdiIcons.check,
-                                color: Colors.green,
-                              ),
-                            )
-                          : null),
+                      : null),
         ),
         SizedBox(
           height: 50,
@@ -335,13 +329,15 @@ class DetailPage extends StatelessWidget {
                             },
                           )
                         : state.session2!.download
-                            ? Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(
-                                  MdiIcons.check,
-                                  color: Colors.green,
-                                ),
-                              )
+                            ? IconButton(
+                                onPressed: () {
+                                  ScaffoldMessenger.of(context)
+                                      .hideCurrentSnackBar();
+                                  context
+                                      .read<DetailBloc>()
+                                      .add(DetailEventExport(numSession: 2));
+                                },
+                                icon: Icon(MdiIcons.shareVariant))
                             : IconButton(
                                 onPressed: () {
                                   ScaffoldMessenger.of(context)
@@ -353,15 +349,7 @@ class DetailPage extends StatelessWidget {
                                 icon: Icon(MdiIcons.download))
                     : (state as DetailStateDownloading).downSession == 2
                         ? CircularProgressIndicator()
-                        : state.session2 != null && state.session2!.download
-                            ? Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Icon(
-                                  MdiIcons.check,
-                                  color: Colors.green,
-                                ),
-                              )
-                            : null,
+                        : null,
           ),
         ),
         SizedBox(

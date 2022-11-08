@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
@@ -9,6 +10,8 @@ import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/model/credentials.dart';
 import 'package:timerun/model/device.dart';
 import 'package:withings_flutter/withings_flutter.dart';
+import 'package:csv/csv.dart';
+import 'package:permission_handler/permission_handler.dart';
 part 'detail_event.dart';
 part 'detail_state.dart';
 
@@ -16,8 +19,9 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
   AppDatabase db = GetIt.I<AppDatabase>();
   SharedPreferences prefs = GetIt.I<SharedPreferences>();
   StreamSubscription? subStreamSession;
-  DetailBloc(int id) : super(DetailStateLoading()) {
-    Stream<List<Session>> streamSession = db.sessionsDao.watchSessionUser(id);
+  DetailBloc(User user) : super(DetailStateLoading()) {
+    Stream<List<Session>> streamSession =
+        db.sessionsDao.watchSessionUser(user.id);
 
     subStreamSession = streamSession.listen((event) async {
       if (event.isEmpty) {
@@ -32,8 +36,8 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     on<DetailEventDeleteUser>(
       (event, emit) async {
         emit(DetailStateDeletingUser());
-        await db.usersDao
-            .deleteUser(id); //on cascade deletes linked Sessions, Intervals
+        await db.usersDao.deleteUser(
+            user.id); //on cascade deletes linked Sessions, Intervals
         //print('Removed user');
         emit(DetailStateDeletedUser());
       },
@@ -284,6 +288,164 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             error: true));
       }
     });
+
+    on<DetailEventExport>(
+      (event, emit) async {
+        print('export ${event.numSession}');
+        var status = await Permission.storage.status;
+        if (!status.isGranted) {
+          await Permission.storage.request();
+        } else {
+          // User csv
+          List<dynamic> headerUser = ['ID', 'Sex', 'Activity'];
+          List<List<dynamic>> rowsUser = [];
+          rowsUser.add(headerUser);
+          rowsUser.add([user.id, user.sex, user.activity]);
+          String Usercsv = ListToCsvConverter().convert(rowsUser);
+          final path =
+              (await Directory('/storage/emulated/0/TimeRun/${user.id}')
+                      .create(recursive: true))
+                  .path;
+          final fileUser = File('$path/user_${user.id}.csv');
+          await fileUser.writeAsString(Usercsv);
+
+          int idSession;
+          event.numSession == 1
+              ? idSession = (state as DetailStateLoaded).session1!.id
+              : idSession = (state as DetailStateLoaded).session2!.id;
+          final Spath = (await Directory(
+                      '/storage/emulated/0/TimeRun/${user.id}/session${idSession}')
+                  .create(recursive: true))
+              .path;
+
+          // Session csv
+          List<List<dynamic>> rowsSession = [];
+          rowsSession.add([
+            'id',
+            'iduser',
+            'numsession',
+            'startsession',
+            'endsession',
+            'device1',
+            'device2'
+          ]);
+          if (event.numSession == 1) {
+            rowsSession.add([
+              (state as DetailStateLoaded).session1!.id,
+              (state as DetailStateLoaded).session1!.iduser,
+              (state as DetailStateLoaded).session1!.numsession,
+              (state as DetailStateLoaded).session1!.startsession,
+              (state as DetailStateLoaded).session1!.endsession,
+              (state as DetailStateLoaded).session1!.device1,
+              (state as DetailStateLoaded).session1!.device2
+            ]);
+          } else {
+            rowsSession.add([
+              (state as DetailStateLoaded).session2!.id,
+              (state as DetailStateLoaded).session2!.iduser,
+              (state as DetailStateLoaded).session2!.numsession,
+              (state as DetailStateLoaded).session2!.startsession,
+              (state as DetailStateLoaded).session2!.endsession,
+              (state as DetailStateLoaded).session2!.device1,
+              (state as DetailStateLoaded).session2!.device2
+            ]);
+          }
+          String Sessioncsv = ListToCsvConverter().convert(rowsSession);
+          final fileSession =
+              File('$Spath/session_${user.id}_${idSession}.csv');
+          fileSession.writeAsString(Sessioncsv);
+
+          // Intervals csv
+          List<Interval> intervals =
+              await db.intervalsDao.getIntervalBySession(idSession);
+          List<List<dynamic>> rowsIntervals = [];
+          rowsIntervals.add([
+            'id',
+            'idSession',
+            'runstatus',
+            'startimesamp',
+            'endtimestamp',
+            'deltatime'
+          ]);
+          intervals.forEach((element) {
+            rowsIntervals.add([
+              element.id,
+              element.idSession,
+              element.runstatus,
+              element.startstimestamp,
+              element.endtimestamp,
+              element.deltatime
+            ]);
+          });
+          String Intervalcsv = ListToCsvConverter().convert(rowsIntervals);
+          final fileInterval =
+              File('$Spath/intervals_${user.id}_${idSession}.csv');
+          fileInterval.writeAsString(Intervalcsv);
+
+          // Polar csv
+          List<dynamic> headerPolar = ['idInterval', 'timestamp', 'value'];
+          List<List<dynamic>> rowsPolar = [];
+          rowsPolar.add(headerPolar);
+          for (int i = 0; i < intervals.length; i++) {
+            List<PolarRate> polarSingleInterval =
+                await db.polarRatesDao.polarByInterval(intervals[i].id);
+            polarSingleInterval.forEach((element) {
+              rowsPolar
+                  .add([element.idInterval, element.timestamp, element.value]);
+            });
+          }
+          String Polarcsv = ListToCsvConverter().convert(rowsPolar);
+          final filePolar = File('$Spath/polar_${user.id}_${idSession}.csv');
+          filePolar.writeAsString(Polarcsv);
+
+          Session session;
+          event.numSession == 1
+              ? session = (state as DetailStateLoaded).session1!
+              : session = (state as DetailStateLoaded).session2!;
+          if (session.device1 == devices[0] || session.device2 == devices[0]) {
+            //fitbit
+            List<dynamic> headerFitbit = ['idInterval', 'timestamp', 'value'];
+            List<List<dynamic>> rowsFitbit = [];
+            rowsFitbit.add(headerFitbit);
+            for (int i = 0; i < intervals.length; i++) {
+              List<FitbitRate> fitbitSingleInterval =
+                  await db.fitbitRatesDao.fitbitByInterval(intervals[i].id);
+              fitbitSingleInterval.forEach((element) {
+                rowsFitbit.add(
+                    [element.idInterval, element.timestamp, element.value]);
+              });
+            }
+            String Fitbitcsv = ListToCsvConverter().convert(rowsFitbit);
+            final fileFitbit =
+                File('$Spath/fitbit_${user.id}_${idSession}.csv');
+            fileFitbit.writeAsString(Fitbitcsv);
+          }
+
+          if (session.device1 == devices[1] || session.device2 == devices[1]) {
+            //withings
+            List<dynamic> headerWithings = [
+              'idInterval',
+              'timestamp',
+              'value'
+            ];
+            List<List<dynamic>> rowsWithings = [];
+            rowsWithings.add(headerWithings);
+            for (int i = 0; i < intervals.length; i++) {
+              List<WithingsRate> withingsSingleInterval =
+                  await db.withingsRatesDao.withingsByInterval(intervals[i].id);
+              withingsSingleInterval.forEach((element) {
+                rowsWithings.add(
+                    [element.idInterval, element.timestamp, element.value]);
+              });
+            }
+            String Withingscsv = ListToCsvConverter().convert(rowsWithings);
+            final fileWithings =
+                File('$Spath/withings_${user.id}_${idSession}.csv');
+            fileWithings.writeAsString(Withingscsv);
+          }
+        }
+      },
+    );
   }
   @override
   Future<void> close() async {
