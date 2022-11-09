@@ -63,20 +63,35 @@ class DetailPage extends StatelessWidget {
               ),
               body: BlocConsumer<DetailBloc, DetailState>(
                 listener: (context, state) {
-                  if (state is DetailStateLoaded && state.error == true) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Row(
-                      children: [
-                        Icon(
-                          MdiIcons.alertCircle,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text('Something went wrong'),
-                      ],
-                    )));
+                  if (state is DetailStateLoaded && state.message != null) {
+                    state.message!.contains('Error')
+                        ? ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Row(
+                            children: [
+                              Icon(
+                                MdiIcons.alertCircle,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Text(state.message!),
+                            ],
+                          )))
+                        : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Row(
+                              children: [
+                                Icon(
+                                  MdiIcons.fileExport,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                Text(state.message!),
+                              ],
+                            )));
                   }
                 },
                 builder: (context, state) {

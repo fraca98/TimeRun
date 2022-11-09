@@ -285,7 +285,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         emit(DetailStateLoaded(
             session1: (state as DetailStateDownloading).session1,
             session2: (state as DetailStateDownloading).session2,
-            error: true));
+            message: 'Error: Something went wrong'));
       }
     });
 
@@ -293,7 +293,16 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       (event, emit) async {
         var status = await Permission.storage.status;
         if (!status.isGranted) {
-          await Permission.storage.request();
+          await Permission.storage
+              .request(); //if not permission, ask permission
+          status = await Permission.storage.status;
+        }
+        if (!status.isGranted) {
+          //if permission refused: return error
+          emit(DetailStateLoaded(
+              session1: (state as DetailStateLoaded).session1,
+              session2: (state as DetailStateLoaded).session2,
+              message: 'Error: Provide permission'));
         } else {
           // User csv
           List<dynamic> headerUser = ['ID', 'Sex', 'Activity'];
@@ -422,11 +431,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
           if (session.device1 == devices[1] || session.device2 == devices[1]) {
             //withings
-            List<dynamic> headerWithings = [
-              'idInterval',
-              'timestamp',
-              'value'
-            ];
+            List<dynamic> headerWithings = ['idInterval', 'timestamp', 'value'];
             List<List<dynamic>> rowsWithings = [];
             rowsWithings.add(headerWithings);
             for (int i = 0; i < intervals.length; i++) {
@@ -442,6 +447,10 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 File('$Spath/withings_${user.id}_${idSession}.csv');
             fileWithings.writeAsString(Withingscsv);
           }
+          emit(DetailStateLoaded(
+              session1: (state as DetailStateLoaded).session1,
+              session2: (state as DetailStateLoaded).session2,
+              message: 'Session exported'));
         }
       },
     );
