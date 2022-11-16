@@ -20,11 +20,16 @@ class DetailStateExt extends DetailState {
 }
 
 class DetailStateLoaded extends DetailStateExt {
-  bool? error;
-  DetailStateLoaded({super.session1, super.session2, this.error});
+  String? message;
+  DetailStateLoaded({super.session1, super.session2, this.message});
 
   @override
-  List<Object?> get props => [session1, session2, error];
+  List<Object?> get props => [
+        session1,
+        session2,
+        message,
+        identityHashCode(this)
+      ]; //identity hash code so i can re-emit the state even if i have the same message when exporting (cause else same state)
 }
 
 class DetailStateDeletingUser extends DetailState {} //deleting user

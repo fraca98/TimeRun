@@ -69,19 +69,6 @@ class FormUserPage extends StatelessWidget {
                           prefixIcon: Icon(Icons.cake),
                         ),
                       ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                      RadioButtonGroupFieldBlocBuilder<String>(
-                        selectFieldBloc: formBloc.activity,
-                        itemBuilder: (context, value) => FieldItem(
-                          child: Text(value),
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Activity level',
-                          prefixIcon: SizedBox(),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -141,14 +128,7 @@ class LoadingDialog extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async => false,
       child: Center(
-        child: Card(
-          child: Container(
-            width: 120,
-            height: 120,
-            padding: const EdgeInsets.all(12.0),
-            child: const CircularProgressIndicator(),
-          ),
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }

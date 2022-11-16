@@ -17,9 +17,7 @@ class FitbitRatesDao extends DatabaseAccessor<AppDatabase>
     return into(fitbitRates).insert(data);
   }
 
-  Future<List<FitbitRate>> fitbitByInterval(int idInterval) {
-    return (select(fitbitRates)
-          ..where((tbl) => tbl.idInterval.equals(idInterval)))
-        .get();
+    Future<List<FitbitRate>> fitbitBySession(int idSession){
+    return (select(fitbitRates)..where((tbl) => tbl.idSession.equals(idSession))).get();
   }
 }

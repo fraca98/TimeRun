@@ -16,7 +16,8 @@ class PolarRatesDao extends DatabaseAccessor<AppDatabase>
     return into(polarRates).insert(data);
   }
 
-  Future<List<PolarRate>> polarByInterval (int idInterval){
-    return (select(polarRates)..where((tbl) => tbl.idInterval.equals(idInterval))).get();
+  Future<List<PolarRate>> polarBySession(int idSession){
+    return (select(polarRates)..where((tbl) => tbl.idSession.equals(idSession))).get();
   }
+
 }

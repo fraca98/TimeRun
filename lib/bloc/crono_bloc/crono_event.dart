@@ -16,11 +16,11 @@ class CronoEventPlay extends CronoEvent {
 }
 
 class CronoEventPause extends CronoEvent {
-  String? errorMessage;
-  CronoEventPause({this.errorMessage});
+  String? message;
+  CronoEventPause({this.message});
 
   @override
-  List<Object?> get props => [errorMessage];
+  List<Object?> get props => [message];
 }
 
 class CronoEventStop extends CronoEvent {}

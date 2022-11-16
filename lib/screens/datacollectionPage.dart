@@ -77,14 +77,9 @@ class DataCollectionPage extends StatelessWidget {
                     //print(previous);
                     //print(current);
                     if (previous is CronoStateExt && current is CronoStateExt) {
-                      if (previous.errorMessage != null &&
-                          previous.errorMessage == current.errorMessage) {
+                      if (previous.message != null &&
+                          previous.message == current.message) {
                         //print('Same error');
-                        return false;
-                      } else if (previous.errorMessage != null &&
-                          previous.errorMessage!.contains('interval') &&
-                          current.errorMessage == null) {
-                        //to show snackbar of empty interval without removing it if there are not errors then
                         return false;
                       } else {
                         return true;
@@ -96,8 +91,8 @@ class DataCollectionPage extends StatelessWidget {
                   listener: (context, state) {
                     SnackBar snackBar;
                     if (state is CronoStateExt) {
-                      (state).errorMessage != null
-                          ? state.errorMessage!.contains('interval')
+                      (state).message != null
+                          ? state.message!.contains('interval')
                               ? snackBar = SnackBar(
                                   content: Row(
                                     children: [
@@ -108,7 +103,7 @@ class DataCollectionPage extends StatelessWidget {
                                       SizedBox(
                                         width: 15,
                                       ),
-                                      Text(state.errorMessage!)
+                                      Text(state.message!)
                                     ],
                                   ),
                                   dismissDirection: DismissDirection.none,
@@ -117,8 +112,7 @@ class DataCollectionPage extends StatelessWidget {
                                   content: Row(
                                     children: [
                                       Icon(
-                                        state.errorMessage!
-                                                .contains('Bluetooth')
+                                        state.message!.contains('Bluetooth')
                                             ? MdiIcons.bluetoothOff
                                             : MdiIcons.contactlessPayment,
                                         color: Colors.white,
@@ -126,7 +120,7 @@ class DataCollectionPage extends StatelessWidget {
                                       SizedBox(
                                         width: 15,
                                       ),
-                                      Text(state.errorMessage!)
+                                      Text(state.message!)
                                     ],
                                   ),
                                   duration: Duration(days: 365),
@@ -134,20 +128,19 @@ class DataCollectionPage extends StatelessWidget {
                                 )
                           : snackBar = SnackBar(content: SizedBox());
 
-                      if (state is CronoStatePlay &&
-                          state.errorMessage != null) {
+                      if (state is CronoStatePlay && state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStatePause &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStateStop &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStateRunning &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
@@ -198,7 +191,7 @@ class DataCollectionPage extends StatelessWidget {
 
   Widget _polar(BuildContext context, CronoStateExt state) {
     final double maxHrValue =
-        (220 - (DateTime.now().year - user.birthDate)).toDouble();
+        (220 - (DateTime.now().year - user.birthYear)).toDouble();
     String text;
     switch (state.progressIndex) {
       case 0:
@@ -222,8 +215,7 @@ class DataCollectionPage extends StatelessWidget {
     Icon batteryIcon;
     String batteryLevel;
     if (state.battery != null) {
-      if (state.errorMessage != null &&
-          state.errorMessage!.contains('Bluetooth')) {
+      if (state.message != null && state.message!.contains('Bluetooth')) {
         batteryIcon = Icon(MdiIcons.batteryUnknown);
         batteryLevel = '';
       } else {
@@ -233,7 +225,7 @@ class DataCollectionPage extends StatelessWidget {
             color: Colors.green,
           );
           batteryLevel = state.battery.toString();
-        } else if (state.battery! > 100 && state.battery! >= 90) {
+        } else if (state.battery! < 100 && state.battery! >= 90) {
           batteryIcon = Icon(
             MdiIcons.battery90,
             color: Colors.green,

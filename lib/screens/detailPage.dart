@@ -63,20 +63,35 @@ class DetailPage extends StatelessWidget {
               ),
               body: BlocConsumer<DetailBloc, DetailState>(
                 listener: (context, state) {
-                  if (state is DetailStateLoaded && state.error == true) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Row(
-                      children: [
-                        Icon(
-                          MdiIcons.alertCircle,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text('Something went wrong'),
-                      ],
-                    )));
+                  if (state is DetailStateLoaded && state.message != null) {
+                    state.message!.contains('Error')
+                        ? ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Row(
+                            children: [
+                              Icon(
+                                MdiIcons.alertCircle,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 15,
+                              ),
+                              Text(state.message!),
+                            ],
+                          )))
+                        : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            backgroundColor: Colors.green,
+                            content: Row(
+                              children: [
+                                Icon(
+                                  MdiIcons.fileExport,
+                                  color: Colors.white,
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                Text(state.message!),
+                              ],
+                            )));
                   }
                 },
                 builder: (context, state) {
@@ -141,7 +156,6 @@ class DetailPage extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
           child: Table(
-            //border: TableBorder.all(),
             children: [
               TableRow(children: [
                 Column(children: [
@@ -172,33 +186,7 @@ class DetailPage extends StatelessWidget {
                   )
                 ]),
                 Column(children: [
-                  Text(user.birthDate.toString(),
-                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
-                ]),
-              ]),
-              TableRow(children: [
-                //fake TableRow to add space
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  height: 10,
-                )
-              ]),
-              TableRow(children: [
-                Column(children: [
-                  Text(
-                    'Activity Level',
-                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
-                  )
-                ]),
-                Column(children: [
-                  Text(
-                      user.activity == 0
-                          ? 'Low'
-                          : user.activity == 1
-                              ? 'Medium'
-                              : 'High',
+                  Text(user.birthYear.toString(),
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),

@@ -17,9 +17,9 @@ class WithingsRatesDao extends DatabaseAccessor<AppDatabase>
     return into(withingsRates).insert(data);
   }
 
-  Future<List<WithingsRate>> withingsByInterval(int idInterval) {
+  Future<List<WithingsRate>> withingsBySession(int idSession) {
     return (select(withingsRates)
-          ..where((tbl) => tbl.idInterval.equals(idInterval)))
+          ..where((tbl) => tbl.idSession.equals(idSession)))
         .get();
   }
 }
