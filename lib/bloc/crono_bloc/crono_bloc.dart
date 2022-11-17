@@ -7,6 +7,7 @@ import 'package:polar/polar.dart';
 import 'package:timerun/database/AppDatabase.dart';
 import 'package:timerun/model/device.dart';
 import 'package:timerun/model/ticker.dart';
+import 'package:vibration/vibration.dart';
 
 import '../../model/status.dart';
 part 'crono_event.dart';
@@ -14,24 +15,30 @@ part 'crono_state.dart';
 
 class CronoBloc extends Bloc<CronoEvent, CronoState> {
   int? idSession;
-  AppDatabase db = GetIt.I<AppDatabase>();
   int progressIndex = 0;
-  Polar polar;
+
   Ticker ticker = Ticker();
   StreamSubscription<int>? tickerSubscription;
+
   StreamSubscription? hrSubscription;
   StreamSubscription? bluePolar;
   StreamSubscription? batteryPolar;
+  List<PolarRatesCompanion> polarToSave = [];
+
   DateTime? startTimeInterval;
   DateTime? endTimeInterval;
   List<timeInterval> listTimeIntervals = [];
-  List<PolarRatesCompanion> polarToSave = [];
+
+  AppDatabase db = GetIt.I<AppDatabase>();
 
   CronoBloc({
-    required this.polar,
+    required Polar polar,
     required int idUser,
     required List<String> sessionDevices,
     required int numSession,
+    required List<int> minHr,
+    required List<int> maxHr,
+    required int maxHrValue,
   }) : super(CronoStateInit()) {
     batteryPolar = polar.batteryLevelStream.listen((event) {
       print('Battery level ${event.level}');
@@ -82,6 +89,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     });
 
     bluePolar = polar.deviceDisconnectedStream.listen((event) {
+      Vibration.vibrate(); //vibrate if Bluetooth connection interrupts
       print('Disconnected from Bluetooth');
       String error = "Disconnected from Bluetooth";
       if (state is CronoStateInit) {
@@ -117,7 +125,28 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     hrSubscription = polar.heartRateStream.listen((event) {
       print('Polar HR: ${event.data.hr}');
       polarToSave.add(PolarRatesCompanion(
-          time: Value(DateTime.now()), rate: Value(event.data.hr)));
+          time: Value(DateTime.now()),
+          rate: Value(event.data.hr))); // add Polar data
+
+      if (state is CronoStateExt) {
+        //manage vibration across the interval
+        if (((state as CronoStateExt).hr < minHr[progressIndex] ||
+                (state as CronoStateExt).hr > maxHr[progressIndex]) &&
+            (event.data.hr >= minHr[progressIndex] &&
+                event.data.hr <= maxHr[progressIndex])) {
+          //out --> in
+          Vibration.vibrate();
+          print('out-->in in the interval');
+        }
+        if (((state as CronoStateExt).hr >= minHr[progressIndex] &&
+                (state as CronoStateExt).hr <= maxHr[progressIndex]) &&
+            (event.data.hr < minHr[progressIndex] ||
+                event.data.hr > maxHr[progressIndex])) {
+          //in --> out
+          Vibration.vibrate();
+          print('same in-->out in the interval');
+        }
+      }
 
       String? error;
       if (event.data.hr == 0) {
@@ -127,6 +156,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       }
 
       if (state is CronoStateInit) {
+        Vibration
+            .vibrate(); // vibrate when CronoStatPlay appears for the first time (so first hr emitted by Polar)
         emit(CronoStatePlay(
             progressIndex: progressIndex,
             duration: 0,
@@ -167,13 +198,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             message: error,
             battery: (state as CronoStateStop).battery));
       }
-      if (state is CronoStateSaving) {
-        emit(CronoStateSaving());
-      }
-      if (state is CronoStateCompleted) {
-        emit(CronoStateCompleted());
-      }
     });
+
     on<CronoEventPlay>((event, emit) {
       if ((state as CronoStateExt).hr != 0) {
         emit(CronoStateRunning(

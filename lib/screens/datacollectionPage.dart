@@ -6,7 +6,6 @@ import 'package:polar/polar.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
-import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
 import '../database/AppDatabase.dart';
@@ -16,32 +15,47 @@ class DataCollectionPage extends StatelessWidget {
   final User user;
   final List<String> sessionDevices;
   final int numSession;
-  BuildContext detailcontext;
 
   DataCollectionPage(
       {required this.polar,
       required this.numSession,
       required this.sessionDevices,
       required this.user,
-      required this.detailcontext,
       super.key});
 
   @override
   Widget build(BuildContext context) {
+    final int maxHrValue =
+        (220 - (DateTime.now().year - user.birthYear)).toInt();
+    final List<int> minHr = [];
+    minHr.add(1);
+    minHr.add((maxHrValue * 0.5).round());
+    minHr.add((maxHrValue * 0.6).round());
+    minHr.add((maxHrValue * 0.7).round());
+    minHr.add((maxHrValue * 0.8).round());
+    minHr.add((maxHrValue * 0.9).round());
+
+    final List<int> maxHr = [];
+    maxHr.add((maxHrValue * 0.5).round());
+    maxHr.add((maxHrValue * 0.6).round());
+    maxHr.add((maxHrValue * 0.7).round());
+    maxHr.add((maxHrValue * 0.8).round());
+    maxHr.add((maxHrValue * 0.9).round());
+    maxHr.add((maxHrValue).round());
+
     return BlocProvider(
       create: (context) => CronoBloc(
         polar: polar,
         idUser: user.id,
         sessionDevices: sessionDevices,
         numSession: numSession,
+        minHr: minHr,
+        maxHr: maxHr,
+        maxHrValue: maxHrValue,
       ),
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
           if (state is CronoStateCompleted) {
-            detailcontext
-                .read<DetailBloc>()
-                .subStreamSession
-                ?.resume(); //resume stream for detail
             Navigator.pop(context);
           }
         },
@@ -140,7 +154,7 @@ class DataCollectionPage extends StatelessWidget {
                               state is CronoStateCompleted
                           ? Center(
                               child: /*CircularProgressIndicator(),*/
-                               LottieBuilder.asset(
+                                  LottieBuilder.asset(
                                 'assets/database-store.json',
                                 repeat: true,
                                 frameRate: FrameRate.max,
@@ -148,7 +162,8 @@ class DataCollectionPage extends StatelessWidget {
                             )
                           : Column(
                               children: [
-                                _polar(context, state as CronoStateExt),
+                                _polar(context, state as CronoStateExt, minHr,
+                                    maxHr, maxHrValue),
                                 Divider(
                                   thickness: 2,
                                 ),
@@ -174,26 +189,8 @@ class DataCollectionPage extends StatelessWidget {
     );
   }
 
-  Widget _polar(BuildContext context, CronoStateExt state) {
-    final double maxHrValue =
-        (220 - (DateTime.now().year - user.birthYear)).toDouble();
-
-    final List<double> minHr = [];
-    minHr.add(0);
-    minHr.add(maxHrValue * 0.5);
-    minHr.add(maxHrValue * 0.6);
-    minHr.add(maxHrValue * 0.7);
-    minHr.add(maxHrValue * 0.8);
-    minHr.add(maxHrValue * 0.9);
-
-    final List<double> maxHr = [];
-    maxHr.add(maxHrValue * 0.5);
-    maxHr.add(maxHrValue * 0.6);
-    maxHr.add(maxHrValue * 0.7);
-    maxHr.add(maxHrValue * 0.8);
-    maxHr.add(maxHrValue * 0.9);
-    maxHr.add(maxHrValue);
-
+  Widget _polar(BuildContext context, CronoStateExt state, List<int> minHr,
+      List<int> maxHr, int maxHrValue) {
     String? text;
     switch (state.progressIndex) {
       case 0:
@@ -336,7 +333,7 @@ class DataCollectionPage extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  '${minHr[state.progressIndex].toInt()} - ',
+                  '${state.progressIndex == 0 ? 0 : minHr[state.progressIndex].toInt()} - ',
                   style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
                   textAlign: TextAlign.center,
                 ),
@@ -355,7 +352,7 @@ class DataCollectionPage extends StatelessWidget {
                                       state.hr <= maxHr[state.progressIndex]
                                   ? Colors.green
                                   : Colors.red),
-                                  textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
                     Text(
                       ' BPM',
@@ -363,7 +360,7 @@ class DataCollectionPage extends StatelessWidget {
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Poppins'),
-                          textAlign: TextAlign.center,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -384,7 +381,7 @@ class DataCollectionPage extends StatelessWidget {
               maximum: 220,
               ranges: [
                 LinearGaugeRange(
-                  startValue: minHr[0],
+                  startValue: 0,
                   endValue: 0.5 * maxHrValue,
                   color: Colors.white,
                 ),

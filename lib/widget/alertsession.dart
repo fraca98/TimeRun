@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/screens/bluetoothPage.dart';
 import '../database/AppDatabase.dart';
 
+/// AlertDialog widget when i want to start a session
 class AlertSession extends StatefulWidget {
-  //Dialog alert session when start
-  var selectable;
-  User user;
-  BuildContext detailcontext;
+  final selectable;
+  final User user;
 
   AlertSession({
     super.key,
-    required this.detailcontext,
     required this.selectable,
     required this.user,
   });
@@ -88,10 +84,6 @@ class _AlertSessionState extends State<AlertSession> {
                     }
                   }
                   Navigator.pop(context);
-                  widget.detailcontext
-                      .read<DetailBloc>()
-                      .subStreamSession!
-                      .pause();
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -99,7 +91,6 @@ class _AlertSessionState extends State<AlertSession> {
                         user: widget.user,
                         numSession: numSession,
                         sessionDevices: sessionDevices,
-                        detailcontext: widget.detailcontext,
                       ),
                     ),
                   );

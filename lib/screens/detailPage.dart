@@ -232,7 +232,6 @@ class DetailPage extends StatelessWidget {
                                   return AlertSession(
                                     selectable: selectable,
                                     user: user,
-                                    detailcontext: context,
                                   );
                                 });
                           },
@@ -311,7 +310,6 @@ class DetailPage extends StatelessWidget {
                                     return AlertSession(
                                       selectable: selectable,
                                       user: user,
-                                      detailcontext: context,
                                     );
                                   });
                             },

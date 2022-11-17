@@ -8,7 +8,7 @@ abstract class BluetoothState extends Equatable {
 }
 
 class BluetoothStateConnect extends BluetoothState {
-  int? sett;
+  final int? sett;
   BluetoothStateConnect({this.sett});
   /*
   0: GPS not active

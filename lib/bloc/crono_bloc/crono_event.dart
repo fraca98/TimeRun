@@ -8,7 +8,7 @@ abstract class CronoEvent extends Equatable {
 }
 
 class CronoEventPlay extends CronoEvent {
-  int duration;
+  final int duration;
   CronoEventPlay({required this.duration});
 
   @override
@@ -16,7 +16,7 @@ class CronoEventPlay extends CronoEvent {
 }
 
 class CronoEventPause extends CronoEvent {
-  String? message;
+  final String? message;
   CronoEventPause({this.message});
 
   @override
@@ -34,7 +34,7 @@ class CronoEventResume extends CronoEvent {}
 class CronoEventDeleteSession extends CronoEvent {}
 
 class CronoEventTicked extends CronoEvent {
-  int duration;
+  final int duration;
   CronoEventTicked({required this.duration});
   @override
   List<Object> get props => [duration];

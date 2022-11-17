@@ -10,7 +10,7 @@ abstract class DetailEvent extends Equatable {
 class DetailEventDeleteUser extends DetailEvent {}
 
 class DetailEventDownload extends DetailEvent {
-  int numSession;
+  final int numSession;
   DetailEventDownload({required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
 
   @override
@@ -18,7 +18,7 @@ class DetailEventDownload extends DetailEvent {
 }
 
 class DetailEventExport extends DetailEvent {
-  int numSession;
+  final int numSession;
   DetailEventExport({required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
 
   @override

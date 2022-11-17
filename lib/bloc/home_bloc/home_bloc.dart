@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -32,8 +31,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         //print(file.path);
         await GetIt.I<AppDatabase>()
             .exportInto(file); // save the database (export) in local
-        await Share.shareFiles([file.path],
-            subject: 'TimeRun database'); //share the database file saved
+        await Share.shareXFiles([XFile(file.path)],
+            subject: 'TimeRun database', text: 'Date: ${DateTime.now()}'); //share the database file saved
       },
     );
   }

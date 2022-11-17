@@ -8,11 +8,11 @@ abstract class CronoState extends Equatable {
 }
 
 class CronoStateExt extends CronoState {
-  int progressIndex;
-  int duration;
-  int hr;
-  String? message;
-  int? battery;
+  final int progressIndex;
+  final int duration;
+  final int hr;
+  final String? message;
+  final int? battery;
   CronoStateExt(
       {required this.progressIndex,
       required this.duration,
@@ -26,7 +26,7 @@ class CronoStateExt extends CronoState {
 }
 
 class CronoStateInit extends CronoState {
-  int? battery;
+  final int? battery;
   CronoStateInit({this.battery});
    @override
   List<Object?> get props =>
