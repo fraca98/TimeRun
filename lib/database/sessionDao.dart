@@ -26,7 +26,7 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<Session>> watchSessionUser(int idUser) {
     //watches changes of list of Sessions given idUser
-    return (select(sessions)..where((tbl) => tbl.iduser.equals(idUser)))
+    return (select(sessions)..where((tbl) => tbl.idUser.equals(idUser)))
         .watch();
   }
 

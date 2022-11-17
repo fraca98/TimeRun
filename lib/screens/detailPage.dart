@@ -149,7 +149,7 @@ class DetailPage extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Column(children: [
         Icon(
-          user.sex ? MdiIcons.faceMan : MdiIcons.faceWoman,
+          user.sex == 1 ? MdiIcons.faceMan : MdiIcons.faceWoman,
           size: 150,
           color: colorFaceIcon,
         ),

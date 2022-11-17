@@ -16,9 +16,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   int? idSession;
   AppDatabase db = GetIt.I<AppDatabase>();
   int progressIndex = 0;
-
   Polar polar;
-
   Ticker ticker = Ticker();
   StreamSubscription<int>? tickerSubscription;
   StreamSubscription? hrSubscription;
@@ -27,7 +25,6 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
   DateTime? startTimeInterval;
   DateTime? endTimeInterval;
   List<timeInterval> listTimeIntervals = [];
-
   List<PolarRatesCompanion> polarToSave = [];
 
   CronoBloc({
@@ -252,7 +249,6 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     );
 
     on<CronoEventSave>((event, emit) async {
-      print(polarToSave);
       listTimeIntervals
           .add(timeInterval(start: startTimeInterval!, end: endTimeInterval!));
       startTimeInterval = null;
@@ -262,16 +258,15 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       if (progressIndex == status.length) {
         emit(CronoStateSaving());
         //end the session of data collection
-        //print(polarToSave);
         await hrSubscription?.cancel(); //stop collecting heart data
         await bluePolar?.cancel();
         await batteryPolar?.cancel();
         await polar.disconnectFromDevice(polarIdentifier); //disconnect Polar
 
         int idSession = await db.sessionsDao.inserNewSession(SessionsCompanion(
-            iduser: Value(idUser),
+            idUser: Value(idUser),
             numsession: Value(numSession),
-            start: Value(listTimeIntervals.first.start),
+            start: polarToSave.first.time,
             end: Value(listTimeIntervals.last.end),
             device1: Value(sessionDevices[0]),
             device2: Value(sessionDevices[1])));
@@ -280,7 +275,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           await db.intervalsDao.inserNewInterval(IntervalsCompanion(
             //Save the new interval
             idSession: Value(idSession),
-            runstatus: Value(i),
+            runStatus: Value(i),
             start: Value(listTimeIntervals[i].start),
             end: Value(listTimeIntervals[i].end),
             deltatime: Value(listTimeIntervals[i]
@@ -288,14 +283,16 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
                 .difference(listTimeIntervals[i].start)
                 .inSeconds),
           ));
-          for (int j = 0; j < polarToSave.length; j++) {
-            await db.polarRatesDao.insert(PolarRatesCompanion(
-              idSession: Value(idSession),
-              time: polarToSave[j].time,
-              rate: polarToSave[j].rate,
-            ));
-          }
         }
+
+        polarToSave.forEach((element) async {
+          await db.polarRatesDao.insert(PolarRatesCompanion(
+            idSession: Value(idSession),
+            time: element.time,
+            rate: element.rate,
+          ));
+        });
+
         numSession ==
                 1 //update the completed (number of completed session for the user)
             ? await db.usersDao.updateComplete(idUser, 1)

@@ -89,44 +89,28 @@ class DataCollectionPage extends StatelessWidget {
                     }
                   }),
                   listener: (context, state) {
-                    SnackBar snackBar;
+                    late SnackBar snackBar;
                     if (state is CronoStateExt) {
                       (state).message != null
-                          ? state.message!.contains('interval')
-                              ? snackBar = SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Icon(
-                                        MdiIcons.noteRemove,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(
-                                        width: 15,
-                                      ),
-                                      Text(state.message!)
-                                    ],
+                          ? snackBar = SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(
+                                    state.message!.contains('Bluetooth')
+                                        ? MdiIcons.bluetoothOff
+                                        : MdiIcons.contactlessPayment,
+                                    color: Colors.white,
                                   ),
-                                  dismissDirection: DismissDirection.none,
-                                )
-                              : snackBar = SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Icon(
-                                        state.message!.contains('Bluetooth')
-                                            ? MdiIcons.bluetoothOff
-                                            : MdiIcons.contactlessPayment,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(
-                                        width: 15,
-                                      ),
-                                      Text(state.message!)
-                                    ],
+                                  SizedBox(
+                                    width: 15,
                                   ),
-                                  duration: Duration(days: 365),
-                                  dismissDirection: DismissDirection.none,
-                                )
-                          : snackBar = SnackBar(content: SizedBox());
+                                  Text(state.message!)
+                                ],
+                              ),
+                              duration: Duration(days: 365),
+                              dismissDirection: DismissDirection.none,
+                            )
+                          : null;
 
                       if (state is CronoStatePlay && state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -155,7 +139,8 @@ class DataCollectionPage extends StatelessWidget {
                       : state is CronoStateSaving ||
                               state is CronoStateCompleted
                           ? Center(
-                              child: LottieBuilder.asset(
+                              child: /*CircularProgressIndicator(),*/
+                               LottieBuilder.asset(
                                 'assets/database-store.json',
                                 repeat: true,
                                 frameRate: FrameRate.max,
@@ -192,7 +177,24 @@ class DataCollectionPage extends StatelessWidget {
   Widget _polar(BuildContext context, CronoStateExt state) {
     final double maxHrValue =
         (220 - (DateTime.now().year - user.birthYear)).toDouble();
-    String text;
+
+    final List<double> minHr = [];
+    minHr.add(0);
+    minHr.add(maxHrValue * 0.5);
+    minHr.add(maxHrValue * 0.6);
+    minHr.add(maxHrValue * 0.7);
+    minHr.add(maxHrValue * 0.8);
+    minHr.add(maxHrValue * 0.9);
+
+    final List<double> maxHr = [];
+    maxHr.add(maxHrValue * 0.5);
+    maxHr.add(maxHrValue * 0.6);
+    maxHr.add(maxHrValue * 0.7);
+    maxHr.add(maxHrValue * 0.8);
+    maxHr.add(maxHrValue * 0.9);
+    maxHr.add(maxHrValue);
+
+    String? text;
     switch (state.progressIndex) {
       case 0:
         text = 'Keep the indicator in the white zone';
@@ -209,8 +211,11 @@ class DataCollectionPage extends StatelessWidget {
       case 4:
         text = "Keep the indicator in the orange zone";
         break;
+      case 5:
+        text = "Keep the indicator in the red zone";
+        break;
       default:
-        text = '';
+        throw StateError('Invalid zone (${state.progressIndex})');
     }
     Icon batteryIcon;
     String batteryLevel;
@@ -281,7 +286,7 @@ class DataCollectionPage extends StatelessWidget {
           batteryLevel = state.battery.toString();
         } else if (state.battery! < 10) {
           batteryIcon = Icon(
-            MdiIcons.batteryOff,
+            MdiIcons.batteryOutline,
             color: Colors.red,
           );
           batteryLevel = state.battery.toString();
@@ -328,21 +333,48 @@ class DataCollectionPage extends StatelessWidget {
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Spacer(),
-              Text(
-                state.hr == 0 ? '?' : state.hr.toString(),
-                style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+              Expanded(
+                child: Text(
+                  '${minHr[state.progressIndex].toInt()} - ',
+                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              Text(
-                ' BPM',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins'),
+              Container(
+                child: Row(
+                  children: [
+                    Text(
+                      state.hr == 0 ? '?' : state.hr.toString(),
+                      style: TextStyle(
+                          fontSize: 40,
+                          fontFamily: 'Poppins',
+                          color: state.hr == 0
+                              ? Colors.black
+                              : state.hr >= minHr[state.progressIndex] &&
+                                      state.hr <= maxHr[state.progressIndex]
+                                  ? Colors.green
+                                  : Colors.red),
+                                  textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      ' BPM',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins'),
+                          textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              Spacer(),
+              Expanded(
+                child: Text(
+                  ' - ${maxHr[state.progressIndex].toInt()}',
+                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ],
           ),
           Container(
@@ -352,7 +384,7 @@ class DataCollectionPage extends StatelessWidget {
               maximum: 220,
               ranges: [
                 LinearGaugeRange(
-                  startValue: 0,
+                  startValue: minHr[0],
                   endValue: 0.5 * maxHrValue,
                   color: Colors.white,
                 ),

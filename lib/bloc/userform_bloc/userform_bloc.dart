@@ -26,9 +26,10 @@ class RegFormBloc extends FormBloc<dynamic, dynamic> {
 
   @override
   void onSubmitting() async {
+    print(sex.value);
     await db.usersDao.insertNewUser(
       UsersCompanion(
-          sex: Value(sex.value == "Man"),
+          sex: Value(sex.value == 'Man' ? 1 : 0),
           birthYear: Value(birthDate.value!.year)),
     );
     emitSuccess();

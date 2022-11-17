@@ -242,7 +242,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           await db.fitbitRatesDao.insert(FitbitRatesCompanion(
               idSession: element.idSession,
               time: element.time,
-              rate: element.value));
+              rate: element.rate));
         });
         withingsToSave?.forEach((element) async {
           await db.withingsRatesDao.insert(WithingsRatesCompanion(
@@ -316,7 +316,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           if (event.numSession == 1) {
             rowsSession.add([
               (state as DetailStateLoaded).session1!.id,
-              (state as DetailStateLoaded).session1!.iduser,
+              (state as DetailStateLoaded).session1!.idUser,
               (state as DetailStateLoaded).session1!.numsession,
               (state as DetailStateLoaded).session1!.start,
               (state as DetailStateLoaded).session1!.end,
@@ -326,7 +326,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           } else {
             rowsSession.add([
               (state as DetailStateLoaded).session2!.id,
-              (state as DetailStateLoaded).session2!.iduser,
+              (state as DetailStateLoaded).session2!.idUser,
               (state as DetailStateLoaded).session2!.numsession,
               (state as DetailStateLoaded).session2!.start,
               (state as DetailStateLoaded).session2!.end,
@@ -349,7 +349,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             rowsIntervals.add([
               element.id,
               element.idSession,
-              element.runstatus,
+              element.runStatus,
               element.start,
               element.end,
               element.deltatime

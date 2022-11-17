@@ -5,4 +5,4 @@ targets:
     builders:
       drift_dev:
         options:
-          store_date_time_values_as_text: true
+          store_date_time_values_as_text: true # DateTime stored in database in iso String format, so i have info about milliseconds
