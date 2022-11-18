@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get_it/get_it.dart';
 import 'package:polar/polar.dart';
 import 'package:timerun/database/AppDatabase.dart';
@@ -41,7 +42,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     required int maxHrValue,
   }) : super(CronoStateInit()) {
     batteryPolar = polar.batteryLevelStream.listen((event) {
-      print('Battery level ${event.level}');
+      debugPrint('Battery level ${event.level}');
       if (state is CronoStateInit) {
         emit(
           CronoStateInit(battery: event.level),
@@ -89,8 +90,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     });
 
     bluePolar = polar.deviceDisconnectedStream.listen((event) {
-      Vibration.vibrate(); //vibrate if Bluetooth connection interrupts
-      print('Disconnected from Bluetooth');
+      Vibration.vibrate(duration: 400); //vibrate if Bluetooth connection interrupts
+      debugPrint('Disconnected from Bluetooth');
       String error = "Disconnected from Bluetooth";
       if (state is CronoStateInit) {
         emit(CronoStatePlay(
@@ -123,7 +124,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     });
 
     hrSubscription = polar.heartRateStream.listen((event) {
-      print('Polar HR: ${event.data.hr}');
+      debugPrint('Polar HR: ${event.data.hr}');
       polarToSave.add(PolarRatesCompanion(
           time: Value(DateTime.now()),
           rate: Value(event.data.hr))); // add Polar data
@@ -135,29 +136,29 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
             (event.data.hr >= minHr[progressIndex] &&
                 event.data.hr <= maxHr[progressIndex])) {
           //out --> in
-          Vibration.vibrate();
-          print('out-->in in the interval');
+          Vibration.vibrate(duration: 400);
+          debugPrint('Out-->In in the interval');
         }
         if (((state as CronoStateExt).hr >= minHr[progressIndex] &&
                 (state as CronoStateExt).hr <= maxHr[progressIndex]) &&
             (event.data.hr < minHr[progressIndex] ||
                 event.data.hr > maxHr[progressIndex])) {
           //in --> out
-          Vibration.vibrate();
-          print('same in-->out in the interval');
+          Vibration.vibrate(duration: 400);
+          debugPrint('In-->Out in the interval');
         }
       }
 
       String? error;
       if (event.data.hr == 0) {
-        print('No contact');
+        debugPrint('No contact');
         error = "No contact";
         //polar shut down or no contact
       }
 
       if (state is CronoStateInit) {
         Vibration
-            .vibrate(); // vibrate when CronoStatPlay appears for the first time (so first hr emitted by Polar)
+            .vibrate(duration: 400); // vibrate when CronoStatPlay appears for the first time (so first hr emitted by Polar)
         emit(CronoStatePlay(
             progressIndex: progressIndex,
             duration: 0,

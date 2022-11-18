@@ -88,12 +88,12 @@ class DataCollectionPage extends StatelessWidget {
                 ),
                 body: BlocListener<CronoBloc, CronoState>(
                   listenWhen: ((previous, current) {
-                    //print(previous);
-                    //print(current);
+                    //debugPrint(previous.toString());
+                    //debugPrint(current.toString());
                     if (previous is CronoStateExt && current is CronoStateExt) {
                       if (previous.message != null &&
                           previous.message == current.message) {
-                        //print('Same error');
+                        //debugPrint('Same error');
                         return false;
                       } else {
                         return true;

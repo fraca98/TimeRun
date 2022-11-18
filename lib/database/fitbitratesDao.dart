@@ -17,7 +17,16 @@ class FitbitRatesDao extends DatabaseAccessor<AppDatabase>
     return into(fitbitRates).insert(data);
   }
 
-    Future<List<FitbitRate>> fitbitBySession(int idSession){
-    return (select(fitbitRates)..where((tbl) => tbl.idSession.equals(idSession))).get();
+  Future<List<FitbitRate>> fitbitBySession(int idSession) {
+    return (select(fitbitRates)
+          ..where((tbl) => tbl.idSession.equals(idSession)))
+        .get();
+  }
+
+  Future<void> insertMultipleEntries(List<FitbitRatesCompanion> entries) async {
+    //insert multiple entries with a batch
+    await batch((batch) {
+      batch.insertAll(fitbitRates, entries);
+    });
   }
 }

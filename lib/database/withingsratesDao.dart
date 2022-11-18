@@ -22,4 +22,12 @@ class WithingsRatesDao extends DatabaseAccessor<AppDatabase>
           ..where((tbl) => tbl.idSession.equals(idSession)))
         .get();
   }
+
+  Future<void> insertMultipleEntries(
+      List<WithingsRatesCompanion> entries) async {
+    //insert multiple entries with a batch
+    await batch((batch) {
+      batch.insertAll(withingsRates, entries);
+    });
+  }
 }

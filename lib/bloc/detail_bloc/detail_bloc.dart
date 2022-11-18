@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fitbitter/fitbitter.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,12 +85,12 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             )); //retry the request with refreshed tokens
           } else {
             error = true;
-            print('Error refreshing tokens');
+            m.debugPrint('Error refreshing tokens');
           }
         }
         if (getWithingsSession.status == 0) {
           if (getWithingsSession.series == null) {
-            print('No data for this session');
+            m.debugPrint('No data for this session');
             error = true;
           } else {
             getWithingsSession.series!.forEach((element) {
@@ -108,7 +108,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           }
         }
       } catch (e) {
-        print(e);
+        m.debugPrint(e.toString());
         error = true;
       }
 
@@ -159,17 +159,16 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               intradayDetailLevel: IntradayDetailLevel.ONE_SECOND),
         ) as List<FitbitHeartRateIntradayData>;
         if (getFitbitSession.isEmpty) {
-          print('No data for this session');
+          m.debugPrint('No data for this session');
           error = true;
         } else {
+          DateTime sessionStartNoAfterSec = DateTime.parse(
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(session
+                  .start)); //session start and end remove micro/milliseconds to compare, cause dateOfMonitoring doesn't have these values (max returns seconds)
+          DateTime sessionEndNoAfterSec = DateTime.parse(
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(session.end));
           //Warning: Fitbit data are returned considering the yyyy-MM-dd HH:mm and not the seconds (ss), so i have to cut data and keep only the one related to the session
-          getFitbitSession.forEach((element) { //TODO: check if correct
-            DateTime sessionStartNoAfterSec = DateTime.parse(
-                DateFormat('yyyy-MM-dd HH:mm:ss').format(session
-                    .start)); //session start and end remove micro/milliseconds to compare, cause dateOfMonitoring doesn't have these values (max returns seconds)
-            DateTime sessionEndNoAfterSec = DateTime.parse(
-                DateFormat('yyyy-MM-dd HH:mm:ss').format(session.end));
-
+          getFitbitSession.forEach((element) {
             if ((element.dateOfMonitoring!.isAfter(sessionStartNoAfterSec) &&
                     element.dateOfMonitoring!.isBefore(sessionEndNoAfterSec)) ||
                 element.dateOfMonitoring!
@@ -187,7 +186,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           });
         }
       } catch (e) {
-        print(e);
+        m.debugPrint(e.toString());
         error = true;
       }
 
@@ -199,15 +198,15 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     }
 
     on<DetailEventDownload>((event, emit) async {
-      print('Pressed download');
+      m.debugPrint('Pressed download');
       emit(DetailStateDownloading(
           session1: (state as DetailStateLoaded).session1,
           session2: (state as DetailStateLoaded).session2,
           downSession: event.numSession));
 
       bool error = false;
-      var fitbitToSave;
-      var withingsToSave;
+      List<FitbitRatesCompanion>? fitbitToSave;
+      List<WithingsRatesCompanion>? withingsToSave;
 
       if (event.numSession == 1) {
         if (error == false &&
@@ -253,18 +252,12 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         } //Withings
       }
       if (error == false) {
-        fitbitToSave?.forEach((element) async {
-          await db.fitbitRatesDao.insert(FitbitRatesCompanion(
-              idSession: element.idSession,
-              time: element.time,
-              rate: element.rate));
-        });
-        withingsToSave?.forEach((element) async {
-          await db.withingsRatesDao.insert(WithingsRatesCompanion(
-              idSession: element.idSession,
-              time: element.time,
-              rate: element.rate));
-        });
+        fitbitToSave != null
+            ? db.fitbitRatesDao.insertMultipleEntries(fitbitToSave)
+            : null;
+        withingsToSave != null
+            ? db.withingsRatesDao.insertMultipleEntries(withingsToSave)
+            : null;
         //if no error update session as downloaded
         event.numSession == 1
             ? await db.sessionsDao.updateDown(

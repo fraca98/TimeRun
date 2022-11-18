@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
@@ -27,8 +28,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (event, emit) async {
         final path = (await getApplicationDocumentsDirectory()).path;
         final file = File('$path/database.sqlite');
-        //print(file);
-        //print(file.path);
+        //debugPrint(file.toString());
+        //debugPrint(file.path);
         await GetIt.I<AppDatabase>()
             .exportInto(file); // save the database (export) in local
         await Share.shareXFiles([XFile(file.path)],
