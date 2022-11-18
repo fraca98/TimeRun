@@ -289,7 +289,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
         await batteryPolar?.cancel();
         await polar.disconnectFromDevice(polarIdentifier); //disconnect Polar
 
-        int idSession = await db.sessionsDao.inserNewSession(SessionsCompanion(
+        int idSession = await db.sessionsDao.insertNewSession(SessionsCompanion(
             idUser: Value(idUser),
             numsession: Value(numSession),
             start: polarToSave.first.time,
@@ -311,20 +311,14 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
           ));
         }
 
-        polarToSave.forEach((element) async {
-          await db.polarRatesDao.insert(PolarRatesCompanion(
-            idSession: Value(idSession),
-            time: element.time,
-            rate: element.rate,
-          ));
-        });
+        await db.polarRatesDao.insertMultipleEntries(polarToSave, idSession);
 
         numSession ==
                 1 //update the completed (number of completed session for the user)
             ? await db.usersDao.updateComplete(idUser, 1)
             : await db.usersDao.updateComplete(idUser, 2);
 
-        await Future.delayed(Duration(seconds: 2)); //to show animation
+        await Future.delayed(Duration(seconds: 2)); //to see the animation
 
         emit(CronoStateCompleted());
       } else {

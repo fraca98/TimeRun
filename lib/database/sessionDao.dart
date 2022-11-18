@@ -15,7 +15,7 @@ class SessionsDao extends DatabaseAccessor<AppDatabase>
   Future<List<Session>> get allEntries =>
       select(sessions).get(); //get all the sessions
 
-  Future<int> inserNewSession(SessionsCompanion session) {
+  Future<int> insertNewSession(SessionsCompanion session) {
     //insert a new session and return the id (use SessionsCompanion cause id is autoincremental)
     return into(sessions).insert(session);
   }

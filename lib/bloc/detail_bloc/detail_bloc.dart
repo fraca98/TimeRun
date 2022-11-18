@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fitbitter/fitbitter.dart';
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/database/AppDatabase.dart';
@@ -47,16 +48,15 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         Session session) async {
       bool error = false;
       List<WithingsRatesCompanion> withingsToSave = [];
-
-      print((session.start.toUtc().millisecondsSinceEpoch / 1000).floor());
       try {
         WithingsMeasureGetIntradayactivityData getWithingsSession =
             await WithingsMeasureGetIntradayactivityDataManager()
                 .fetch(WithingsMeasureAPIURL.getIntradayactivity(
           accessToken: prefs.getString('withingsAccessToken')!,
-          startdate:
-              (session.start.toUtc().millisecondsSinceEpoch / 1000).floor(),
-          enddate: (session.end.toUtc().microsecondsSinceEpoch / 1000).floor(),
+          startdate: (session.start.toUtc().millisecondsSinceEpoch / 1000)
+              .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
+          enddate: (session.end.toUtc().millisecondsSinceEpoch / 1000)
+              .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
           dataFields: 'heart_rate',
         ));
         if ([101, 102, 200, 401].contains(getWithingsSession.status)) {
@@ -77,9 +77,10 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 await WithingsMeasureGetIntradayactivityDataManager()
                     .fetch(WithingsMeasureAPIURL.getIntradayactivity(
               accessToken: prefs.getString('withingsAccessToken')!,
-              startdate:
-                  (session.start.toUtc().millisecondsSinceEpoch / 1000).floor(),
-              enddate: (session.end.toUtc().microsecondsSinceEpoch).floor(),
+              startdate: (session.start.toUtc().millisecondsSinceEpoch / 1000)
+                  .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
+              enddate: (session.end.toUtc().millisecondsSinceEpoch / 1000)
+                  .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
               dataFields: 'heart_rate',
             )); //retry the request with refreshed tokens
           } else {
@@ -161,14 +162,28 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           print('No data for this session');
           error = true;
         } else {
-          getFitbitSession.forEach((element) {
-            fitbitToSave.add(
-              FitbitRatesCompanion(
-                idSession: Value(session.id),
-                time: Value(element.dateOfMonitoring!),
-                rate: Value(element.value!.toInt()),
-              ),
-            );
+          //Warning: Fitbit data are returned considering the yyyy-MM-dd HH:mm and not the seconds (ss), so i have to cut data and keep only the one related to the session
+          getFitbitSession.forEach((element) { //TODO: check if correct
+            DateTime sessionStartNoAfterSec = DateTime.parse(
+                DateFormat('yyyy-MM-dd HH:mm:ss').format(session
+                    .start)); //session start and end remove micro/milliseconds to compare, cause dateOfMonitoring doesn't have these values (max returns seconds)
+            DateTime sessionEndNoAfterSec = DateTime.parse(
+                DateFormat('yyyy-MM-dd HH:mm:ss').format(session.end));
+
+            if ((element.dateOfMonitoring!.isAfter(sessionStartNoAfterSec) &&
+                    element.dateOfMonitoring!.isBefore(sessionEndNoAfterSec)) ||
+                element.dateOfMonitoring!
+                    .isAtSameMomentAs(sessionStartNoAfterSec) ||
+                element.dateOfMonitoring!
+                    .isAtSameMomentAs(sessionEndNoAfterSec)) {
+              fitbitToSave.add(
+                FitbitRatesCompanion(
+                  idSession: Value(session.id),
+                  time: Value(element.dateOfMonitoring!),
+                  rate: Value(element.value!.toInt()),
+                ),
+              );
+            }
           });
         }
       } catch (e) {
@@ -282,9 +297,10 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               message: 'Error: Provide permission'));
         } else {
           // User csv
-          List<dynamic> headerUser = ['id', 'sex'];
+          List<dynamic> headerUser = ['id', 'sex', 'birthYear'];
           List<List<dynamic>> rowsUser = [];
           rowsUser.add(headerUser);
+          rowsUser.add([user.id, user.sex, user.birthYear]);
           String Usercsv = ListToCsvConverter().convert(rowsUser);
           final path =
               (await Directory('/storage/emulated/0/TimeRun/${user.id}')
@@ -344,7 +360,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               await db.intervalsDao.getIntervalBySession(idSession);
           List<List<dynamic>> rowsIntervals = [];
           rowsIntervals.add(
-              ['id', 'idSession', 'runstatus', 'start', 'end', 'deltatime']);
+              ['id', 'idSession', 'runStatus', 'start', 'end', 'deltatime']);
           intervals.forEach((element) {
             rowsIntervals.add([
               element.id,
@@ -382,13 +398,11 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             List<dynamic> headerFitbit = ['time', 'rate'];
             List<List<dynamic>> rowsFitbit = [];
             rowsFitbit.add(headerFitbit);
-            for (int i = 0; i < intervals.length; i++) {
-              List<FitbitRate> fitbitSessionExp =
-                  await db.fitbitRatesDao.fitbitBySession(intervals[i].id);
-              fitbitSessionExp.forEach((element) {
-                rowsFitbit.add([element.time, element.rate]);
-              });
-            }
+            List<FitbitRate> fitbitSessionExp =
+                await db.fitbitRatesDao.fitbitBySession(idSession);
+            fitbitSessionExp.forEach((element) {
+              rowsFitbit.add([element.time, element.rate]);
+            });
             String Fitbitcsv = ListToCsvConverter().convert(rowsFitbit);
             final fileFitbit =
                 File('$Spath/fitbit_${user.id}_${idSession}.csv');
@@ -400,13 +414,11 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             List<dynamic> headerWithings = ['time', 'value'];
             List<List<dynamic>> rowsWithings = [];
             rowsWithings.add(headerWithings);
-            for (int i = 0; i < intervals.length; i++) {
-              List<WithingsRate> withingsSessionExp =
-                  await db.withingsRatesDao.withingsBySession(idSession);
-              withingsSessionExp.forEach((element) {
-                rowsWithings.add([element.time, element.rate]);
-              });
-            }
+            List<WithingsRate> withingsSessionExp =
+                await db.withingsRatesDao.withingsBySession(idSession);
+            withingsSessionExp.forEach((element) {
+              rowsWithings.add([element.time, element.rate]);
+            });
             String Withingscsv = ListToCsvConverter().convert(rowsWithings);
             final fileWithings =
                 File('$Spath/withings_${user.id}_${idSession}.csv');
