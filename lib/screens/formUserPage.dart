@@ -58,12 +58,11 @@ class FormUserPage extends StatelessWidget {
                       SizedBox(
                         height: 40,
                       ),
-                      DateTimeFieldBlocBuilder(
-                        dateTimeFieldBloc: formBloc.birthDate,
+                      YearPickerFieldBlocBuilder(
+                        yearPickerFieldBloc: formBloc.birthDate,
                         firstDate: DateTime(1900),
-                        initialDate: DateTime.now(),
-                        lastDate: DateTime.now(),
-                        format: DateFormat('yyyy'),
+                        lastDate: DateTime.now().subtract(
+                            Duration(days: 18 * 365)), //at least 18 years
                         decoration: const InputDecoration(
                           labelText: 'Year of birth',
                           prefixIcon: Icon(Icons.cake),

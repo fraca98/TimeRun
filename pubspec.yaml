@@ -1,5 +1,5 @@
 name: timerun
-description: A new Flutter project.
+description: A Flutter application developed to collect heart data from multiple smartwatches to study their accuracy, respect to a H10 Polar device.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -48,7 +48,11 @@ dependencies:
   provider: ^6.0.3 #State management
   flutter_bloc: ^8.1.1 #Bloc
   equatable: ^2.0.5 #Bloc
-  flutter_form_bloc: ^0.30.1 #Bloc Form
+  flutter_form_bloc: #Bloc Form
+    git:
+      url: https://github.com/fraca98/form_bloc
+      path: packages/flutter_form_bloc
+      ref: yearpicker
 
   drift: ^2.1.0 #Database
   sqlite3_flutter_libs: ^0.5.0 #Database
