@@ -350,7 +350,7 @@ class DetailPage extends StatelessWidget {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
       title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Are you sure to delete this user ?",
+      content: Text("Are you sure to delete this user?",
           style: TextStyle(fontFamily: 'Poppins')),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       actions: [

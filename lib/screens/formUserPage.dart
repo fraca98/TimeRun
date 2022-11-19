@@ -87,8 +87,8 @@ class FormUserPage extends StatelessWidget {
   Widget alertBack(BuildContext context) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Are you sure to go back ? All data will be lost",
+      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins'),),
+      content: Text("Are you sure? Data are not saved",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
@@ -104,7 +104,7 @@ class FormUserPage extends StatelessWidget {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text('Go back', style: TextStyle(fontFamily: 'Poppins')))
       ],
     );
   }

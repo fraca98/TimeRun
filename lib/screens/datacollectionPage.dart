@@ -617,7 +617,7 @@ class DataCollectionPage extends StatelessWidget {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
       title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Are you sure to delete this session ?",
+      content: Text("Are you sure to delete this session?",
           style: TextStyle(fontFamily: 'Poppins')),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
