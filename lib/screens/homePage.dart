@@ -92,7 +92,7 @@ class HomePage extends StatelessWidget {
                                             )));
                               },
                               leading: Icon(
-                                state.users[index].sex
+                                state.users[index].sex == 1
                                     ? MdiIcons.faceMan
                                     : MdiIcons.faceWoman,
                                 color: color,

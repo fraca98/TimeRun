@@ -6,7 +6,6 @@ import 'package:polar/polar.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:timelines/timelines.dart';
 import 'package:timerun/bloc/crono_bloc/crono_bloc.dart';
-import 'package:timerun/bloc/detail_bloc/detail_bloc.dart';
 import 'package:timerun/model/status.dart';
 import 'package:timerun/widget/timerText.dart';
 import '../database/AppDatabase.dart';
@@ -16,32 +15,47 @@ class DataCollectionPage extends StatelessWidget {
   final User user;
   final List<String> sessionDevices;
   final int numSession;
-  BuildContext detailcontext;
 
   DataCollectionPage(
       {required this.polar,
       required this.numSession,
       required this.sessionDevices,
       required this.user,
-      required this.detailcontext,
       super.key});
 
   @override
   Widget build(BuildContext context) {
+    final int maxHrValue =
+        (220 - (DateTime.now().year - user.birthYear)).toInt();
+    final List<int> minHr = [];
+    minHr.add(1);
+    minHr.add((maxHrValue * 0.5).round());
+    minHr.add((maxHrValue * 0.6).round());
+    minHr.add((maxHrValue * 0.7).round());
+    minHr.add((maxHrValue * 0.8).round());
+    minHr.add((maxHrValue * 0.9).round());
+
+    final List<int> maxHr = [];
+    maxHr.add((maxHrValue * 0.5).round());
+    maxHr.add((maxHrValue * 0.6).round());
+    maxHr.add((maxHrValue * 0.7).round());
+    maxHr.add((maxHrValue * 0.8).round());
+    maxHr.add((maxHrValue * 0.9).round());
+    maxHr.add((maxHrValue).round());
+
     return BlocProvider(
       create: (context) => CronoBloc(
         polar: polar,
         idUser: user.id,
         sessionDevices: sessionDevices,
         numSession: numSession,
+        minHr: minHr,
+        maxHr: maxHr,
+        maxHrValue: maxHrValue,
       ),
       child: BlocConsumer<CronoBloc, CronoState>(
         listener: (context, state) async {
           if (state is CronoStateCompleted) {
-            detailcontext
-                .read<DetailBloc>()
-                .subStreamSession
-                ?.resume(); //resume stream for detail
             Navigator.pop(context);
           }
         },
@@ -74,17 +88,12 @@ class DataCollectionPage extends StatelessWidget {
                 ),
                 body: BlocListener<CronoBloc, CronoState>(
                   listenWhen: ((previous, current) {
-                    //print(previous);
-                    //print(current);
+                    //debugPrint(previous.toString());
+                    //debugPrint(current.toString());
                     if (previous is CronoStateExt && current is CronoStateExt) {
-                      if (previous.errorMessage != null &&
-                          previous.errorMessage == current.errorMessage) {
-                        //print('Same error');
-                        return false;
-                      } else if (previous.errorMessage != null &&
-                          previous.errorMessage!.contains('interval') &&
-                          current.errorMessage == null) {
-                        //to show snackbar of empty interval without removing it if there are not errors then
+                      if (previous.message != null &&
+                          previous.message == current.message) {
+                        //debugPrint('Same error');
                         return false;
                       } else {
                         return true;
@@ -94,60 +103,42 @@ class DataCollectionPage extends StatelessWidget {
                     }
                   }),
                   listener: (context, state) {
-                    SnackBar snackBar;
+                    late SnackBar snackBar;
                     if (state is CronoStateExt) {
-                      (state).errorMessage != null
-                          ? state.errorMessage!.contains('interval')
-                              ? snackBar = SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Icon(
-                                        MdiIcons.noteRemove,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(
-                                        width: 15,
-                                      ),
-                                      Text(state.errorMessage!)
-                                    ],
+                      (state).message != null
+                          ? snackBar = SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(
+                                    state.message!.contains('Bluetooth')
+                                        ? MdiIcons.bluetoothOff
+                                        : MdiIcons.contactlessPayment,
+                                    color: Colors.white,
                                   ),
-                                  dismissDirection: DismissDirection.none,
-                                )
-                              : snackBar = SnackBar(
-                                  content: Row(
-                                    children: [
-                                      Icon(
-                                        state.errorMessage!
-                                                .contains('Bluetooth')
-                                            ? MdiIcons.bluetoothOff
-                                            : MdiIcons.contactlessPayment,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(
-                                        width: 15,
-                                      ),
-                                      Text(state.errorMessage!)
-                                    ],
+                                  SizedBox(
+                                    width: 15,
                                   ),
-                                  duration: Duration(days: 365),
-                                  dismissDirection: DismissDirection.none,
-                                )
-                          : snackBar = SnackBar(content: SizedBox());
+                                  Text(state.message!)
+                                ],
+                              ),
+                              duration: Duration(days: 365),
+                              dismissDirection: DismissDirection.none,
+                            )
+                          : null;
 
-                      if (state is CronoStatePlay &&
-                          state.errorMessage != null) {
+                      if (state is CronoStatePlay && state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStatePause &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStateStop &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else if (state is CronoStateRunning &&
-                          state.errorMessage != null) {
+                          state.message != null) {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
@@ -162,7 +153,8 @@ class DataCollectionPage extends StatelessWidget {
                       : state is CronoStateSaving ||
                               state is CronoStateCompleted
                           ? Center(
-                              child: LottieBuilder.asset(
+                              child: /*CircularProgressIndicator(),*/
+                                  LottieBuilder.asset(
                                 'assets/database-store.json',
                                 repeat: true,
                                 frameRate: FrameRate.max,
@@ -170,7 +162,8 @@ class DataCollectionPage extends StatelessWidget {
                             )
                           : Column(
                               children: [
-                                _polar(context, state as CronoStateExt),
+                                _polar(context, state as CronoStateExt, minHr,
+                                    maxHr, maxHrValue),
                                 Divider(
                                   thickness: 2,
                                 ),
@@ -196,10 +189,9 @@ class DataCollectionPage extends StatelessWidget {
     );
   }
 
-  Widget _polar(BuildContext context, CronoStateExt state) {
-    final double maxHrValue =
-        (220 - (DateTime.now().year - user.birthDate)).toDouble();
-    String text;
+  Widget _polar(BuildContext context, CronoStateExt state, List<int> minHr,
+      List<int> maxHr, int maxHrValue) {
+    String? text;
     switch (state.progressIndex) {
       case 0:
         text = 'Keep the indicator in the white zone';
@@ -216,14 +208,16 @@ class DataCollectionPage extends StatelessWidget {
       case 4:
         text = "Keep the indicator in the orange zone";
         break;
+      case 5:
+        text = "Keep the indicator in the red zone";
+        break;
       default:
-        text = '';
+        throw StateError('Invalid zone (${state.progressIndex})');
     }
     Icon batteryIcon;
     String batteryLevel;
     if (state.battery != null) {
-      if (state.errorMessage != null &&
-          state.errorMessage!.contains('Bluetooth')) {
+      if (state.message != null && state.message!.contains('Bluetooth')) {
         batteryIcon = Icon(MdiIcons.batteryUnknown);
         batteryLevel = '';
       } else {
@@ -233,7 +227,7 @@ class DataCollectionPage extends StatelessWidget {
             color: Colors.green,
           );
           batteryLevel = state.battery.toString();
-        } else if (state.battery! > 100 && state.battery! >= 90) {
+        } else if (state.battery! < 100 && state.battery! >= 90) {
           batteryIcon = Icon(
             MdiIcons.battery90,
             color: Colors.green,
@@ -289,7 +283,7 @@ class DataCollectionPage extends StatelessWidget {
           batteryLevel = state.battery.toString();
         } else if (state.battery! < 10) {
           batteryIcon = Icon(
-            MdiIcons.batteryOff,
+            MdiIcons.batteryOutline,
             color: Colors.red,
           );
           batteryLevel = state.battery.toString();
@@ -336,21 +330,48 @@ class DataCollectionPage extends StatelessWidget {
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Spacer(),
-              Text(
-                state.hr == 0 ? '?' : state.hr.toString(),
-                style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+              Expanded(
+                child: Text(
+                  '${state.progressIndex == 0 ? 0 : minHr[state.progressIndex].toInt()} - ',
+                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+                  textAlign: TextAlign.center,
+                ),
               ),
-              Text(
-                ' BPM',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins'),
+              Container(
+                child: Row(
+                  children: [
+                    Text(
+                      state.hr == 0 ? '?' : state.hr.toString(),
+                      style: TextStyle(
+                          fontSize: 40,
+                          fontFamily: 'Poppins',
+                          color: state.hr == 0
+                              ? Colors.black
+                              : state.hr >= minHr[state.progressIndex] &&
+                                      state.hr <= maxHr[state.progressIndex]
+                                  ? Colors.green
+                                  : Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      ' BPM',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins'),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              Spacer(),
+              Expanded(
+                child: Text(
+                  ' - ${maxHr[state.progressIndex].toInt()}',
+                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ],
           ),
           Container(

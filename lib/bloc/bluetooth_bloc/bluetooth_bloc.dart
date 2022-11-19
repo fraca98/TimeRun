@@ -1,11 +1,10 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:polar/polar.dart';
-
 import '../../model/device.dart';
 
 part 'bluetooth_event.dart';
@@ -33,7 +32,7 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
 
   BluetoothBloc() : super(BluetoothStateConnect()) {
     settingsSubSub = settingsStream().listen((value) {
-      //print(value);
+      //debugPrint(value);
       if (value[0] == false && value[1] == false) {
         add(BluetoothEventDisconnect());
         emit(BluetoothStateConnect(sett: 2));
@@ -53,15 +52,15 @@ class BluetoothBloc extends Bloc<BluetoothEvent, BluetoothState> {
     });
 
     polarConnect = polar.deviceConnectingStream.listen((event) {
-      print('Connecting: ${event.name}');
+      debugPrint('Connecting: ${event.name}');
     });
     polarConnected = polar.deviceConnectedStream.listen((event) {
-      print('Connected: ${event.name}');
+      debugPrint('Connected: ${event.name}');
       emit(BluetoothStateConnected());
     });
 
     polarDisconnect = polar.deviceDisconnectedStream.listen((event) {
-      print('Disconnected: ${event.name}');
+      debugPrint('Disconnected: ${event.name}');
     });
 
     on<BluetoothEventConnect>(

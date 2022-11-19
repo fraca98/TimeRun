@@ -12,11 +12,27 @@ class PolarRatesDao extends DatabaseAccessor<AppDatabase>
   // of this object.
   PolarRatesDao(AppDatabase db) : super(db);
 
-  Future<int> insert(PolarRatesCompanion data) async { //insert data
+  Future<int> insert(PolarRatesCompanion data) async {
+    //insert data
     return into(polarRates).insert(data);
   }
 
-  Future<List<PolarRate>> polarByInterval (int idInterval){
-    return (select(polarRates)..where((tbl) => tbl.idInterval.equals(idInterval))).get();
+  Future<List<PolarRate>> polarBySession(int idSession) {
+    return (select(polarRates)..where((tbl) => tbl.idSession.equals(idSession)))
+        .get();
+  }
+
+  Future<void> insertMultipleEntries(
+      List<PolarRatesCompanion> entries, int idSession) async {
+    //insert multiple entries with a batch and adding the idSession
+    await batch((batch) {
+      batch.insertAll(polarRates, [
+        for (var element in entries)
+          PolarRatesCompanion.insert(
+              idSession: idSession,
+              time: element.time.value,
+              rate: element.rate.value)
+      ]);
+    });
   }
 }

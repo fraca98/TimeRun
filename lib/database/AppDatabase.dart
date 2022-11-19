@@ -17,9 +17,8 @@ part 'AppDatabase.g.dart';
 // this will generate a table called "Users"
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
-  BoolColumn get sex => boolean()(); // true : Man, false : Woman
-  IntColumn get activity => integer()(); //low = 0, medium = 1, high = 2
-  IntColumn get birthDate => integer()();
+  IntColumn get sex => integer()(); // 1 : Man, 0 : Woman
+  IntColumn get birthYear => integer()();
   IntColumn get completed => integer().withDefault(Constant(0))();
   /*
   0: no session
@@ -31,11 +30,11 @@ class Users extends Table {
 // this will generate the table called "Sessions"
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get iduser =>
+  IntColumn get idUser =>
       integer().references(Users, #id, onDelete: KeyAction.cascade)();
-  IntColumn get numsession => integer()();
-  IntColumn get startsession => integer()();
-  IntColumn get endsession => integer().nullable()();
+  IntColumn get numsession => integer()(); //If first or second for the user
+  DateTimeColumn get start => dateTime()(); //Datetime
+  DateTimeColumn get end => dateTime()(); //Datetime
   TextColumn get device1 => text()();
   TextColumn get device2 => text()();
   BoolColumn get download => boolean().withDefault(Constant(false))();
@@ -46,34 +45,34 @@ class Intervals extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get idSession =>
       integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
-  IntColumn get runstatus => integer()();
-  IntColumn get startstimestamp => integer()();
-  IntColumn get endtimestamp => integer()();
-  IntColumn get deltatime => integer()();
+  IntColumn get runStatus => integer()();
+  DateTimeColumn get start => dateTime()(); //Datetime
+  DateTimeColumn get end => dateTime()(); //Datetime
+  IntColumn get deltatime => integer()(); //Datetime
 }
 
 // this will generate the table called "PolarRates" to store HR of Polar during intervals
 class PolarRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idInterval => integer().references(Intervals, #id, onDelete: KeyAction.cascade)();
-  IntColumn get timestamp => integer()();
-  IntColumn get value => integer()();
+  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  DateTimeColumn get time => dateTime()(); //Datetime
+  IntColumn get rate => integer()();
 }
 
 // this will generate the table called "FitbitRates" to store HR of Fitbit during intervals
 class FitbitRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idInterval => integer().references(Intervals, #id, onDelete: KeyAction.cascade)();
-  IntColumn get timestamp => integer()();
-  IntColumn get value => integer()();
+  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  DateTimeColumn get time => dateTime()(); //Datetime
+  IntColumn get rate => integer()();
 }
 
 // this will generate the table called "WithingsRates" to store HR of WithingsRates during intervals
 class WithingsRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idInterval => integer().references(Intervals, #id, onDelete: KeyAction.cascade)();
-  IntColumn get timestamp => integer()();
-  IntColumn get value => integer()();
+  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  DateTimeColumn get time => dateTime()(); //Datetime
+  IntColumn get rate => integer()();
 }
 
 // this annotation tells drift to prepare a database class that uses both of the

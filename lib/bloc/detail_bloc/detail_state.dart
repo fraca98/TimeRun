@@ -10,8 +10,8 @@ abstract class DetailState extends Equatable {
 class DetailStateLoading extends DetailState {}
 
 class DetailStateExt extends DetailState {
-  Session? session1;
-  Session? session2;
+  final Session? session1;
+  final Session? session2;
 
   DetailStateExt({this.session1, this.session2});
 
@@ -20,7 +20,7 @@ class DetailStateExt extends DetailState {
 }
 
 class DetailStateLoaded extends DetailStateExt {
-  String? message;
+  final String? message;
   DetailStateLoaded({super.session1, super.session2, this.message});
 
   @override
@@ -37,7 +37,7 @@ class DetailStateDeletingUser extends DetailState {} //deleting user
 class DetailStateDeletedUser extends DetailState {} //user deleted
 
 class DetailStateDownloading extends DetailStateExt {
-  int downSession;
+  final int downSession;
   DetailStateDownloading(
       {super.session1, super.session2, required this.downSession});
 

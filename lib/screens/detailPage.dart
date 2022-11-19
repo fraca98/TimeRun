@@ -149,14 +149,13 @@ class DetailPage extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Column(children: [
         Icon(
-          user.sex ? MdiIcons.faceMan : MdiIcons.faceWoman,
+          user.sex == 1 ? MdiIcons.faceMan : MdiIcons.faceWoman,
           size: 150,
           color: colorFaceIcon,
         ),
         Padding(
           padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
           child: Table(
-            //border: TableBorder.all(),
             children: [
               TableRow(children: [
                 Column(children: [
@@ -187,33 +186,7 @@ class DetailPage extends StatelessWidget {
                   )
                 ]),
                 Column(children: [
-                  Text(user.birthDate.toString(),
-                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
-                ]),
-              ]),
-              TableRow(children: [
-                //fake TableRow to add space
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  height: 10,
-                )
-              ]),
-              TableRow(children: [
-                Column(children: [
-                  Text(
-                    'Activity Level',
-                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
-                  )
-                ]),
-                Column(children: [
-                  Text(
-                      user.activity == 0
-                          ? 'Low'
-                          : user.activity == 1
-                              ? 'Medium'
-                              : 'High',
+                  Text(user.birthYear.toString(),
                       style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
                 ]),
               ]),
@@ -259,7 +232,6 @@ class DetailPage extends StatelessWidget {
                                   return AlertSession(
                                     selectable: selectable,
                                     user: user,
-                                    detailcontext: context,
                                   );
                                 });
                           },
@@ -338,7 +310,6 @@ class DetailPage extends StatelessWidget {
                                     return AlertSession(
                                       selectable: selectable,
                                       user: user,
-                                      detailcontext: context,
                                     );
                                   });
                             },

@@ -58,28 +58,14 @@ class FormUserPage extends StatelessWidget {
                       SizedBox(
                         height: 40,
                       ),
-                      DateTimeFieldBlocBuilder(
-                        dateTimeFieldBloc: formBloc.birthDate,
+                      YearPickerFieldBlocBuilder(
+                        yearPickerFieldBloc: formBloc.birthDate,
                         firstDate: DateTime(1900),
-                        initialDate: DateTime.now(),
-                        lastDate: DateTime.now(),
-                        format: DateFormat('yyyy'),
+                        lastDate: DateTime.now().subtract(
+                            Duration(days: 18 * 365)), //at least 18 years
                         decoration: const InputDecoration(
                           labelText: 'Year of birth',
                           prefixIcon: Icon(Icons.cake),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 40,
-                      ),
-                      RadioButtonGroupFieldBlocBuilder<String>(
-                        selectFieldBloc: formBloc.activity,
-                        itemBuilder: (context, value) => FieldItem(
-                          child: Text(value),
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Activity level',
-                          prefixIcon: SizedBox(),
                         ),
                       ),
                     ],
@@ -141,14 +127,7 @@ class LoadingDialog extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async => false,
       child: Center(
-        child: Card(
-          child: Container(
-            width: 120,
-            height: 120,
-            padding: const EdgeInsets.all(12.0),
-            child: const CircularProgressIndicator(),
-          ),
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }

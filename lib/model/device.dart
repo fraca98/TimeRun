@@ -5,4 +5,4 @@ List<String> devices  = [
   'Garmin'
 ];
 
-String polarIdentifier = "B31B0B23";
+String polarIdentifier = "B2178924";

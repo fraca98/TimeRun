@@ -9,7 +9,7 @@ import '../bloc/introwithings_bloc/introwithings_bloc.dart';
 import 'homePage.dart';
 
 class IntroductionPage extends StatelessWidget {
-  SharedPreferences? prefs;
+  final SharedPreferences? prefs;
 
   IntroductionPage({required this.prefs, super.key});
 

@@ -1,5 +1,5 @@
 name: timerun
-description: A new Flutter project.
+description: A Flutter application developed to collect heart data from multiple smartwatches to study their accuracy, respect to a H10 Polar device.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -32,41 +32,46 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_blue_plus: ^1.3.1
-  geolocator: ^9.0.2
+  flutter_blue_plus: ^1.3.1 #Bluetooth
+  geolocator: ^9.0.2 #Location (gps)
+  vibration: ^1.7.6 #Vibration
   
   polar: ^3.1.0 #Polar wrapper
-  fitbitter: #fitbit
+  fitbitter: #Fibit
     git:
       url: https://github.com/fraca98/fitbitter
       ref: fraca98
 
-  withings_flutter: ^1.0.2
+  withings_flutter: ^1.0.2 #Withings
 
-  shared_preferences: ^2.0.15 #save
-  provider: ^6.0.3 #state management
-  flutter_bloc: ^8.1.1 #for bloc
-  equatable: ^2.0.5 #for bloc
-  flutter_form_bloc: ^0.30.1 #for bloc form
+  shared_preferences: ^2.0.15 #Save data
+  provider: ^6.0.3 #State management
+  flutter_bloc: ^8.1.1 #Bloc
+  equatable: ^2.0.5 #Bloc
+  flutter_form_bloc: #Bloc Form
+    git:
+      url: https://github.com/fraca98/form_bloc
+      path: packages/flutter_form_bloc
+      ref: yearpicker
 
-  drift: ^2.1.0 #for database
-  sqlite3_flutter_libs: ^0.5.0 #for database
-  path_provider: ^2.0.0 #for database
-  path: ^1.8.2 #for database
+  drift: ^2.1.0 #Database
+  sqlite3_flutter_libs: ^0.5.0 #Database
+  path_provider: ^2.0.0 #path
+  path: ^1.8.2 #Database
 
   get_it: ^7.2.0 #inject db in bloc (access without context)
 
-  drift_db_viewer: ^2.0.0 #view db in app
-  csv: ^5.0.1 #save to csv
-  share_plus: ^4.4.0 #share file
+  drift_db_viewer: ^2.0.0 #Database
+  csv: ^5.0.1 #Csv to convert
+  share_plus: ^6.3.0 #Share files
 
-  permission_handler: ^10.2.0 #permissions
+  permission_handler: ^10.2.0 #Manage permissions
 
-  material_design_icons_flutter: ^5.0.6996 #icons
-  syncfusion_flutter_gauges: ^20.2.49 #bar
-  timelines: ^0.1.0 #timeline
-  lottie: ^1.4.3 #lottie animation
-  introduction_screen: ^3.0.2 #flutter introduction screen
+  material_design_icons_flutter: ^5.0.6996 #Icons
+  syncfusion_flutter_gauges: ^20.2.49 #Widget bar
+  timelines: ^0.1.0 #Timeline
+  lottie: ^1.4.3 #Lottie animation
+  introduction_screen: ^3.0.2 #Flutter introduction screen
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -75,11 +80,11 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  drift_dev: ^2.1.0 #for database
-  build_runner: ^2.2.0 #for database
+  drift_dev: ^2.1.0 #Database
+  build_runner: ^2.2.0 #Database
 
-  flutter_launcher_icons: ^0.10.0
-  flutter_native_splash: ^2.2.12
+  flutter_launcher_icons: ^0.10.0 #Set Icon of app
+  flutter_native_splash: ^2.2.12 #Set Splash screen of app
 
 flutter_icons: #icon of the app
   android: "launcher_icon"

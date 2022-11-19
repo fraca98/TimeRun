@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:bloc/bloc.dart';
 import 'package:drift/drift.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fitbitter/fitbitter.dart';
+import 'package:flutter/material.dart' as m;
+import 'package:flutter_form_bloc/flutter_form_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timerun/database/AppDatabase.dart';
@@ -43,20 +44,19 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       },
     );
 
-    Future<List<List<WithingsRatesCompanion>>?> _withingsDownload(
-        int idSession) async {
+    Future<List<WithingsRatesCompanion>?> _withingsDownload(
+        Session session) async {
       bool error = false;
-      List<Interval> interv =
-          await db.intervalsDao.getIntervalBySession(idSession);
-      List<List<WithingsRatesCompanion>> withingsToSave =
-          List.generate(interv.length, (index) => []);
+      List<WithingsRatesCompanion> withingsToSave = [];
       try {
         WithingsMeasureGetIntradayactivityData getWithingsSession =
             await WithingsMeasureGetIntradayactivityDataManager()
                 .fetch(WithingsMeasureAPIURL.getIntradayactivity(
           accessToken: prefs.getString('withingsAccessToken')!,
-          startdate: interv[0].startstimestamp,
-          enddate: interv[interv.length - 1].endtimestamp,
+          startdate: (session.start.toUtc().millisecondsSinceEpoch / 1000)
+              .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
+          enddate: (session.end.toUtc().millisecondsSinceEpoch / 1000)
+              .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
           dataFields: 'heart_rate',
         ));
         if ([101, 102, 200, 401].contains(getWithingsSession.status)) {
@@ -77,35 +77,38 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 await WithingsMeasureGetIntradayactivityDataManager()
                     .fetch(WithingsMeasureAPIURL.getIntradayactivity(
               accessToken: prefs.getString('withingsAccessToken')!,
-              startdate: interv[0].startstimestamp,
-              enddate: interv[interv.length - 1].endtimestamp,
+              startdate: (session.start.toUtc().millisecondsSinceEpoch / 1000)
+                  .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
+              enddate: (session.end.toUtc().millisecondsSinceEpoch / 1000)
+                  .floor(), //use floor() cause i want timestamp in seconds considering only seconds of the datetime
               dataFields: 'heart_rate',
             )); //retry the request with refreshed tokens
           } else {
             error = true;
-            print('Error refreshing tokens');
+            m.debugPrint('Error refreshing tokens');
           }
         }
         if (getWithingsSession.status == 0) {
           if (getWithingsSession.series == null) {
-            print('No data for this session');
+            m.debugPrint('No data for this session');
             error = true;
           } else {
-            for (int i = 0; i < interv.length; i++) {
-              var intToSave = getWithingsSession.series!.where((element) =>
-                  element.timestamp! >= interv[i].startstimestamp &&
-                  element.timestamp! <= interv[i].endtimestamp);
-              intToSave.forEach((element) {
-                withingsToSave[i].add(WithingsRatesCompanion(
-                    idInterval: Value(interv[i].id),
-                    timestamp: Value(element.timestamp!),
-                    value: Value(element.heartRate!)));
-              });
-            }
+            getWithingsSession.series!.forEach((element) {
+              withingsToSave.add(
+                WithingsRatesCompanion(
+                  idSession: Value(session.id),
+                  time: Value(
+                    DateTime.fromMillisecondsSinceEpoch(
+                        element.timestamp! * 1000),
+                  ),
+                  rate: Value(element.heartRate!),
+                ),
+              );
+            });
           }
         }
       } catch (e) {
-        print(e);
+        m.debugPrint(e.toString());
         error = true;
       }
 
@@ -116,13 +119,9 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       }
     }
 
-    Future<List<List<FitbitRatesCompanion>>?> _fitbitDownload(
-        int idSession) async {
+    Future<List<FitbitRatesCompanion>?> _fitbitDownload(Session session) async {
       bool error = false;
-      List<Interval> interv =
-          await db.intervalsDao.getIntervalBySession(idSession);
-      List<List<FitbitRatesCompanion>> fitbitToSave =
-          List.generate(interv.length, (index) => []);
+      List<FitbitRatesCompanion> fitbitToSave = [];
       try {
         bool valid = await FitbitConnector.isTokenValid(
           fitbitCredentials: FitbitCredentials(
@@ -155,43 +154,39 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                   userID: prefs.getString('fitbitUserID')!,
                   fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
                   fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
-              startDate: DateTime.fromMillisecondsSinceEpoch(
-                  interv[0].startstimestamp * 1000),
-              endDate: DateTime.fromMillisecondsSinceEpoch(
-                  interv[interv.length - 1].endtimestamp * 1000),
+              startDate: session.start,
+              endDate: session.end,
               intradayDetailLevel: IntradayDetailLevel.ONE_SECOND),
         ) as List<FitbitHeartRateIntradayData>;
         if (getFitbitSession.isEmpty) {
-          print('No data for this session');
+          m.debugPrint('No data for this session');
           error = true;
         } else {
-          for (int i = 0; i < interv.length; i++) {
-            var intToSave = getFitbitSession.where((element) =>
-                (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
-                            1000)
-                        .floor() >=
-                    interv[i].startstimestamp &&
-                (element.dateOfMonitoring!.toUtc().millisecondsSinceEpoch /
-                            1000)
-                        .floor() <=
-                    interv[i].endtimestamp);
-            intToSave.forEach((element) {
-              fitbitToSave[i].add(
+          DateTime sessionStartNoAfterSec = DateTime.parse(
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(session
+                  .start)); //session start and end remove micro/milliseconds to compare, cause dateOfMonitoring doesn't have these values (max returns seconds)
+          DateTime sessionEndNoAfterSec = DateTime.parse(
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(session.end));
+          //Warning: Fitbit data are returned considering the yyyy-MM-dd HH:mm and not the seconds (ss), so i have to cut data and keep only the one related to the session
+          getFitbitSession.forEach((element) {
+            if ((element.dateOfMonitoring!.isAfter(sessionStartNoAfterSec) &&
+                    element.dateOfMonitoring!.isBefore(sessionEndNoAfterSec)) ||
+                element.dateOfMonitoring!
+                    .isAtSameMomentAs(sessionStartNoAfterSec) ||
+                element.dateOfMonitoring!
+                    .isAtSameMomentAs(sessionEndNoAfterSec)) {
+              fitbitToSave.add(
                 FitbitRatesCompanion(
-                  idInterval: Value(interv[i].id),
-                  timestamp: Value((element.dateOfMonitoring!
-                              .toUtc()
-                              .millisecondsSinceEpoch /
-                          1000)
-                      .floor()),
-                  value: Value(element.value!.toInt()),
+                  idSession: Value(session.id),
+                  time: Value(element.dateOfMonitoring!),
+                  rate: Value(element.value!.toInt()),
                 ),
               );
-            });
-          }
+            }
+          });
         }
       } catch (e) {
-        print(e);
+        m.debugPrint(e.toString());
         error = true;
       }
 
@@ -203,15 +198,15 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
     }
 
     on<DetailEventDownload>((event, emit) async {
-      print('Pressed download');
+      m.debugPrint('Pressed download');
       emit(DetailStateDownloading(
           session1: (state as DetailStateLoaded).session1,
           session2: (state as DetailStateLoaded).session2,
           downSession: event.numSession));
 
       bool error = false;
-      var fitbitToSave;
-      var withingsToSave;
+      List<FitbitRatesCompanion>? fitbitToSave;
+      List<WithingsRatesCompanion>? withingsToSave;
 
       if (event.numSession == 1) {
         if (error == false &&
@@ -220,7 +215,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 (state as DetailStateDownloading).session1!.device2 ==
                     devices[0])) {
           fitbitToSave = await _fitbitDownload(
-              (state as DetailStateDownloading).session1!.id);
+              (state as DetailStateDownloading).session1!);
           fitbitToSave != null ? error = false : error = true;
           //print('1f');
         } //Fitbit
@@ -230,7 +225,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 (state as DetailStateDownloading).session1!.device2 ==
                     devices[1])) {
           withingsToSave = await _withingsDownload(
-              (state as DetailStateDownloading).session1!.id);
+              (state as DetailStateDownloading).session1!);
           withingsToSave != null ? error = false : error = true;
           //print('1w');
         } //Withings
@@ -241,7 +236,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 (state as DetailStateDownloading).session2!.device2 ==
                     devices[0])) {
           fitbitToSave = await _fitbitDownload(
-              (state as DetailStateDownloading).session2!.id);
+              (state as DetailStateDownloading).session2!);
           fitbitToSave != null ? error = false : error = true;
           //print('2f');
         } //Fitbit
@@ -251,28 +246,18 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                 (state as DetailStateDownloading).session2!.device2 ==
                     devices[1])) {
           withingsToSave = await _withingsDownload(
-              (state as DetailStateDownloading).session2!.id);
+              (state as DetailStateDownloading).session2!);
           withingsToSave != null ? error = false : error = true;
           //print('2w');
         } //Withings
       }
       if (error == false) {
-        fitbitToSave?.forEach((element) {
-          element.forEach((element) async {
-            await db.fitbitRatesDao.insert(FitbitRatesCompanion(
-                idInterval: element.idInterval,
-                timestamp: element.timestamp,
-                value: element.value));
-          });
-        });
-        withingsToSave?.forEach((element) {
-          element.forEach((element) async {
-            await db.withingsRatesDao.insert(WithingsRatesCompanion(
-                idInterval: element.idInterval,
-                timestamp: element.timestamp,
-                value: element.value));
-          });
-        });
+        fitbitToSave != null
+            ? db.fitbitRatesDao.insertMultipleEntries(fitbitToSave)
+            : null;
+        withingsToSave != null
+            ? db.withingsRatesDao.insertMultipleEntries(withingsToSave)
+            : null;
         //if no error update session as downloaded
         event.numSession == 1
             ? await db.sessionsDao.updateDown(
@@ -305,10 +290,10 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               message: 'Error: Provide permission'));
         } else {
           // User csv
-          List<dynamic> headerUser = ['ID', 'Sex', 'Activity'];
+          List<dynamic> headerUser = ['id', 'sex', 'birthYear'];
           List<List<dynamic>> rowsUser = [];
           rowsUser.add(headerUser);
-          rowsUser.add([user.id, user.sex, user.activity]);
+          rowsUser.add([user.id, user.sex, user.birthYear]);
           String Usercsv = ListToCsvConverter().convert(rowsUser);
           final path =
               (await Directory('/storage/emulated/0/TimeRun/${user.id}')
@@ -332,28 +317,28 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
             'id',
             'iduser',
             'numsession',
-            'startsession',
-            'endsession',
+            'start',
+            'end',
             'device1',
             'device2'
           ]);
           if (event.numSession == 1) {
             rowsSession.add([
               (state as DetailStateLoaded).session1!.id,
-              (state as DetailStateLoaded).session1!.iduser,
+              (state as DetailStateLoaded).session1!.idUser,
               (state as DetailStateLoaded).session1!.numsession,
-              (state as DetailStateLoaded).session1!.startsession,
-              (state as DetailStateLoaded).session1!.endsession,
+              (state as DetailStateLoaded).session1!.start,
+              (state as DetailStateLoaded).session1!.end,
               (state as DetailStateLoaded).session1!.device1,
               (state as DetailStateLoaded).session1!.device2
             ]);
           } else {
             rowsSession.add([
               (state as DetailStateLoaded).session2!.id,
-              (state as DetailStateLoaded).session2!.iduser,
+              (state as DetailStateLoaded).session2!.idUser,
               (state as DetailStateLoaded).session2!.numsession,
-              (state as DetailStateLoaded).session2!.startsession,
-              (state as DetailStateLoaded).session2!.endsession,
+              (state as DetailStateLoaded).session2!.start,
+              (state as DetailStateLoaded).session2!.end,
               (state as DetailStateLoaded).session2!.device1,
               (state as DetailStateLoaded).session2!.device2
             ]);
@@ -367,21 +352,15 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           List<Interval> intervals =
               await db.intervalsDao.getIntervalBySession(idSession);
           List<List<dynamic>> rowsIntervals = [];
-          rowsIntervals.add([
-            'id',
-            'idSession',
-            'runstatus',
-            'startimesamp',
-            'endtimestamp',
-            'deltatime'
-          ]);
+          rowsIntervals.add(
+              ['id', 'idSession', 'runStatus', 'start', 'end', 'deltatime']);
           intervals.forEach((element) {
             rowsIntervals.add([
               element.id,
               element.idSession,
-              element.runstatus,
-              element.startstimestamp,
-              element.endtimestamp,
+              element.runStatus,
+              element.start,
+              element.end,
               element.deltatime
             ]);
           });
@@ -391,17 +370,14 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
           fileInterval.writeAsString(Intervalcsv);
 
           // Polar csv
-          List<dynamic> headerPolar = ['idInterval', 'timestamp', 'value'];
+          List<dynamic> headerPolar = ['time', 'rate'];
           List<List<dynamic>> rowsPolar = [];
           rowsPolar.add(headerPolar);
-          for (int i = 0; i < intervals.length; i++) {
-            List<PolarRate> polarSingleInterval =
-                await db.polarRatesDao.polarByInterval(intervals[i].id);
-            polarSingleInterval.forEach((element) {
-              rowsPolar
-                  .add([element.idInterval, element.timestamp, element.value]);
-            });
-          }
+          List<PolarRate> polarSessionExp =
+              await db.polarRatesDao.polarBySession(idSession);
+          polarSessionExp.forEach((element) {
+            rowsPolar.add([element.time, element.rate]);
+          });
           String Polarcsv = ListToCsvConverter().convert(rowsPolar);
           final filePolar = File('$Spath/polar_${user.id}_${idSession}.csv');
           filePolar.writeAsString(Polarcsv);
@@ -412,17 +388,14 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
               : session = (state as DetailStateLoaded).session2!;
           if (session.device1 == devices[0] || session.device2 == devices[0]) {
             //fitbit
-            List<dynamic> headerFitbit = ['idInterval', 'timestamp', 'value'];
+            List<dynamic> headerFitbit = ['time', 'rate'];
             List<List<dynamic>> rowsFitbit = [];
             rowsFitbit.add(headerFitbit);
-            for (int i = 0; i < intervals.length; i++) {
-              List<FitbitRate> fitbitSingleInterval =
-                  await db.fitbitRatesDao.fitbitByInterval(intervals[i].id);
-              fitbitSingleInterval.forEach((element) {
-                rowsFitbit.add(
-                    [element.idInterval, element.timestamp, element.value]);
-              });
-            }
+            List<FitbitRate> fitbitSessionExp =
+                await db.fitbitRatesDao.fitbitBySession(idSession);
+            fitbitSessionExp.forEach((element) {
+              rowsFitbit.add([element.time, element.rate]);
+            });
             String Fitbitcsv = ListToCsvConverter().convert(rowsFitbit);
             final fileFitbit =
                 File('$Spath/fitbit_${user.id}_${idSession}.csv');
@@ -431,17 +404,14 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
           if (session.device1 == devices[1] || session.device2 == devices[1]) {
             //withings
-            List<dynamic> headerWithings = ['idInterval', 'timestamp', 'value'];
+            List<dynamic> headerWithings = ['time', 'value'];
             List<List<dynamic>> rowsWithings = [];
             rowsWithings.add(headerWithings);
-            for (int i = 0; i < intervals.length; i++) {
-              List<WithingsRate> withingsSingleInterval =
-                  await db.withingsRatesDao.withingsByInterval(intervals[i].id);
-              withingsSingleInterval.forEach((element) {
-                rowsWithings.add(
-                    [element.idInterval, element.timestamp, element.value]);
-              });
-            }
+            List<WithingsRate> withingsSessionExp =
+                await db.withingsRatesDao.withingsBySession(idSession);
+            withingsSessionExp.forEach((element) {
+              rowsWithings.add([element.time, element.rate]);
+            });
             String Withingscsv = ListToCsvConverter().convert(rowsWithings);
             final fileWithings =
                 File('$Spath/withings_${user.id}_${idSession}.csv');

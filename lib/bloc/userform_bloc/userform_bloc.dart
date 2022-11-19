@@ -17,37 +17,20 @@ class RegFormBloc extends FormBloc<dynamic, dynamic> {
     ],
     initialValue: null,
   );
-  final activity = SelectFieldBloc(
-    validators: [FieldBlocValidators.required],
-    items: ['Low', 'Medium', 'High'],
-  );
 
   RegFormBloc() {
     addFieldBlocs(
-      fieldBlocs: [sex, birthDate, activity],
+      fieldBlocs: [sex, birthDate],
     );
   }
 
   @override
   void onSubmitting() async {
-    late int act;
-    switch (activity.value) {
-      case 'Low':
-        act = 0;
-        break;
-      case 'Medium':
-        act = 1;
-        break;
-      case 'High':
-        act = 2;
-        break;
-      default:
-    }
+    print(sex.value);
     await db.usersDao.insertNewUser(
       UsersCompanion(
-          sex: Value(sex.value == "Man"),
-          activity: Value(act),
-          birthDate: Value(birthDate.value!.year)),
+          sex: Value(sex.value == 'Man' ? 1 : 0),
+          birthYear: Value(birthDate.value!.year)),
     );
     emitSuccess();
   }

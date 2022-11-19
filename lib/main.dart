@@ -23,13 +23,12 @@ void main() async {
 
   getIt.registerSingleton<SharedPreferences>(prefs);
 
-  BlocOverrides.runZoned(() {
-    runApp(MyApp(prefs));
-  }, blocObserver: SimpleBlocObserver());
+  Bloc.observer = SimpleBlocObserver(); //cause runZoned is deprecated
+  runApp(MyApp(prefs));
 }
 
 class MyApp extends StatelessWidget {
-  SharedPreferences prefs;
+  final SharedPreferences prefs;
 
   MyApp(this.prefs, {super.key});
 
