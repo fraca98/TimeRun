@@ -90,7 +90,8 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     });
 
     bluePolar = polar.deviceDisconnectedStream.listen((event) {
-      Vibration.vibrate(duration: 400); //vibrate if Bluetooth connection interrupts
+      Vibration.vibrate(
+          duration: 400); //vibrate if Bluetooth connection interrupts
       debugPrint('Disconnected from Bluetooth');
       String error = "Disconnected from Bluetooth";
       if (state is CronoStateInit) {
@@ -157,8 +158,9 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
       }
 
       if (state is CronoStateInit) {
-        Vibration
-            .vibrate(duration: 400); // vibrate when CronoStatPlay appears for the first time (so first hr emitted by Polar)
+        Vibration.vibrate(
+            duration:
+                400); // vibrate when CronoStatPlay appears for the first time (so first hr emitted by Polar)
         emit(CronoStatePlay(
             progressIndex: progressIndex,
             duration: 0,
@@ -203,12 +205,13 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
 
     on<CronoEventPlay>((event, emit) {
       if ((state as CronoStateExt).hr != 0) {
+        startTimeInterval = DateTime.now();
         emit(CronoStateRunning(
             progressIndex: progressIndex,
             duration: event.duration,
             hr: (state as CronoStateExt).hr,
             battery: (state as CronoStateExt).battery));
-        startTimeInterval = DateTime.now();
+
         tickerSubscription?.cancel();
         tickerSubscription = ticker
             .tick(ticks: event.duration)
@@ -264,6 +267,7 @@ class CronoBloc extends Bloc<CronoEvent, CronoState> {
     on<CronoEventResume>(
       (event, emit) {
         if ((state as CronoStateExt).hr != 0) {
+          endTimeInterval = null;
           tickerSubscription?.resume();
           emit(CronoStateRunning(
             progressIndex: progressIndex,
