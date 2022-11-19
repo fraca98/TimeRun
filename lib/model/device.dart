@@ -5,4 +5,4 @@ List<String> devices  = [
   'Garmin'
 ];
 
-String polarIdentifier = "B2178924";
+String polarIdentifier = "B31B0B23"; //Set H10 Polar identifier
