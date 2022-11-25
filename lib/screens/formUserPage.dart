@@ -25,7 +25,6 @@ class FormUserPage extends StatelessWidget {
             appBar: AppBar(
               title: Text(
                 'User Form',
-                style: TextStyle(fontFamily: 'Poppins'),
               ),
               centerTitle: true,
             ),
@@ -87,9 +86,10 @@ class FormUserPage extends StatelessWidget {
   Widget alertBack(BuildContext context) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins'),),
-      content: Text("Are you sure? Data are not saved",
-          style: TextStyle(fontFamily: 'Poppins')),
+      title: Text("Warning"),
+      content: Text(
+        "Are you sure? Data are not saved",
+      ),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
       actions: [
@@ -97,14 +97,14 @@ class FormUserPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel'),
         ),
         TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             },
-            child: Text('Go back', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text('Go back'))
       ],
     );
   }

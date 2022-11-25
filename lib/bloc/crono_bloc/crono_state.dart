@@ -21,16 +21,14 @@ class CronoStateExt extends CronoState {
       required this.battery});
 
   @override
-  List<Object?> get props =>
-      [progressIndex, duration, hr, message, battery];
+  List<Object?> get props => [progressIndex, duration, hr, message, battery];
 }
 
 class CronoStateInit extends CronoState {
   final int? battery;
   CronoStateInit({this.battery});
-   @override
-  List<Object?> get props =>
-      [battery];
+  @override
+  List<Object?> get props => [battery];
 }
 
 class CronoStatePlay extends CronoStateExt {

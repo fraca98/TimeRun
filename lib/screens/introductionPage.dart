@@ -39,12 +39,14 @@ class IntroductionPage extends StatelessWidget {
     return [
       PageViewModel(
           title: "Welcome",
-          body: "This application allows to run a particular trial, which purpose is to verify the accuracy of heart data from multiple smartwatches in different heart zones",
+          body:
+              "This application allows to run a particular trial, which purpose is to verify the accuracy of heart data from multiple smartwatches in different heart zones",
           image: Center(
               child: Padding(
                   padding: EdgeInsets.only(top: 30),
-                  child:
-                      Container(width: MediaQuery.of(context).size.width*0.7, child: Image.asset('assets/timerunlogo.png'))))),
+                  child: Container(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: Image.asset('assets/timerunlogo.png'))))),
       // Fitbit Page
       PageViewModel(
         title: 'Connect your Fitbit account',
@@ -183,7 +185,10 @@ class IntroductionPage extends StatelessWidget {
           },
         ),
         image: Center(
-          child: LottieBuilder.asset('assets/run.json',frameRate: FrameRate.max,),
+          child: LottieBuilder.asset(
+            'assets/run.json',
+            frameRate: FrameRate.max,
+          ),
         ),
         footer: BlocBuilder<IntroFitbitBloc, IntroFitbitState>(
             builder: (context, fitbitstate) {

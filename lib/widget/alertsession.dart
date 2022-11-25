@@ -37,9 +37,9 @@ class _AlertSessionState extends State<AlertSession> {
           Text(
             'Select the 2 devices for this session',
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'Poppins'),
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
           ),
           Column(
             children: List.generate(
@@ -65,7 +65,7 @@ class _AlertSessionState extends State<AlertSession> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins'))),
+            child: Text('Cancel')),
         togglecheck
                     .where(
                       (element) => element == true,
@@ -95,7 +95,7 @@ class _AlertSessionState extends State<AlertSession> {
                     ),
                   );
                 },
-                child: Text('Start', style: TextStyle(fontFamily: 'Poppins')))
+                child: Text('Start'))
             : Container(),
       ],
     );

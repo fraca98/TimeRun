@@ -41,8 +41,9 @@ class DetailPage extends StatelessWidget {
                         state is DetailStateDownloading
                     ? false
                     : true,
-                title: Text('User Detail',
-                    style: TextStyle(fontFamily: 'Poppins')),
+                title: Text(
+                  'User Detail',
+                ),
                 centerTitle: true,
                 actions: [
                   state is DetailStateLoaded
@@ -107,8 +108,6 @@ class DetailPage extends StatelessWidget {
                             ),
                             Text(
                               "Deleting the user",
-                              style: TextStyle(
-                                  fontSize: 18, fontFamily: 'Poppins'),
                             )
                           ]),
                     );
@@ -161,12 +160,12 @@ class DetailPage extends StatelessWidget {
                 Column(children: [
                   Text(
                     '#ID',
-                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(user.id.toString(),
-                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
+                  Text(
+                    user.id.toString(),
+                  )
                 ]),
               ]),
               TableRow(children: [
@@ -182,12 +181,12 @@ class DetailPage extends StatelessWidget {
                 Column(children: [
                   Text(
                     'BirthYear',
-                    style: TextStyle(fontSize: 20, fontFamily: 'Poppins'),
                   )
                 ]),
                 Column(children: [
-                  Text(user.birthYear.toString(),
-                      style: TextStyle(fontSize: 20, fontFamily: 'Poppins'))
+                  Text(
+                    user.birthYear.toString(),
+                  )
                 ]),
               ]),
             ],
@@ -200,15 +199,18 @@ class DetailPage extends StatelessWidget {
         Container(
           height: 60,
           child: ListTile(
-              title: Text('Session 1', style: TextStyle(fontFamily: 'Poppins')),
+              title: Text(
+                'Session 1',
+              ),
               subtitle: Padding(
                 padding: const EdgeInsets.only(top: 5.0),
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: state.session1 == null
                         ? [
-                            Text('No Data',
-                                style: TextStyle(fontFamily: 'Poppins'))
+                            Text(
+                              'No Data',
+                            )
                           ]
                         : [
                             Text(state.session1!.device1),
@@ -270,7 +272,6 @@ class DetailPage extends StatelessWidget {
           child: ListTile(
             title: Text(
               'Session 2',
-              style: TextStyle(fontFamily: 'Poppins'),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 5.0),
@@ -278,14 +279,17 @@ class DetailPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: state.session2 == null
                       ? [
-                          Text('No Data',
-                              style: TextStyle(fontFamily: 'Poppins'))
+                          Text(
+                            'No Data',
+                          )
                         ]
                       : [
-                          Text(state.session2!.device1,
-                              style: TextStyle(fontFamily: 'Poppins')),
-                          Text(state.session2!.device2,
-                              style: TextStyle(fontFamily: 'Poppins'))
+                          Text(
+                            state.session2!.device1,
+                          ),
+                          Text(
+                            state.session2!.device2,
+                          )
                         ]),
             ),
             leading: Icon(
@@ -349,16 +353,17 @@ class DetailPage extends StatelessWidget {
   Widget alertDelete(BuildContext context, DetailStateLoaded state) {
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Are you sure to delete this user?",
-          style: TextStyle(fontFamily: 'Poppins')),
+      title: Text("Warning"),
+      content: Text(
+        "Are you sure to delete this user?",
+      ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       actions: [
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel'),
         ),
         TextButton(
             onPressed: () {
@@ -367,7 +372,9 @@ class DetailPage extends StatelessWidget {
               context.read<DetailBloc>().add(
                   DetailEventDeleteUser()); //ok cause i pop first the dialog, so its context
             },
-            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text(
+              'Delete',
+            ))
       ],
     );
   }

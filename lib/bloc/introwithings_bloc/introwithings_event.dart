@@ -7,5 +7,5 @@ abstract class IntroWithingsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadIntroWithingsEvent extends IntroWithingsEvent {} //press button to authorize
-
+class LoadIntroWithingsEvent extends IntroWithingsEvent {
+} //press button to authorize

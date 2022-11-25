@@ -334,7 +334,6 @@ class DataCollectionPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${state.progressIndex == 0 ? 0 : minHr[state.progressIndex].toInt()} - ',
-                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -345,7 +344,6 @@ class DataCollectionPage extends StatelessWidget {
                       state.hr == 0 ? '?' : state.hr.toString(),
                       style: TextStyle(
                           fontSize: 40,
-                          fontFamily: 'Poppins',
                           color: state.hr == 0
                               ? Colors.black
                               : state.hr >= minHr[state.progressIndex] &&
@@ -357,9 +355,9 @@ class DataCollectionPage extends StatelessWidget {
                     Text(
                       ' BPM',
                       style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins'),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -368,7 +366,6 @@ class DataCollectionPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   ' - ${maxHr[state.progressIndex].toInt()}',
-                  style: TextStyle(fontSize: 40, fontFamily: 'Poppins'),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -425,7 +422,6 @@ class DataCollectionPage extends StatelessWidget {
                   state is CronoStateRunning
               ? Text(
                   text,
-                  style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
                 )
               : Container(),
         ],
@@ -616,9 +612,10 @@ class DataCollectionPage extends StatelessWidget {
     //pass the context of the page
     return AlertDialog(
       icon: Icon(MdiIcons.alert),
-      title: Text("Warning", style: TextStyle(fontFamily: 'Poppins')),
-      content: Text("Are you sure to delete this session?",
-          style: TextStyle(fontFamily: 'Poppins')),
+      title: Text("Warning"),
+      content: Text(
+        "Are you sure to delete this session?",
+      ),
       shape:
           RoundedRectangleBorder(borderRadius: new BorderRadius.circular(15)),
       actions: [
@@ -626,7 +623,7 @@ class DataCollectionPage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Text('Cancel', style: TextStyle(fontFamily: 'Poppins')),
+          child: Text('Cancel'),
         ),
         TextButton(
             onPressed: () {
@@ -635,7 +632,9 @@ class DataCollectionPage extends StatelessWidget {
               ScaffoldMessenger.of(context).removeCurrentSnackBar();
               Navigator.pop(context);
             },
-            child: Text('Delete', style: TextStyle(fontFamily: 'Poppins')))
+            child: Text(
+              'Delete',
+            ))
       ],
     );
   }

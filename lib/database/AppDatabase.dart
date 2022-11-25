@@ -54,7 +54,8 @@ class Intervals extends Table {
 // this will generate the table called "PolarRates" to store HR of Polar during intervals
 class PolarRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get idSession =>
+      integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get time => dateTime()(); //Datetime
   IntColumn get rate => integer()();
 }
@@ -62,7 +63,8 @@ class PolarRates extends Table {
 // this will generate the table called "FitbitRates" to store HR of Fitbit during intervals
 class FitbitRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get idSession =>
+      integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get time => dateTime()(); //Datetime
   IntColumn get rate => integer()();
 }
@@ -70,16 +72,29 @@ class FitbitRates extends Table {
 // this will generate the table called "WithingsRates" to store HR of WithingsRates during intervals
 class WithingsRates extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get idSession => integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
+  IntColumn get idSession =>
+      integer().references(Sessions, #id, onDelete: KeyAction.cascade)();
   DateTimeColumn get time => dateTime()(); //Datetime
   IntColumn get rate => integer()();
 }
 
 // this annotation tells drift to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
-@DriftDatabase(
-    tables: [Users, Sessions, Intervals, PolarRates, FitbitRates, WithingsRates],
-    daos: [UsersDao, SessionsDao, IntervalsDao, PolarRatesDao, FitbitRatesDao, WithingsRatesDao])
+@DriftDatabase(tables: [
+  Users,
+  Sessions,
+  Intervals,
+  PolarRates,
+  FitbitRates,
+  WithingsRates
+], daos: [
+  UsersDao,
+  SessionsDao,
+  IntervalsDao,
+  PolarRatesDao,
+  FitbitRatesDao,
+  WithingsRatesDao
+])
 class AppDatabase extends _$AppDatabase {
   // we tell the database where to store the data with this constructor
   AppDatabase() : super(_openConnection());

@@ -1,6 +1,6 @@
 part of 'introwithings_bloc.dart';
 
-abstract class IntroWithingsState extends Equatable{
+abstract class IntroWithingsState extends Equatable {
   const IntroWithingsState();
 
   @override
@@ -9,8 +9,8 @@ abstract class IntroWithingsState extends Equatable{
 
 class IntroWithingsInitial extends IntroWithingsState {}
 
-class IntroWithingsLoading extends IntroWithingsState{}
+class IntroWithingsLoading extends IntroWithingsState {}
 
-class IntroWithingsLoaded extends IntroWithingsState{}
+class IntroWithingsLoaded extends IntroWithingsState {}
 
-class IntroWithingsError extends IntroWithingsState{}
+class IntroWithingsError extends IntroWithingsState {}

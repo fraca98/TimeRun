@@ -7,5 +7,5 @@ abstract class IntroFitbitEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadIntroFitbitEvent extends IntroFitbitEvent {} //press button to authorize
-
+class LoadIntroFitbitEvent extends IntroFitbitEvent {
+} //press button to authorize

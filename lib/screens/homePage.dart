@@ -20,7 +20,6 @@ class HomePage extends StatelessWidget {
           appBar: AppBar(
             title: Text(
               'Users',
-              style: TextStyle(fontFamily: 'Poppins'),
             ),
           ),
           drawer: Drawer(
@@ -60,7 +59,7 @@ class HomePage extends StatelessWidget {
                     ? Center(
                         child: Text(
                         'There are not users',
-                        style: TextStyle(fontSize: 18, fontFamily: 'Poppins'),
+                        style: TextStyle(fontSize: 18),
                       ))
                     : ListView.builder(
                         padding: EdgeInsets.only(bottom: 80),

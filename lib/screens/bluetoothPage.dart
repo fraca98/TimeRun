@@ -52,7 +52,6 @@ class BluetoothPage extends StatelessWidget {
                   appBar: AppBar(
                     title: Text(
                       'Connect the Polar device',
-                      style: TextStyle(fontFamily: 'Poppins'),
                     ),
                     centerTitle: true,
                     automaticallyImplyLeading:

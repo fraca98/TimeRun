@@ -11,7 +11,8 @@ class DetailEventDeleteUser extends DetailEvent {}
 
 class DetailEventDownload extends DetailEvent {
   final int numSession;
-  DetailEventDownload({required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
+  DetailEventDownload(
+      {required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
 
   @override
   List<Object?> get props => [numSession];
@@ -19,7 +20,8 @@ class DetailEventDownload extends DetailEvent {
 
 class DetailEventExport extends DetailEvent {
   final int numSession;
-  DetailEventExport({required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
+  DetailEventExport(
+      {required this.numSession}); //1 if session 1, 2 if session 2 (to know which session i'm considering to download data)
 
   @override
   List<Object?> get props => [numSession];

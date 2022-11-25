@@ -10,8 +10,7 @@ class TimerText extends StatelessWidget {
       if (bloc.state is CronoStateExt) {
         var ext = bloc.state as CronoStateExt;
         return ext.duration;
-      }
-      else{
+      } else {
         return null;
       }
     });
@@ -20,7 +19,7 @@ class TimerText extends StatelessWidget {
     final secondsStr = (duration % 60).floor().toString().padLeft(2, '0');
     return Text(
       '$minutesStr:$secondsStr',
-      style: TextStyle(fontFamily: 'Poppins', fontSize: 60),
+      style: TextStyle(fontSize: 60),
     );
   }
 }

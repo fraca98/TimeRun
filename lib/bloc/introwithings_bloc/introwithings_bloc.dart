@@ -17,10 +17,8 @@ class IntroWithingsBloc extends Bloc<IntroWithingsEvent, IntroWithingsState> {
       emit(IntroWithingsLoading());
       WithingsCredentials? withingsCredentials;
       withingsCredentials = await WithingsConnector.authorize(
-          clientID:
-              clientWithings[0],
-          clientSecret:
-              clientWithings[1],
+          clientID: clientWithings[0],
+          clientSecret: clientWithings[1],
           scope: 'user.activity,user.metrics,user.sleepevents',
           redirectUri: clientWithings[2],
           callbackUrlScheme: 'timerun');

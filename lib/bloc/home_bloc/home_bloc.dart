@@ -32,7 +32,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         await GetIt.I<AppDatabase>()
             .exportInto(file); // save the database (export) in local
         await Share.shareXFiles([XFile(file.path)],
-            subject: 'TimeRun database', text: 'Date: ${DateTime.now()}'); //share the database file saved
+            subject: 'TimeRun database',
+            text: 'Date: ${DateTime.now()}'); //share the database file saved
       },
     );
   }

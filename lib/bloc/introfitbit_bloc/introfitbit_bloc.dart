@@ -22,10 +22,10 @@ class IntroFitbitBloc extends Bloc<IntroFitbitEvent, IntroFitbitState> {
           callbackUrlScheme: 'timerun');
       if (fitbitCredentials != null) {
         await prefs?.setString('fitbitUserID', fitbitCredentials.userID);
-        await prefs?.setString('fitbitAccessToken',
-            fitbitCredentials.fitbitAccessToken);
-        await prefs?.setString('fitbitRefreshToken',
-            fitbitCredentials.fitbitRefreshToken);
+        await prefs?.setString(
+            'fitbitAccessToken', fitbitCredentials.fitbitAccessToken);
+        await prefs?.setString(
+            'fitbitRefreshToken', fitbitCredentials.fitbitRefreshToken);
         emit(IntroFitbitLoaded());
       } else {
         emit(IntroFitbitError());

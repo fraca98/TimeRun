@@ -27,12 +27,10 @@ class UsersDao extends DatabaseAccessor<AppDatabase> with _$UsersDaoMixin {
           .getSingle(); // return user given id (primary key)
 
   Future updateComplete(int iduser, int newcomplete) =>
-      (update(users)..where((t) => t.id.equals(iduser))).write(
-          UsersCompanion(
-              completed: Value(newcomplete))); //update completed user value
+      (update(users)..where((t) => t.id.equals(iduser))).write(UsersCompanion(
+          completed: Value(newcomplete))); //update completed user value
 
-  Stream<List<User>> watchUsers(){
+  Stream<List<User>> watchUsers() {
     return select(users).watch();
   }
-
 }
