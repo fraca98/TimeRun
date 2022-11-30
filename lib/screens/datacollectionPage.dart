@@ -334,6 +334,7 @@ class DataCollectionPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${state.progressIndex == 0 ? 0 : minHr[state.progressIndex].toInt()} - ',
+                  style: TextStyle(fontSize: 40),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -366,6 +367,7 @@ class DataCollectionPage extends StatelessWidget {
               Expanded(
                 child: Text(
                   ' - ${maxHr[state.progressIndex].toInt()}',
+                  style: TextStyle(fontSize: 40),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -422,6 +424,9 @@ class DataCollectionPage extends StatelessWidget {
                   state is CronoStateRunning
               ? Text(
                   text,
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
                 )
               : Container(),
         ],

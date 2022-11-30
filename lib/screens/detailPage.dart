@@ -160,11 +160,17 @@ class DetailPage extends StatelessWidget {
                 Column(children: [
                   Text(
                     '#ID',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
                   )
                 ]),
                 Column(children: [
                   Text(
                     user.id.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
                   )
                 ]),
               ]),
@@ -181,11 +187,17 @@ class DetailPage extends StatelessWidget {
                 Column(children: [
                   Text(
                     'BirthYear',
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
                   )
                 ]),
                 Column(children: [
                   Text(
                     user.birthYear.toString(),
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
                   )
                 ]),
               ]),

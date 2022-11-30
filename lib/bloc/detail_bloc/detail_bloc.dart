@@ -155,7 +155,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
                   fitbitAccessToken: prefs.getString('fitbitAccessToken')!,
                   fitbitRefreshToken: prefs.getString('fitbitRefreshToken')!),
               startDate: session.start,
-              endDate: session.end,
+              endDate: session.end.add(Duration(minutes: 1)), //cause fitbit doesn't take values of the end time
               intradayDetailLevel: IntradayDetailLevel.ONE_SECOND),
         ) as List<FitbitHeartRateIntradayData>;
         if (getFitbitSession.isEmpty) {
@@ -404,7 +404,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
           if (session.device1 == devices[1] || session.device2 == devices[1]) {
             //withings
-            List<dynamic> headerWithings = ['time', 'value'];
+            List<dynamic> headerWithings = ['time', 'rate'];
             List<List<dynamic>> rowsWithings = [];
             rowsWithings.add(headerWithings);
             List<WithingsRate> withingsSessionExp =
